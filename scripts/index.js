@@ -1,3 +1,3 @@
-import changeLanguage from "./language.js";
+import LanguageManager from "./language.js";
 
-changeLanguage("English");
+LanguageManager.changeLanguage("English");

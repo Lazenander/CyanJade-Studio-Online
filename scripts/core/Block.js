@@ -1,8 +1,10 @@
 import { formArray } from "../../modules/numjs/ArrayOperations";
 
 export default class Block {
-    constructor(id, blockMould) {
+    constructor(id, x, y, blockMould) {
         this.id = id;
+        this.x = x;
+        this.y = y;
         this.blockMould = blockMould;
         this.logicImports = formArray(blockMould.logicImportNum, []);
         this.logicExports = formArray(blockMould.logicExportNum, []);

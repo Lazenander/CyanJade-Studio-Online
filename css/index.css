@@ -3,6 +3,14 @@ body {
     padding: 0;
 }
 
+.display {
+    display: auto;
+}
+
+.notDisplay {
+    display: none;
+}
+
 .mainContainer {
     position: absolute;
     top: 0;
@@ -20,14 +28,14 @@ body {
     height: 50px;
     background-color: var(--primaryColor);
     box-shadow: 0px 0px 5px var(--darkShadow);
-    z-index: 100;
+    z-index: 101;
 }
 
 .leftContent {
     position: absolute;
     top: 0;
     left: 50px;
-    width: 240px;
+    width: 320px;
     height: 100%;
     background-color: var(--primaryColor);
     display: flex;
@@ -36,28 +44,34 @@ body {
     align-items: center;
 }
 
+.contentHover {
+    background-color: var(--primaryColor);
+}
+
+.contentHover:hover {
+    background-color: var(--secondaryColor);
+}
+
 .contentElement {
     width: 80px;
     height: 100%;
-    background-color: var(--primaryColor);
-    flex-direction: row;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.contentElement:hover {
-    background-color: var(--secondaryColor);
-}
-
 .contentElement p {
+    margin: 0;
+    padding: 0;
     width: 100%;
-    height: 50px;
     text-align: center;
     font-family: "SHSCN-Heavy";
     color: var(--textColor);
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
+    font-size: 18px;
 }
 
 .playgroundContainer {
@@ -78,5 +92,79 @@ body {
     height: 20px;
     background-color: var(--thirdColor);
     box-shadow: 0px 0px 5px var(--darkShadow);
+    z-index: 101;
+}
+
+.selector {
+    position: absolute;
+    top: -180px;
+    width: 120px;
+    height: 180px;
+    box-shadow: 0px 0px 5px var(--darkShadow);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    overflow: scroll;
     z-index: 100;
+}
+
+.selector::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
+
+.selectorElement {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.selectorElement p {
+    width: 80%;
+    height: 40px;
+    line-height: 40px;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-family: "SHSCN-Regular";
+    color: var(--textColor);
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectorAppear {
+    top: 55px;
+    animation: movedown 0.25s 1 0s;
+}
+
+.selectorDisappear {
+    top: -180px;
+    animation: moveup 0.25s 1 0s;
+}
+
+@keyframes moveup {
+    from {
+        top: 55px;
+    }
+    to {
+        top: -180px;
+    }
+}
+
+@keyframes movedown {
+    from {
+        top: -180px;
+    }
+    to {
+        top: 55px;
+    }
 }
