@@ -2,11 +2,32 @@
 <html>
 
 <head>
+    <meta charset="UTF-8" />
     <link rel="stylesheet" href="./css/theme/light.css" />
+    <link rel="stylesheet" href="./css/index.css" />
 </head>
 
 <body>
-
+    <div class="mainContainer">
+        <div class="contentContainer">
+            <div class="leftContent">
+                <div class="contentElement" onClick="contentElementFileClicked()">
+                    <p name="l_op_file"></p>
+                </div>
+                <div class="contentElement" onClick="contentElementBlockClicked()">
+                    <p name="l_op_block"></p>
+                </div>
+                <div class="contentElement" onClick="contentElementTutorialClicked()">
+                    <p name="l_op_tutorial"></p>
+                </div>
+            </div>
+        </div>
+        <div class="playgroundContainer"></div>
+        <div class="infoContainer"></div>
+    </div>
+    <script type="module" src="./scripts/index.js"></script>
+    <script type="module" src="./scripts/observer.js"></script>
+    <!--<script type="text/javascript" src="./scripts/sourceProtection.js"></script>-->
 </body>
 
 </html>

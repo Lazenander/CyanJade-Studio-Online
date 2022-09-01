@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'SHSCN-Regular';
+    src: url("../res/fonts/SiYuanSongTiRegular/SourceHanSerifCN-Regular-1.otf");
+}
+
+@font-face {
+    font-family: 'SHSCN-Heavy';
+    src: url("../res/fonts/SiYuanSongTiRegular/SourceHanSerifCN-Heavy-4.otf");
+}
