@@ -32,10 +32,6 @@ export default class LanguageManager {
             "Chinese": "导入指令库",
             "English": "Import BLib"
         },
-        "l_sel_basicBlockLib": {
-            "Chinese": "基础指令",
-            "English": "Basic"
-        },
         "l_sel_light": {
             "Chinese": "切换暗主题",
             "English": "Dark Theme"
@@ -60,5 +56,8 @@ export default class LanguageManager {
             else
                 continue;
         }
+    }
+    static addPhrase(phraseID, Tphrase) {
+        LanguageManager.phrases[phraseID] = Tphrase;
     }
 }
