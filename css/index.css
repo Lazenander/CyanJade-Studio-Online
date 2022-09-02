@@ -79,9 +79,15 @@ body {
     top: 50px;
     left: 0;
     width: 100%;
-    height: calc(100% - 75px);
+    height: calc(100% - 70px);
     background-color: var(--primaryColor);
+    overflow: scroll;
     z-index: 0;
+}
+
+.playgroundContainer::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .infoContainer {
@@ -172,9 +178,43 @@ body {
 
 .dragArea {
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+
+.canvasArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    min-width: 200%;
+    min-height: 200%;
+    z-index: 1;
+}
+
+.shadowArea {
+    position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 10;
+    z-index: 2;
+}
+
+.blockArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+}
+
+.shadowBlock {
+    position: absolute;
+    background-color: var(--lightShadow);
+    border-radius: 20px;
+    z-index: 2;
 }

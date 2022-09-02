@@ -2,7 +2,6 @@ import LanguageManager from "../language.js";
 
 export default class BlockLibrary {
     constructor(nameID = "", Tnames = { "English": "", "Chinese": "" }, color = "") {
-        console.log(2)
         this.nameID = nameID;
         LanguageManager.addPhrase(this.nameID, Tnames);
         this.color = color;

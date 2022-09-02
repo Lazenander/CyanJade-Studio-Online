@@ -1,5 +1,6 @@
 import BlockLibraryManager from "./core/BlockLibraryManager.js";
 import LanguageManager from "./language.js";
+import px2grid from "./projector.js";
 
 const cssLink = document.getElementById("cssLink");
 const sel_dark = document.getElementById("sel_dark");
@@ -8,10 +9,16 @@ const opFileSelector = document.getElementById("opFileSelector");
 const opBlockSelector = document.getElementById("opBlockSelector");
 const opSettingSelector = document.getElementById("opSettingSelector");
 const opBlockElementSelector = document.getElementById("opBlockElementSelector");
+const dragDivArea = document.getElementById("dragDivArea");
+const canvasArea = document.getElementById("canvasArea");
+const blockArea = document.getElementById("blockArea");
+const shadowBlock = document.getElementById("shadowBlock");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
 let currentTheme = "light";
+let chosedBlockMould = null;
+let shadowActivated = false;
 
 function eraseBlockLibDisplay() {
     opBlockElementSelector.innerText = "";
@@ -109,6 +116,23 @@ window.changeLanguage = () => {
     LanguageManager.changeLanguage(LanguageManager.currentLanguage == "English" ? "Chinese" : "English");
 }
 
+window.dragAreaDragDetected = (event) => {
+    event.preventDefault();
+    if (shadowActivated == false) {
+        shadowBlock.classList.remove("notDisplay");
+        shadowBlock.classList.add("display");
+        shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
+        shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+        shadowActivated = true;
+    }
+    let calX = px2grid(event.offsetX) * 50;
+    let calY = px2grid(event.offsetY) * 50;
+    shadowBlock.style.left = calX - (chosedBlockMould.size.width + 1) * 20 + "px";
+    shadowBlock.style.top = calY - (chosedBlockMould.size.height + 1) * 20 + "px";
+}
+
+window.dragAreaDropDetected = (event) => {}
+
 for (let blockLib in BlockLibraryManager.instance.libraries) {
     let div = document.createElement("div");
     div.classList.add("selectorElement");
@@ -123,11 +147,22 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
         blockLibDisplay = blockLib;
         eraseBlockLibDisplay();
         for (let blockMould in BlockLibraryManager.instance.libraries[blockLib].BlockMoulds) {
-            console.log(blockMould)
             let div2 = document.createElement("div");
             div2.classList.add("selectorElement");
             div2.classList.add("contentHover");
             div2.draggable = true;
+            div2.ondrag = () => {
+                dragDivArea.classList.remove("notDisplay");
+                dragDivArea.classList.add("display");
+                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+            };
+            div2.ondragend = () => {
+                dragDivArea.classList.remove("display");
+                dragDivArea.classList.add("notDisplay");
+                shadowBlock.classList.remove("display");
+                shadowBlock.classList.add("notDisplay");
+                shadowActivated = false;
+            }
             let p2 = document.createElement("p");
             p2.setAttribute("name", blockMould);
             p2.innerText = LanguageManager.phrases[blockMould][LanguageManager.currentLanguage];
