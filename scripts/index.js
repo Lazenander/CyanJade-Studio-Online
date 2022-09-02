@@ -1,4 +1,5 @@
 import BlockLibraryManager from "./core/BlockLibraryManager.js";
+import CodeManager from "./core/codeManager.js";
 import LanguageManager from "./language.js";
 import px2grid from "./projector.js";
 
@@ -10,6 +11,7 @@ const opBlockSelector = document.getElementById("opBlockSelector");
 const opSettingSelector = document.getElementById("opSettingSelector");
 const opBlockElementSelector = document.getElementById("opBlockElementSelector");
 const dragDivArea = document.getElementById("dragDivArea");
+const playgroundContainer = document.getElementById("playgroundContainer");
 const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
@@ -19,6 +21,8 @@ let blockLibDisplay = "disabled";
 let currentTheme = "light";
 let chosedBlockMould = null;
 let shadowActivated = false;
+let canvasSize = { width: Math.max(window.screen.availWidth * 2, 8000), height: Math.max(window.screen.availHeight * 2, 8000) };
+let resX, resY;
 
 function eraseBlockLibDisplay() {
     opBlockElementSelector.innerText = "";
@@ -127,8 +131,18 @@ window.dragAreaDragDetected = (event) => {
     }
     let calX = px2grid(event.offsetX) * 50;
     let calY = px2grid(event.offsetY) * 50;
-    shadowBlock.style.left = calX - (chosedBlockMould.size.width + 1) * 20 + "px";
-    shadowBlock.style.top = calY - (chosedBlockMould.size.height + 1) * 20 + "px";
+    if (calX - (chosedBlockMould.size.width + 1) * 50 < 0)
+        calX = (chosedBlockMould.size.width + 1) * 50;
+    if (calX + (chosedBlockMould.size.width + 1) * 50 > canvasSize.width)
+        calX = canvasSize.width - (chosedBlockMould.size.width + 1) * 45;
+    if (calY - (chosedBlockMould.size.height + 1) * 50 < 0)
+        calY = (chosedBlockMould.size.height + 1) * 50;
+    if (calY + (chosedBlockMould.size.height + 1) * 50 > canvasSize.height)
+        calY = canvasSize.height - (chosedBlockMould.size.height + 1) * 50;
+    resX = px2grid(calX - (chosedBlockMould.size.width + 1) * 25);
+    resY = px2grid(calY - (chosedBlockMould.size.height + 1) * 25);
+    shadowBlock.style.left = calX - (chosedBlockMould.size.width + 1) * 25 + "px";
+    shadowBlock.style.top = calY - (chosedBlockMould.size.height + 1) * 25 + "px";
 }
 
 window.dragAreaDropDetected = (event) => {}
@@ -157,6 +171,8 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
                 chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
             };
             div2.ondragend = () => {
+                CodeManager.instance.graph.addBlock(chosedBlockMould, resX, resY);
+                CodeManager.instance.render();
                 dragDivArea.classList.remove("display");
                 dragDivArea.classList.add("notDisplay");
                 shadowBlock.classList.remove("display");
@@ -178,4 +194,8 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
     opBlockSelector.appendChild(div);
 }
 
+canvasArea.style.width = canvasSize.width + "px";
+canvasArea.style.height = canvasSize.height + "px";
+playgroundContainer.scrollTop = (canvasSize.height - window.innerHeight) / 2;
+playgroundContainer.scrollLeft = (canvasSize.width - window.innerWidth) / 2;
 LanguageManager.changeLanguage("English");
