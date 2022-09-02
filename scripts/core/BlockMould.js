@@ -1,6 +1,9 @@
+import LanguageManager from "../language.js";
+
 export default class BlockMould {
-    constructor(name, type, lib, size, logicImportNum, logicExportNum, dataImportNum, dataExportNum, forward) {
-        this.name = name;
+    constructor(nameID, Tnames, type, lib, size, logicImportNum, logicExportNum, dataImportNum, dataExportNum, forward) {
+        this.nameID = nameID;
+        LanguageManager.addPhrase(this.nameID, Tnames);
         this.type = type;
         this.lib = lib;
         this.size = size;
