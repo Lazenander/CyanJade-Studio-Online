@@ -20,9 +20,45 @@ let activated = "disabled";
 let blockLibDisplay = "disabled";
 let currentTheme = "light";
 let chosedBlockMould = null;
+let chosedBlockIndex = null;
 let shadowActivated = false;
-let canvasSize = { width: Math.max(window.screen.availWidth * 2, 8000), height: Math.max(window.screen.availHeight * 2, 8000) };
+let dragType = "";
+let canvasSize = { width: Math.max(px2grid(window.screen.availWidth * 2), 500), height: Math.max(px2grid(window.screen.availHeight * 2), 500) };
 let resX, resY;
+
+function renderBlock(index) {
+    let block = CodeManager.instance.graph.blocks[index];
+    let div = document.createElement('div');
+    div.id = "b" + index;
+    div.classList.add("block");
+    div.draggable = true;
+    div.ondragstart = () => {
+        dragType = "block";
+        let tmpblock = document.getElementById("b" + index);
+        tmpblock.style.zIndex = 20;
+        dragDivArea.classList.remove("notDisplay");
+        dragDivArea.classList.add("display");
+        chosedBlockIndex = index;
+    }
+    div.ondragend = () => {
+        dragDivArea.classList.remove("display");
+        dragDivArea.classList.add("notDisplay");
+        shadowBlock.classList.remove("display");
+        shadowBlock.classList.add("notDisplay");
+        shadowActivated = false;
+    }
+    div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
+    div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
+    div.style.left = block.x * 50 + 25 + "px";
+    div.style.top = block.y * 50 + 25 + "px";
+    return div;
+}
+
+function renderGraph() {
+    blockArea.innerText = "";
+    for (let block in CodeManager.instance.graph.blocks)
+        blockArea.appendChild(renderBlock(block));
+}
 
 function eraseBlockLibDisplay() {
     opBlockElementSelector.innerText = "";
@@ -129,23 +165,46 @@ window.dragAreaDragDetected = (event) => {
         shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
         shadowActivated = true;
     }
-    let calX = px2grid(event.offsetX) * 50;
-    let calY = px2grid(event.offsetY) * 50;
-    if (calX - (chosedBlockMould.size.width + 1) * 50 < 0)
-        calX = (chosedBlockMould.size.width + 1) * 50;
-    if (calX + (chosedBlockMould.size.width + 1) * 50 > canvasSize.width)
-        calX = canvasSize.width - (chosedBlockMould.size.width + 1) * 45;
-    if (calY - (chosedBlockMould.size.height + 1) * 50 < 0)
-        calY = (chosedBlockMould.size.height + 1) * 50;
-    if (calY + (chosedBlockMould.size.height + 1) * 50 > canvasSize.height)
-        calY = canvasSize.height - (chosedBlockMould.size.height + 1) * 50;
-    resX = px2grid(calX - (chosedBlockMould.size.width + 1) * 25);
-    resY = px2grid(calY - (chosedBlockMould.size.height + 1) * 25);
-    shadowBlock.style.left = calX - (chosedBlockMould.size.width + 1) * 25 + "px";
-    shadowBlock.style.top = calY - (chosedBlockMould.size.height + 1) * 25 + "px";
+    let calC = { x: -1, y: -1 }
+    if (dragType == "mould")
+        calC = CodeManager.instance.calCoor(
+            px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
+            px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
+            chosedBlockMould, canvasSize);
+    else
+        calC = CodeManager.instance.calCoor(
+            px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
+            px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
+            chosedBlockMould, canvasSize, chosedBlockIndex);
+    resX = calC.x;
+    resY = calC.y;
+    shadowBlock.style.left = resX * 50 + 25 + "px";
+    shadowBlock.style.top = resY * 50 + 25 + "px";
 }
 
-window.dragAreaDropDetected = (event) => {}
+window.dragAreaDropDetected = (event) => {
+    if (dragType == "mould") {
+        let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
+        blockArea.appendChild(renderBlock(newIndex));
+    } else {
+        let tmpblock = document.getElementById("b" + chosedBlockIndex);
+        tmpblock.style.left = resX * 50 + 25 + "px";
+        tmpblock.style.top = resY * 50 + 25 + "px";
+        tmpblock.style.zIndex = 5;
+        CodeManager.instance.blockCoords[chosedBlockIndex] = {
+            x1: resX,
+            x2: resX + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
+            y1: resY,
+            y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
+        };
+        console.log(resX, resY, CodeManager.instance.blockCoords);
+    }
+    dragDivArea.classList.remove("display");
+    dragDivArea.classList.add("notDisplay");
+    shadowBlock.classList.remove("display");
+    shadowBlock.classList.add("notDisplay");
+    shadowActivated = false;
+}
 
 for (let blockLib in BlockLibraryManager.instance.libraries) {
     let div = document.createElement("div");
@@ -165,14 +224,13 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
             div2.classList.add("selectorElement");
             div2.classList.add("contentHover");
             div2.draggable = true;
-            div2.ondrag = () => {
+            div2.ondragstart = () => {
+                dragType = "mould";
                 dragDivArea.classList.remove("notDisplay");
                 dragDivArea.classList.add("display");
                 chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
             };
             div2.ondragend = () => {
-                CodeManager.instance.graph.addBlock(chosedBlockMould, resX, resY);
-                CodeManager.instance.render();
                 dragDivArea.classList.remove("display");
                 dragDivArea.classList.add("notDisplay");
                 shadowBlock.classList.remove("display");
@@ -194,8 +252,15 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
     opBlockSelector.appendChild(div);
 }
 
-canvasArea.style.width = canvasSize.width + "px";
-canvasArea.style.height = canvasSize.height + "px";
-playgroundContainer.scrollTop = (canvasSize.height - window.innerHeight) / 2;
-playgroundContainer.scrollLeft = (canvasSize.width - window.innerWidth) / 2;
+window.onresize = () => {
+    canvasSize.width = Math.max(canvasSize.width, window.screen.availWidth);
+    canvasSize.height = Math.max(canvasSize.height, window.screen.availHeight)
+    canvasArea.style.width = canvasSize.width * 50 + "px";
+    canvasArea.style.height = canvasSize.height * 50 + "px";
+}
+
+canvasArea.style.width = canvasSize.width * 50 + "px";
+canvasArea.style.height = canvasSize.height * 50 + "px";
+playgroundContainer.scrollTop = (canvasSize.height * 50 - window.innerHeight) / 2;
+playgroundContainer.scrollLeft = (canvasSize.width * 50 - window.innerWidth) / 2;
 LanguageManager.changeLanguage("English");

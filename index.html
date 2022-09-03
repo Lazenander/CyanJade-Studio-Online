@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <link id="cssLink" rel="stylesheet" href="./css/theme/light.css" />
     <link rel="stylesheet" href="./css/index.css" />
 </head>
@@ -57,11 +58,12 @@
         </div>
         <div id="playgroundContainer" class="playgroundContainer">
             <div id="canvasArea" class="canvasArea">
-                <div id="dragDivArea" class="dragArea notDisplay" ondragover="dragAreaDragDetected(event)" ondrop="dragAreaDropDetected(event)"></div>
                 <div id="shadowArea" class="shadowArea">
                     <div id="shadowBlock" class="shadowBlock"></div>
                 </div>
-                <div id="blockArea" class="blockArea"></div>
+                <div id="blockArea" class="blockArea">
+                    <div id="dragDivArea" class="dragArea notDisplay" ondragover="dragAreaDragDetected(event)" ondrop="dragAreaDropDetected(event)"></div>
+                </div>
             </div>
         </div>
         <div class="infoContainer"></div>

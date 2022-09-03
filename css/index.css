@@ -222,5 +222,7 @@ body {
     background-color: var(--primaryColor);
     box-shadow: 0px 0px 5px var(--darkShadow);
     border-radius: 20px;
-    z-index: 4;
+    z-index: 5;
+    user-select: none;
+    -webkit-user-select: none;
 }

@@ -1,6 +1,15 @@
-import Block from "./Block";
-
-const blockArea = document.getElementById("blockArea");
+class Block {
+    constructor(index, x, y, blockMould) {
+        this.index = index;
+        this.x = x;
+        this.y = y;
+        this.blockMould = blockMould;
+        this.logicImports = [];
+        this.logicExports = [];
+        this.dataImports = [];
+        this.dataExports = [];
+    }
+}
 
 export default class Graph {
     constructor() {
@@ -16,24 +25,19 @@ export default class Graph {
         let newBlock = new Block(newIndex, x, y, blockMould);
         this.blocks[newIndex] = newBlock;
         this.size++;
-        return;
+        return newIndex;
     }
 
     delBlock(index) {
         delete this.blocks[index];
         this.emptyIndex.push(index);
+        this.size--;
         return;
     }
 
     addLogicConnection(index1, port1, index2, port2) {
         this.blocks[index1].logicExports[port1].append(index2);
         this.blocks[index2].logicImports[port2].append(index1);
-    }
-
-    render() {
-        for (let block of this.blocks) {
-            blockArea.appendChild(block.render());
-        }
     }
 
     forward() {}
