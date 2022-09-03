@@ -10,13 +10,18 @@ export default class CodeManager {
 
     addBlock(blockMould, x, y) {
         let ret = this.graph.addBlock(blockMould, x, y);
-        this.blockCoords[this.graph.size - 1] = ({
+        this.blockCoords[ret] = ({
             x1: x,
             x2: x + blockMould.size.width + 1,
             y1: y,
             y2: y + blockMould.size.height + 1
         });
         return ret;
+    }
+
+    delBlock(index) {
+        delete this.blockCoords[index];
+        this.graph.delBlock(index);
     }
 
     _coorAvailable(x1, y1, x2, y2, ignoreIndex = -1) {

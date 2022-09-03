@@ -40,11 +40,20 @@ function renderBlock(index) {
         dragDivArea.classList.add("display");
         chosedBlockIndex = index;
     }
+    div.onmouseup = (event) => {
+        if (event.button == 2) {
+            CodeManager.instance.delBlock(index);
+            let tmpblock = document.getElementById("b" + index);
+            blockArea.removeChild(tmpblock);
+        }
+    }
     div.ondragend = () => {
+        let tmpblock = document.getElementById("b" + index);
         dragDivArea.classList.remove("display");
         dragDivArea.classList.add("notDisplay");
         shadowBlock.classList.remove("display");
         shadowBlock.classList.add("notDisplay");
+        tmpblock.style.zIndex = 5;
         shadowActivated = false;
     }
     div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
@@ -55,7 +64,11 @@ function renderBlock(index) {
 }
 
 function renderGraph() {
-    blockArea.innerText = "";
+    for (let htmlElement in blockArea.children) {
+        if (htmlElement == 0)
+            continue;
+        blockArea.removeChild(blockArea.children[htmlElement]);
+    }
     for (let block in CodeManager.instance.graph.blocks)
         blockArea.appendChild(renderBlock(block));
 }
@@ -197,7 +210,6 @@ window.dragAreaDropDetected = (event) => {
             y1: resY,
             y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
         };
-        console.log(resX, resY, CodeManager.instance.blockCoords);
     }
     dragDivArea.classList.remove("display");
     dragDivArea.classList.add("notDisplay");
