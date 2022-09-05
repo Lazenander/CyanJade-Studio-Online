@@ -56,6 +56,42 @@ function renderBlock(index) {
         tmpblock.style.zIndex = 5;
         shadowActivated = false;
     }
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
+        let port = document.createElement("div");
+        port.style.left = "5px";
+        port.style.top = i * 50 + 25 + 16 + "px";
+        port.classList.add("logicport");
+        div.appendChild(port);
+    }
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
+        let port = document.createElement("div");
+        port.style.left = "5px";
+        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 18.5 + "px";
+        port.classList.add("dataport");
+        div.appendChild(port);
+    }
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
+        let port = document.createElement("div");
+        port.style.right = "5px";
+        port.style.top = i * 50 + 25 + 16 + "px";
+        port.classList.add("logicport");
+        div.appendChild(port);
+    }
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
+        let port = document.createElement("div");
+        port.style.right = "7px";
+        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 18.5 + "px";
+        port.classList.add("dataport");
+        div.appendChild(port);
+    }
+    let divblock = document.createElement("div");
+    divblock.classList.add("blockdiv");
+    let p = document.createElement("p");
+    p.className = "blockp";
+    p.setAttribute("name", block.blockMould.nameID);
+    p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+    divblock.appendChild(p);
+    div.appendChild(divblock);
     div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
     div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
     div.style.left = block.x * 50 + 25 + "px";

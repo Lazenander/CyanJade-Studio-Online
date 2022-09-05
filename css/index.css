@@ -226,3 +226,42 @@ body {
     user-select: none;
     -webkit-user-select: none;
 }
+
+.logicport {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 15px solid var(--secondaryColor);
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+}
+
+.dataport {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    background-color: var(--secondaryColor);
+}
+
+.blockdiv {
+    position: absolute;
+    left: 25px;
+    top: 25px;
+    width: calc(100% - 50px);
+    height: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.blockp {
+    width: 100%;
+    font-family: "SHSCN-Regular";
+    color: var(--textColor);
+    font-size: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
