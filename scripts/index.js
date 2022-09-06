@@ -25,6 +25,11 @@ let shadowActivated = false;
 let dragType = "";
 let canvasSize = { width: Math.max(px2grid(window.screen.availWidth * 2), 500), height: Math.max(px2grid(window.screen.availHeight * 2), 500) };
 let resX, resY;
+let port1 = {
+    type: "none",
+    blockIndex: -1,
+    portIndex: -1
+};
 
 function renderBlock(index) {
     let block = CodeManager.instance.graph.blocks[index];
@@ -61,6 +66,30 @@ function renderBlock(index) {
         port.style.left = "5px";
         port.style.top = i * 50 + 25 + 16 + "px";
         port.classList.add("logicport");
+        port.classList.add("logicportHover");
+        port.onclick = () => {
+            if (port1.type == "none") {
+                port1 = {
+                    type: "logicImport",
+                    blockIndex: index,
+                    portIndex: i
+                }
+            } else if (port1.type == "logicExport") {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i))
+                    CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            } else {
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            }
+        }
         div.appendChild(port);
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
@@ -68,6 +97,30 @@ function renderBlock(index) {
         port.style.left = "5px";
         port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 18.5 + "px";
         port.classList.add("dataport");
+        port.classList.add("dataportHover");
+        port.onclick = () => {
+            if (port1.type == "none") {
+                port1 = {
+                    type: "dataImport",
+                    blockIndex: index,
+                    portIndex: i
+                }
+            } else if (port1.type == "dataExport") {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i))
+                    CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            } else {
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            }
+        }
         div.appendChild(port);
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
@@ -75,6 +128,31 @@ function renderBlock(index) {
         port.style.right = "5px";
         port.style.top = i * 50 + 25 + 16 + "px";
         port.classList.add("logicport");
+        port.classList.add("logicportHover");
+        port.onclick = () => {
+            if (port1.type == "none") {
+                port1 = {
+                    type: "logicExport",
+                    blockIndex: index,
+                    portIndex: i
+                }
+            } else if (port1.type == "logicImport") {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
+                    CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+        }
         div.appendChild(port);
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
@@ -82,6 +160,33 @@ function renderBlock(index) {
         port.style.right = "7px";
         port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 18.5 + "px";
         port.classList.add("dataport");
+        port.classList.add("dataportHover");
+        port.onclick = () => {
+            if (port1.type == "none") {
+                port1 = {
+                    type: "dataExport",
+                    blockIndex: index,
+                    portIndex: i
+                }
+            } else if (port1.type == "dataImport") {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
+                    CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
+                    //renderLink(index, i, CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + port1.blockIndex,
+                    //    port1.portIndex + CodeManager.instance.graph.blocks[port1.blockIndex].blockMould.logicExportNum);
+                }
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            } else {
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            }
+        }
         div.appendChild(port);
     }
     let divblock = document.createElement("div");

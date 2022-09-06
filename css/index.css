@@ -238,9 +238,9 @@ body {
 
 .dataport {
     position: absolute;
-    width: 13px;
-    height: 13px;
-    background-color: var(--secondaryColor);
+    width: 0;
+    height: 0;
+    border: 6.5px solid var(--secondaryColor);
 }
 
 .blockdiv {
@@ -264,4 +264,20 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
+}
+
+.logicportHover {
+    border-left-color: var(--secondaryColor);
+}
+
+.logicportHover:hover {
+    border-left-color: var(--lightShadow);
+}
+
+.dataportHover {
+    border-color: var(--secondaryColor);
+}
+
+.dataportHover:hover {
+    border-color: var(--lightShadow);
 }
