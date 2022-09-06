@@ -15,6 +15,7 @@ const playgroundContainer = document.getElementById("playgroundContainer");
 const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
+const linkArea = document.getElementById("linkArea");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -30,6 +31,57 @@ let port1 = {
     blockIndex: -1,
     portIndex: -1
 };
+
+function renderLink(index1, port1, index2, port2, type) {
+    console.log(index1, port1, index2, port2, type);
+    let y1b = 0,
+        y2b = 0;
+    if (type == "data") {
+        y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicImportNum;
+        y2b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
+    }
+    let x0, x1, y0, y1;
+    let linkType = 0,
+        linkY = 0;
+    x0 = (CodeManager.instance.graph.blocks[index1].x + CodeManager.instance.graph.blocks[index1].blockMould.size.width) * 50 + 75;
+    y0 = (CodeManager.instance.graph.blocks[index1].y + y1b) * 50 + 75;
+    x1 = (CodeManager.instance.graph.blocks[index2].x) * 50 + 25;
+    y1 = (CodeManager.instance.graph.blocks[index2].y + y2b) * 50 + 75;
+    if (x0 > x1) {
+        let tmp = x0;
+        x0 = x1;
+        x1 = tmp;
+        linkType = 1;
+    }
+    if (y0 > y1) {
+        let tmp = y0;
+        y0 = y1;
+        y1 = tmp;
+        linkY = 1;
+    }
+    x0 -= 27.5;
+    x1 += 27.5;
+    y0 -= 2.5;
+    y1 += 2.5;
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    svg.id = "l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type;
+    svg.classList.add("connection");
+    svg.style.left = x0 + "px";
+    svg.style.top = y0 + "px";
+    svg.style.width = x1 - x0 + "px";
+    svg.style.height = y1 - y0 + "px";
+    let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
+    if (linkType == 0) {
+        pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
+    }
+    path.setAttribute("d", pathstr);
+    path.setAttribute("stroke", "var(--lightShadow)");
+    path.setAttribute("stroke-width", "5px")
+    path.setAttribute("fill", "none");
+    svg.appendChild(path);
+    linkArea.appendChild(svg);
+}
 
 function renderBlock(index) {
     let block = CodeManager.instance.graph.blocks[index];
@@ -75,8 +127,10 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "logicExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i))
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i)) {
                     CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
+                    renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
+                }
                 port1 = {
                     type: "none",
                     blockIndex: -1,
@@ -106,8 +160,10 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "dataExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i))
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i)) {
                     CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
+                    renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
+                }
                 port1 = {
                     type: "none",
                     blockIndex: -1,
@@ -139,17 +195,18 @@ function renderBlock(index) {
             } else if (port1.type == "logicImport") {
                 if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
                     CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
-                    port1 = {
-                        type: "none",
-                        blockIndex: -1,
-                        portIndex: -1
-                    }
-                } else {
-                    port1 = {
-                        type: "none",
-                        blockIndex: -1,
-                        portIndex: -1
-                    }
+                    renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
+                }
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
+                }
+            } else {
+                port1 = {
+                    type: "none",
+                    blockIndex: -1,
+                    portIndex: -1
                 }
             }
         }
@@ -171,8 +228,7 @@ function renderBlock(index) {
             } else if (port1.type == "dataImport") {
                 if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
                     CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
-                    //renderLink(index, i, CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + port1.blockIndex,
-                    //    port1.portIndex + CodeManager.instance.graph.blocks[port1.blockIndex].blockMould.logicExportNum);
+                    renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
                 }
                 port1 = {
                     type: "none",
@@ -342,6 +398,8 @@ window.dragAreaDropDetected = (event) => {
         blockArea.appendChild(renderBlock(newIndex));
     } else {
         let tmpblock = document.getElementById("b" + chosedBlockIndex);
+        CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
+        CodeManager.instance.graph.blocks[chosedBlockIndex].y = resY;
         tmpblock.style.left = resX * 50 + 25 + "px";
         tmpblock.style.top = resY * 50 + 25 + "px";
         tmpblock.style.zIndex = 5;
@@ -351,6 +409,17 @@ window.dragAreaDropDetected = (event) => {
             y1: resY,
             y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
         };
+        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
+            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
+                let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
+                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
+                    "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+                linkArea.removeChild(link);
+                renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
+                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
+                    chosedBlockIndex, i, "logic");
+            }
+        }
     }
     dragDivArea.classList.remove("display");
     dragDivArea.classList.add("notDisplay");

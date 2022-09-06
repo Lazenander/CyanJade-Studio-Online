@@ -17,6 +17,34 @@ class Block {
         for (let i = 0; i < blockMould.dataExportNum; i++)
             this.dataExports.push([]);
     }
+
+    searchLogicImport(index) {
+        for (let i = 0; i < this.blockMould.logicImportNum; i++)
+            if (this.logicImports[i].indexOf(index) != -1)
+                return i;
+        return -1;
+    }
+
+    searchLogicExport(index) {
+        for (let i = 0; i < this.blockMould.logicExportNum; i++)
+            if (this.logicExports[i].indexOf(index) != -1)
+                return i;
+        return -1;
+    }
+
+    searchDataImport(index) {
+        for (let i = 0; i < this.blockMould.dataImportNum; i++)
+            if (this.dataImports[i] == index)
+                return i;
+        return -1;
+    }
+
+    searchDataExport(index) {
+        for (let i = 0; i < this.blockMould.dataExportNum; i++)
+            if (this.dataExports[i].indexOf(index) != -1)
+                return i;
+        return -1;
+    }
 }
 
 export default class Graph {
@@ -84,13 +112,13 @@ export default class Graph {
         if (dataport != -1 && this.blocks[index2].dataImports[dataport] != -1)
             return false;
         for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
-            if (this.blocks[index2].logicImports.indexOf(index1) != -1)
+            if (this.blocks[index2].logicImports[i].indexOf(index1) != -1)
                 return false;
         for (let i = 0; i < this.blocks[index1].logicExports.length; i++)
-            if (this.blocks[index1].logicExports.indexOf(index2) != -1)
+            if (this.blocks[index1].logicExports[i].indexOf(index2) != -1)
                 return false;
         for (let i = 0; i < this.blocks[index1].dataExports.length; i++)
-            if (this.blocks[index1].dataExports.indexOf(index2) != -1)
+            if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
                 return false;
         if (this.checkRegion(index1) != this.checkRegion(index2))
             return false;
@@ -111,7 +139,6 @@ export default class Graph {
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
                 if (this.blocks[tindex].dataImports[i] != -1 && q.indexOf(this.blocks[tindex].dataImports[i]) == -1)
                     q.push(this.blocks[tindex].dataImports[i]);
-            q.push(this.blocks[tindex].dataImports[i][j]);
             for (let i = 0; i < this.blocks[tindex].blockMould.logicImportNum; i++)
                 for (let j = 0; j < this.blocks[tindex].logicImports[i].length; j++)
                     if (this.blocks[tindex].logicImports[i][j] != -1 && q.indexOf(this.blocks[tindex].logicImports[i][j]) == -1)
