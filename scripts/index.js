@@ -431,6 +431,28 @@ window.dragAreaDropDetected = (event) => {
                     CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
             }
         }
+        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
+            if (CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
+                continue;
+            let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
+                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
+                "_" + chosedBlockIndex + "_" + i + "_" + "data");
+            linkArea.removeChild(link);
+            renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
+                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
+                chosedBlockIndex, i, "data");
+        }
+        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
+            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
+                let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                    "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
+                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
+                    "_" + "data");
+                linkArea.removeChild(link);
+                renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
+                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
+            }
+        }
     }
     dragDivArea.classList.remove("display");
     dragDivArea.classList.add("notDisplay");
