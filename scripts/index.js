@@ -420,6 +420,17 @@ window.dragAreaDropDetected = (event) => {
                     chosedBlockIndex, i, "logic");
             }
         }
+        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
+            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
+                let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                    "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
+                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
+                    "_" + "logic");
+                linkArea.removeChild(link);
+                renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
+                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
+            }
+        }
     }
     dragDivArea.classList.remove("display");
     dragDivArea.classList.add("notDisplay");
