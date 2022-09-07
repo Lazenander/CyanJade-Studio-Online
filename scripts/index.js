@@ -15,7 +15,6 @@ const playgroundContainer = document.getElementById("playgroundContainer");
 const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
-const linkArea = document.getElementById("linkArea");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -33,9 +32,8 @@ let port1 = {
 };
 
 function renderLink(index1, port1, index2, port2, type) {
-    console.log(index1, port1, index2, port2, type);
-    let y1b = 0,
-        y2b = 0;
+    let y1b = port1,
+        y2b = port2;
     if (type == "data") {
         y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicImportNum;
         y2b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
@@ -64,23 +62,77 @@ function renderLink(index1, port1, index2, port2, type) {
     y0 -= 2.5;
     y1 += 2.5;
     let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.id = "l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type;
     svg.classList.add("connection");
     svg.style.left = x0 + "px";
     svg.style.top = y0 + "px";
     svg.style.width = x1 - x0 + "px";
     svg.style.height = y1 - y0 + "px";
-    let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
     if (linkType == 0) {
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
         pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
+        path.setAttribute("d", pathstr);
+        path.setAttribute("stroke", "var(--lightShadow)");
+        path.setAttribute("stroke-width", "5px")
+        path.setAttribute("fill", "none");
+        path.onmouseup = (event) => {
+            if (event.button == 2) {
+                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                blockArea.removeChild(delsvg);
+                if (type == "logic")
+                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                else
+                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+            }
+        }
+        svg.appendChild(path);
+    } else {
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        let pathstr1 = "M 27.5 " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+        pathstr1 += " C " + 2.5 + " " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+        pathstr1 += " " + 2.5 + " " + (y1 - y0) / 2;
+        pathstr1 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+        path1.setAttribute("d", pathstr1);
+        path1.setAttribute("stroke", "var(--lightShadow)");
+        path1.setAttribute("stroke-width", "5px")
+        path1.setAttribute("fill", "none");
+        path1.onmouseup = (event) => {
+            if (event.button == 2) {
+                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                blockArea.removeChild(delsvg);
+                if (type == "logic")
+                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                else
+                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+            }
+        }
+        svg.appendChild(path1);
+        let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        let pathstr2 = "M " + (x1 - x0 - 27.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+        pathstr2 += " C " + (x1 - x0 - 2.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+        pathstr2 += " " + (x1 - x0 - 2.5) + " " + (y1 - y0) / 2;
+        pathstr2 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+        path2.setAttribute("d", pathstr2);
+        path2.setAttribute("stroke", "var(--lightShadow)");
+        path2.setAttribute("stroke-width", "5px")
+        path2.setAttribute("fill", "none");
+        path2.onmouseup = (event) => {
+            if (event.button == 2) {
+                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                blockArea.removeChild(delsvg);
+                if (type == "logic")
+                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                else
+                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+            }
+        }
+        svg.appendChild(path2);
     }
-    path.setAttribute("d", pathstr);
-    path.setAttribute("stroke", "var(--lightShadow)");
-    path.setAttribute("stroke-width", "5px")
-    path.setAttribute("fill", "none");
-    svg.appendChild(path);
-    linkArea.appendChild(svg);
+    svg.onclick = (event) => {
+        event.preventDefault();
+    }
+    blockArea.appendChild(svg);
 }
 
 function renderBlock(index) {
@@ -414,7 +466,7 @@ window.dragAreaDropDetected = (event) => {
                 let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
                     "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
                     "_" + chosedBlockIndex + "_" + i + "_" + "logic");
-                linkArea.removeChild(link);
+                blockArea.removeChild(link);
                 renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
                     CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
                     chosedBlockIndex, i, "logic");
@@ -426,7 +478,7 @@ window.dragAreaDropDetected = (event) => {
                     "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
                     "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
                     "_" + "logic");
-                linkArea.removeChild(link);
+                blockArea.removeChild(link);
                 renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
                     CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
             }
@@ -437,7 +489,7 @@ window.dragAreaDropDetected = (event) => {
             let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
                 "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
                 "_" + chosedBlockIndex + "_" + i + "_" + "data");
-            linkArea.removeChild(link);
+            blockArea.removeChild(link);
             renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
                 CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
                 chosedBlockIndex, i, "data");
@@ -448,7 +500,7 @@ window.dragAreaDropDetected = (event) => {
                     "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
                     "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
                     "_" + "data");
-                linkArea.removeChild(link);
+                blockArea.removeChild(link);
                 renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
                     CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
             }

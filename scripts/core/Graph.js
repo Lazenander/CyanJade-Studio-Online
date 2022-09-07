@@ -83,6 +83,27 @@ export default class Graph {
         console.log(`Add Data Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 
+    delLogicConnection(index1, port1, index2, port2) {
+        let delIndex1 = this.blocks[index1].logicExports[port1].indexOf(index2);
+        let delIndex2 = this.blocks[index2].logicImports[port2].indexOf(index1);
+        if (delIndex1 == -1 || delIndex2 == -1)
+            return;
+        this.blocks[index1].logicExports[port1].splice(delIndex1, 1);
+        this.blocks[index2].logicImports[port2].splice(delIndex2, 1);
+        console.log(`Delete Logic Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
+    }
+
+    delDataConnection(index1, port1, index2, port2) {
+        let delIndex1 = this.blocks[index1].dataExports[port1].indexOf(index2);
+        console.log(this.blocks[index2].dataImports);
+        if (delIndex1 == -1 || this.blocks[index2].dataImports[port2] != index1)
+            return;
+        this.blocks[index1].dataExports[port1].splice(delIndex1, 1);
+        this.blocks[index2].dataImports[port2] = -1;
+        console.log(this.blocks[index2].dataImports);
+        console.log(`Delete Data Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
+    }
+
     checkRegion(index) {
         let q = [];
         for (let i = 0; i < this.blocks[index].blockMould.dataImportNum; i++)

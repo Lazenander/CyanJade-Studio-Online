@@ -183,6 +183,8 @@ body {
     width: 100%;
     height: 100%;
     z-index: 10;
+    user-select: none;
+    -moz-user-select: none;
 }
 
 .canvasArea {
@@ -190,6 +192,8 @@ body {
     left: 0;
     top: 0;
     z-index: 1;
+    user-select: none;
+    -moz-user-select: none;
 }
 
 .shadowArea {
@@ -199,6 +203,8 @@ body {
     width: 100%;
     height: 100%;
     z-index: 2;
+    user-select: none;
+    -moz-user-select: none;
 }
 
 .blockArea {
@@ -208,15 +214,8 @@ body {
     width: 100%;
     height: 100%;
     z-index: 4;
-}
-
-.linkArea {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 3;
+    user-select: none;
+    -moz-user-select: none;
 }
 
 .shadowBlock {
@@ -224,6 +223,8 @@ body {
     background-color: var(--lightShadow);
     border-radius: 20px;
     z-index: 2;
+    user-select: none;
+    -moz-user-select: none;
 }
 
 .block {
