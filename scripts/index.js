@@ -35,12 +35,13 @@ function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
         y2b = port2;
     if (type == "data") {
-        y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicImportNum;
-        y2b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
+        y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
+        y2b += CodeManager.instance.graph.blocks[index2].blockMould.logicImportNum;
     }
     let x0, x1, y0, y1;
     let linkType = 0,
         linkY = 0;
+    console.log(y1b);
     x0 = (CodeManager.instance.graph.blocks[index1].x + CodeManager.instance.graph.blocks[index1].blockMould.size.width) * 50 + 75;
     y0 = (CodeManager.instance.graph.blocks[index1].y + y1b) * 50 + 75;
     x1 = (CodeManager.instance.graph.blocks[index2].x) * 50 + 25;
@@ -129,9 +130,6 @@ function renderLink(index1, port1, index2, port2, type) {
         }
         svg.appendChild(path2);
     }
-    svg.onclick = (event) => {
-        event.preventDefault();
-    }
     blockArea.appendChild(svg);
 }
 
@@ -206,6 +204,7 @@ function renderBlock(index) {
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
+            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "logicImport",
@@ -213,7 +212,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "logicExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i)) {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, "logic")) {
                     CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
                     renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
                 }
@@ -239,6 +238,7 @@ function renderBlock(index) {
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {
+            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "dataImport",
@@ -246,7 +246,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "dataExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i)) {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, "data")) {
                     CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
                     renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
                 }
@@ -272,6 +272,7 @@ function renderBlock(index) {
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
+            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "logicExport",
@@ -279,7 +280,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "logicImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, "logic")) {
                     CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
                     renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
                 }
@@ -305,6 +306,7 @@ function renderBlock(index) {
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {
+            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "dataExport",
@@ -312,7 +314,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "dataImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex)) {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, "data")) {
                     CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
                     renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
                 }
@@ -457,8 +459,13 @@ window.dragAreaDragDetected = (event) => {
     if (shadowActivated == false) {
         shadowBlock.classList.remove("notDisplay");
         shadowBlock.classList.add("display");
-        shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
-        shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+        if (dragType == "mould") {
+            shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
+            shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+        } else {
+            shadowBlock.style.width = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
+            shadowBlock.style.height = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
+        }
         shadowActivated = true;
     }
     let calC = { x: -1, y: -1 }
@@ -469,9 +476,9 @@ window.dragAreaDragDetected = (event) => {
             chosedBlockMould, canvasSize);
     else
         calC = CodeManager.instance.calCoor(
-            px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
-            px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
-            chosedBlockMould, canvasSize, chosedBlockIndex);
+            px2grid(event.offsetX) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
+            px2grid(event.offsetY) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
+            CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
     resX = calC.x;
     resY = calC.y;
     shadowBlock.style.left = resX * 50 + 25 + "px";

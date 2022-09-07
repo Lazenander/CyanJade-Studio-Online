@@ -149,20 +149,40 @@ export default class Graph {
         return -1;
     }
 
-    isConnectionAvailable(index1, index2, dataport = -1) {
-        console.log(index1, index2);
-        if (dataport != -1 && this.blocks[index2].dataImports[dataport] != -1)
+    isConnectionAvailable(index1, index2, dataport = -1, type = "logic") {
+        console.log(1, this.blocks[index2].dataImports, type);
+        if (type == "logic") {
+            for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
+                if (this.blocks[index2].logicImports[i].indexOf(index1) != -1)
+                    return false;
+            for (let i = 0; i < this.blocks[index1].logicExports.length; i++)
+                if (this.blocks[index1].logicExports[i].indexOf(index2) != -1)
+                    return false;
+        } else {
+            console.log(1);
+            if (dataport != -1 && this.blocks[index2].dataImports.length != 0 && this.blocks[index2].dataImports[dataport] != -1)
+                return false;
+            console.log(1);
+            for (let i = 0; i < this.blocks[index1].dataExports.length; i++)
+                if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
+                    return false;
+            console.log(1);
+        }
+        let region1 = this.checkRegion(index1),
+            region2 = this.checkRegion(index2);
+        console.log(region1, region2);
+
+        function isEmpty(arr) {
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i].length != 0)
+                    return false;
+            }
+            return true;
+        }
+        console.log(this.blocks[index2].logicImports, isEmpty(this.blocks[index2].logicImports));
+        if (type == "logic" && region1 != region2 && isEmpty(this.blocks[index2].logicImports) == false)
             return false;
-        for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
-            if (this.blocks[index2].logicImports[i].indexOf(index1) != -1)
-                return false;
-        for (let i = 0; i < this.blocks[index1].logicExports.length; i++)
-            if (this.blocks[index1].logicExports[i].indexOf(index2) != -1)
-                return false;
-        for (let i = 0; i < this.blocks[index1].dataExports.length; i++)
-            if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
-                return false;
-        if (this.checkRegion(index1) != this.checkRegion(index2))
+        if (type == "data" && region1 != region2 && isEmpty(this.blocks[index1].logicImports) == false)
             return false;
         let q = [];
         console.log(this.blocks[index1].logicImports, this.blocks[index1].dataImports);
@@ -186,6 +206,7 @@ export default class Graph {
                     if (this.blocks[tindex].logicImports[i][j] != -1 && q.indexOf(this.blocks[tindex].logicImports[i][j]) == -1)
                         q.push(this.blocks[tindex].logicImports[i][j]);
         }
+        console.log("checked")
         return true;
     }
 

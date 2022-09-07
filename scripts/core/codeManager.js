@@ -102,7 +102,7 @@ export default class CodeManager {
         return { x: calX, y: calY }
     }
 
-    isConnectionAvailable(index1, index2, dataport) {
-        return this.graph.isConnectionAvailable(index1, index2, dataport);
+    isConnectionAvailable(index1, index2, dataport, type) {
+        return this.graph.isConnectionAvailable(index1, index2, dataport, type);
     }
 }
