@@ -77,7 +77,7 @@ export default class Graph {
         for (let i = 0; i < this.blocks[index].blockMould.dataImportNum; i++) {
             if (this.blocks[index].dataImports[i] == -1)
                 continue;
-            this.delLogicConnection(this.blocks[index].dataImports[i],
+            this.delDataConnection(this.blocks[index].dataImports[i],
                 this.blocks[this.blocks[index].dataImports[i]].searchDataExport(index),
                 index, i);
         }
