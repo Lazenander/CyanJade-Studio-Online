@@ -151,9 +151,43 @@ function renderBlock(index) {
     }
     div.onmouseup = (event) => {
         if (event.button == 2) {
-            CodeManager.instance.delBlock(index);
             let tmpblock = document.getElementById("b" + index);
+            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicImports[i].length; j++) {
+                    let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                        "_" + index + "_" + i + "_" + "logic");
+                    blockArea.removeChild(link);
+                }
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicExports[i].length; j++) {
+                    let link = document.getElementById("l" + index + "_" + i +
+                        "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                        "_" + "logic");
+                    blockArea.removeChild(link);
+                }
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
+                if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
+                    continue;
+                let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
+                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                    "_" + index + "_" + i + "_" + "data");
+                blockArea.removeChild(link);
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[index].dataExports[i].length; j++) {
+                    let link = document.getElementById("l" + index + "_" + i +
+                        "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                        "_" + "data");
+                    blockArea.removeChild(link);
+                }
+            }
             blockArea.removeChild(tmpblock);
+            CodeManager.instance.delBlock(index);
         }
     }
     div.ondragend = () => {

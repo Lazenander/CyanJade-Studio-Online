@@ -65,6 +65,26 @@ export default class Graph {
     }
 
     delBlock(index) {
+        for (let i = 0; i < this.blocks[index].blockMould.logicImportNum; i++)
+            for (let j = 0; j < this.blocks[index].logicImports[i].length; j++)
+                this.delLogicConnection(this.blocks[index].logicImports[i][j],
+                    this.blocks[this.blocks[index].logicImports[i][j]].searchLogicExport(index),
+                    index, i);
+        for (let i = 0; i < this.blocks[index].blockMould.logicExportNum; i++)
+            for (let j = 0; j < this.blocks[index].logicExports[i].length; j++)
+                this.delLogicConnection(index, i, this.blocks[index].logicExports[i][j],
+                    this.blocks[this.blocks[index].logicExports[i][j]].searchLogicImport(index));
+        for (let i = 0; i < this.blocks[index].blockMould.dataImportNum; i++) {
+            if (this.blocks[index].dataImports[i] == -1)
+                continue;
+            this.delLogicConnection(this.blocks[index].dataImports[i],
+                this.blocks[this.blocks[index].dataImports[i]].searchDataExport(index),
+                index, i);
+        }
+        for (let i = 0; i < this.blocks[index].blockMould.dataExportNum; i++)
+            for (let j = 0; j < this.blocks[index].dataExports[i].length; j++)
+                this.delDataConnection(index, i, this.blocks[index].dataExports[i][j],
+                    this.blocks[this.blocks[index].dataExports[i][j]].searchDataImport(index));
         delete this.blocks[index];
         this.emptyIndex.push(index);
         this.size--;
@@ -84,6 +104,7 @@ export default class Graph {
     }
 
     delLogicConnection(index1, port1, index2, port2) {
+        console.log(index1, port1, index2, port2);
         let delIndex1 = this.blocks[index1].logicExports[port1].indexOf(index2);
         let delIndex2 = this.blocks[index2].logicImports[port2].indexOf(index1);
         if (delIndex1 == -1 || delIndex2 == -1)
