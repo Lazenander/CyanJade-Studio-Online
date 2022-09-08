@@ -9,9 +9,10 @@ export default class BlockLibraryManager {
     constructor() {
         this.libraries = {};
         let basic = new BlockLibrary("sys_lib_basic", { "English": "Basic", "Chinese": "基础指令" }, "#2c9678");
-        basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataFLow) => {
+        basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream) => {
             let ds = new DataStream();
-            ds.read(innerInput[0]);
+            ds = innerInput[0];
+            console.log(innerInput[0], ds)
             if (ds.type != "variable") {
                 ErrorManager.error(1, ds.data);
                 return {
@@ -19,14 +20,16 @@ export default class BlockLibraryManager {
                     dataOutput: [new DataStream()]
                 }
             }
-            VariableTable.assignVariable(ds, preDataFLow[0]);
+            console.log(preDataStream);
+            VariableTable.instance.assignVariable(ds, preDataStream[0].dataOutput[0]);
             return {
                 logicport: 0,
                 dataOutput: [ds]
             }
         });
-        basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 2, height: 1 }, 0, 0, 0, 1, (innerInput, preDataFLow) => {
+        basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 2, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream) => {
             let ds = new DataStream();
+            console.log(innerInput);
             ds.data = innerInput[0].readData();
             if (innerInput[0].type == "variable")
                 ds.type = innerInput[0].data.type;
@@ -37,18 +40,18 @@ export default class BlockLibraryManager {
                 dataOutput: [ds]
             }
         });
-        basic.BlockMoulds["output"] = new BlockMould("output", { "English": "output", "Chinese": "输出" }, "logic", "output", "sys_lib_basic", { width: 2, height: 2 }, 1, 0, 1, 0, (innerInput, preDataFLow) => {
+        basic.BlockMoulds["output"] = new BlockMould("output", { "English": "output", "Chinese": "输出" }, "logic", "output", "sys_lib_basic", { width: 2, height: 2 }, 1, 0, 1, 0, (innerInput, preDataStream) => {
             return {
                 logicport: -1,
                 dataOutput: []
             }
         });
-        basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "if", "sys_lib_basic", { width: 2, height: 3 }, 1, 3, 1, 0, (innerInput, preDataFLow) => {
-            if (preDataFLow.type == "boolean" && preDataFLow.data == true || preDataFLow.type == "number" && preDataFLow.data != 0 || preDataFLow.type == "string" && preDataFLow.data != "")
+        basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "if", "sys_lib_basic", { width: 2, height: 3 }, 1, 3, 1, 0, (innerInput, preDataStream) => {
+            if (preDataStream.type == "boolean" && preDataStream.data == true || preDataStream.type == "number" && preDataStream.data != 0 || preDataStream.type == "string" && preDataStream.data != "")
                 return { logicport: 0, dataOutput: [] };
             return { logicport: 1, dataOutput: [] };
         });
-        basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "while", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataFLow) => {
+        basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "while", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream) => {
             return {
                 logicport: -1,
                 dataOutput: []

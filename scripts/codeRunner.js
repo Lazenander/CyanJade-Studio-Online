@@ -1,6 +1,7 @@
 import CodeManager from "./codeManager.js";
 import DataStream from "./DataStream.js";
 import MemoryManager from "./MemoryManager.js";
+import VariableTable from "./VariableTable.js";
 
 let isCodeRunning = false;
 let userStop = false;
@@ -16,15 +17,21 @@ function runCalculation(index) {
         let block = document.getElementById("b" + index);
         let ds = new DataStream();
         ds.read(block.lastChild.firstChild.value);
+        console.log(ds);
         innerDataStream.push(ds);
     } else {
-        for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataImports; i++)
-            runCalculation(i);
+        for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataImports.length; i++) {
+            if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
+                continue;
+            runCalculation(CodeManager.instance.graph.blocks[index].dataImports[i]);
+        }
     }
+    console.log(index);
     let res = CodeManager.instance.graph.blocks[index].blockMould.forward(innerDataStream, MemoryManager.instance.inputMemory[index]);
+    console.log(CodeManager.instance.graph.blocks[index].dataExports, MemoryManager.instance.inputMemory)
     MemoryManager.instance.outputMemory[index] = res;
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataExports; i++)
-        MemoryManager.instance.inputMemory[CodeManager.instance.graph.blocks[index].dataExports[i]].push(res);
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataExports.length; i++)
+        MemoryManager.instance.inputMemory[CodeManager.instance.graph.blocks[index].dataExports[i][0]].push(res);
 }
 
 async function forward(index) {
@@ -35,8 +42,11 @@ async function forward(index) {
         ds.read(block.lastChild.firstChild.value);
         innerDataStream.push(ds);
     }
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataImports.length; i++)
-        runCalculation(i)
+    for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataImports.length; i++) {
+        if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
+            continue;
+        runCalculation(CodeManager.instance.graph.blocks[index].dataImports[i]);
+    }
     console.log(CodeManager.instance.graph.blocks[index].dataImports, MemoryManager.instance.inputMemory)
     let res = CodeManager.instance.graph.blocks[index].blockMould.forward(innerDataStream, MemoryManager.instance.inputMemory[index]);
     MemoryManager.instance.outputMemory[index] = res;
@@ -51,9 +61,10 @@ async function forward(index) {
     console.log(res);
     if (res.logicport != -1) {
         for (let i = 0; i < CodeManager.instance.graph.blocks[index].logicExports[res.logicport].length; i++) {
-            inDegree[i]--;
-            if (inDegree[i] == 0)
-                forward(i);
+            console.log(CodeManager.instance.graph.blocks[index].logicExports[res.logicport][i], CodeManager.instance.graph.blocks[index].logicExports[res.logicport], index);
+            inDegree[CodeManager.instance.graph.blocks[index].logicExports[res.logicport][i]]--;
+            if (inDegree[CodeManager.instance.graph.blocks[index].logicExports[res.logicport][i]] == 0)
+                forward(CodeManager.instance.graph.blocks[index].logicExports[res.logicport][i]);
         }
     }
     OriginalRegionDegrees--;
@@ -62,6 +73,7 @@ async function forward(index) {
 };
 
 function codeInitialize() {
+    VariableTable.instance.clearVariableTable();
     MemoryManager.instance.clearOutputMemory();
     MemoryManager.instance.clearInputMemory();
     for (let i in CodeManager.instance.graph.blocks) {
@@ -94,8 +106,6 @@ function codeRunFinished() {
             block.lastChild.firstChild.classList.remove("inputTransBorder");
         }
     }
-    MemoryManager.instance.clearOutputMemory();
-    MemoryManager.instance.clearInputMemory();
 }
 
 window.runCode = (event) => {
@@ -113,6 +123,7 @@ window.runCode = (event) => {
             }
         }
         codeInitialize();
+        console.log(CodeManager.instance.graph.blocks);
         for (let i in CodeManager.instance.graph.blocks) {
             if (CodeManager.instance.graph.blocks[i].blockMould.generalType == "data")
                 continue;

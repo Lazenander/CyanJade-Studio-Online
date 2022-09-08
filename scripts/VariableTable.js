@@ -7,6 +7,10 @@ export default class VariableTable {
         this._storage = {};
     }
 
+    clearVariableTable() {
+        this._storage = {};
+    }
+
     assignVariable(variable, data) {
         if (variable.type != "variable") {
             ErrorManager.error(1, variable.data);
