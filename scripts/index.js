@@ -339,11 +339,13 @@ function renderBlock(index) {
         case "input":
             let input = document.createElement("input");
             input.className = "blockInput";
+            input.classList.add("inputBorder");
             divblock.appendChild(input);
             break;
         case "assign":
             let assign = document.createElement("input");
             assign.className = "blockAssign";
+            assign.classList.add("inputBorder");
             divblock.appendChild(assign);
             break;
         case "output":
@@ -367,16 +369,6 @@ function renderBlock(index) {
     div.style.left = block.x * 50 + 25 + "px";
     div.style.top = block.y * 50 + 25 + "px";
     return div;
-}
-
-function renderGraph() {
-    for (let htmlElement in blockArea.children) {
-        if (htmlElement == 0)
-            continue;
-        blockArea.removeChild(blockArea.children[htmlElement]);
-    }
-    for (let block in CodeManager.instance.graph.blocks)
-        blockArea.appendChild(renderBlock(block));
 }
 
 function eraseBlockLibDisplay() {

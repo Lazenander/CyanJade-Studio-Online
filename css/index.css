@@ -59,11 +59,17 @@ body {
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .runButton img {
     width: 25px;
     height: 25px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .contentHover {
@@ -242,6 +248,17 @@ body {
     -moz-user-select: none;
 }
 
+.lockArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    user-select: none;
+    -moz-user-select: none;
+}
+
 .shadowBlock {
     position: absolute;
     background-color: var(--lightShadow);
@@ -302,13 +319,20 @@ body {
     text-align: center;
 }
 
+.inputBorder {
+    border: solid 2px var(--secondaryColor);
+}
+
+.inputTransBorder {
+    border: solid 2px transparent;
+}
+
 .blockInput {
     width: calc(100% - 10px);
     min-height: 36px;
     font-family: "SHSCN-Regular";
     color: var(--textColor);
     background-color: transparent;
-    border: solid 2px var(--secondaryColor);
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;
@@ -323,7 +347,6 @@ body {
     font-family: "SHSCN-Regular";
     color: var(--textColor);
     background-color: transparent;
-    border: solid 2px var(--secondaryColor);
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;

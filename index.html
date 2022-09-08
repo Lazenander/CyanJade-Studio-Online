@@ -25,8 +25,8 @@
                     <p name="l_op_setting"></p>
                 </div>
             </div>
-            <div class="runButton" title="run" onclick>
-                <img src="./res/svg/feather_cyan/play.svg" />
+            <div class="runButton" title="run" onclick="runCode()">
+                <img id="img_runButton" src="./res/svg/feather_cyan/play.svg" />
             </div>
         </div>
         <div style="position: absolute; top:0; left: 0; width: 0; height: 0">
@@ -67,11 +67,13 @@
                 <div id="blockArea" class="blockArea">
                     <div id="dragDivArea" class="dragArea notDisplay" ondragover="dragAreaDragDetected(event)" ondrop="dragAreaDropDetected(event)"></div>
                 </div>
+                <div id="lockArea" class="lockArea notDisplay"></div>
             </div>
         </div>
         <div class="infoContainer"></div>
     </div>
     <script type="module" src="./scripts/index.js"></script>
+    <script type="module" src="./scripts/codeRunner.js"></script>
     <script type="text/javascript " src="./scripts/sourceProtection.js "></script>
 </body>
 
