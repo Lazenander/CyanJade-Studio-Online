@@ -8,7 +8,7 @@ export default class DataStream {
 
     readData() {
         if (this.type == "variable")
-            return VariableTable.readVariable(this.data);
+            return VariableTable.instance.readVariable(this);
         return this.data;
     }
 
@@ -33,7 +33,7 @@ export default class DataStream {
             this.data = str.substr(1, str.length - 2);
             return;
         }
-        if (str[0] >= "0" && str[0] <= "9" || str[0] == '.') {
+        if (str[0] >= "0" && str[0] <= "9" || str[0] == '.' || str[0] == '-' && str[1] >= "0" && str[1] <= "9") {
             this.type = "number";
             this.data = parseFloat(str);
             return;
