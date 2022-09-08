@@ -149,7 +149,7 @@ export default class Graph {
         return -1;
     }
 
-    isConnectionAvailable(index1, index2, dataport = -1, type = "logic") {
+    isConnectionAvailable(index1, index2, dataImport = -1, dataExport = -1, type = "logic") {
         console.log(1, this.blocks[index2].dataImports, type);
         if (type == "logic") {
             for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
@@ -159,10 +159,11 @@ export default class Graph {
                 if (this.blocks[index1].logicExports[i].indexOf(index2) != -1)
                     return false;
         } else {
-            console.log(1);
-            if (dataport != -1 && this.blocks[index2].dataImports.length != 0 && this.blocks[index2].dataImports[dataport] != -1)
+            console.log(dataExport);
+            if (dataImport != -1 && this.blocks[index2].dataImports.length != 0 && this.blocks[index2].dataImports[dataImport] != -1)
                 return false;
-            console.log(1);
+            if (this.blocks[index1].dataExports[dataExport].length >= 1)
+                return false;
             for (let i = 0; i < this.blocks[index1].dataExports.length; i++)
                 if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
                     return false;

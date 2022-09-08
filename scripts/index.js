@@ -212,7 +212,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "logicExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, "logic")) {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "logic")) {
                     CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
                     renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
                 }
@@ -246,7 +246,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "dataExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, "data")) {
+                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "data")) {
                     CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
                     renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
                 }
@@ -280,7 +280,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "logicImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, "logic")) {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "logic")) {
                     CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
                     renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
                 }
@@ -314,7 +314,7 @@ function renderBlock(index) {
                     portIndex: i
                 }
             } else if (port1.type == "dataImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, "data")) {
+                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "data")) {
                     CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
                     renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
                 }
