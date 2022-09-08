@@ -1,4 +1,4 @@
-import LanguageManager from "../language.js";
+import LanguageManager from "./language.js";
 
 export default class BlockLibrary {
     constructor(nameID = "", Tnames = { "English": "", "Chinese": "" }, color = "") {

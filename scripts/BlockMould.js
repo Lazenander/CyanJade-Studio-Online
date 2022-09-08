@@ -1,4 +1,4 @@
-import LanguageManager from "../language.js";
+import LanguageManager from "./language.js";
 
 export default class BlockMould {
     constructor(nameID, Tnames, type, lib, size, logicImportNum, logicExportNum, dataImportNum, dataExportNum, forward) {

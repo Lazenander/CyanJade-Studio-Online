@@ -1,5 +1,5 @@
-import BlockLibraryManager from "./core/BlockLibraryManager.js";
-import CodeManager from "./core/codeManager.js";
+import BlockLibraryManager from "./BlockLibraryManager.js";
+import CodeManager from "./codeManager.js";
 import LanguageManager from "./language.js";
 import px2grid from "./projector.js";
 
@@ -335,12 +335,33 @@ function renderBlock(index) {
     }
     let divblock = document.createElement("div");
     divblock.classList.add("blockdiv");
-    let p = document.createElement("p");
-    p.className = "blockp";
-    p.setAttribute("name", block.blockMould.nameID);
-    p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
-    divblock.appendChild(p);
+    switch (block.blockMould.type) {
+        case "input":
+            let input = document.createElement("input");
+            input.className = "blockInput";
+            divblock.appendChild(input);
+            break;
+        case "assign":
+            let assign = document.createElement("input");
+            assign.className = "blockAssign";
+            divblock.appendChild(assign);
+            break;
+        case "output":
+            let output = document.createElement("p");
+            output.className = "blockp";
+            output.id = "out" + index;
+            divblock.appendChild(output);
+            break;
+        default:
+            let p = document.createElement("p");
+            p.className = "blockp";
+            p.setAttribute("name", block.blockMould.nameID);
+            p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+            divblock.appendChild(p);
+            break;
+    }
     div.appendChild(divblock);
+    div.title = LanguageManager.phrases[block.blockMould.nameID]["English"];
     div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
     div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
     div.style.left = block.x * 50 + 25 + "px";

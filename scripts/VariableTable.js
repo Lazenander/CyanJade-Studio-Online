@@ -1,4 +1,4 @@
-import ErrorManager from "./ErrorManager";
+import ErrorManager from "./ErrorManager.js";
 
 export default class VariableTable {
     static instance = new VariableTable();
