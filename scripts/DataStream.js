@@ -9,7 +9,7 @@ export default class DataStream {
     readData() {
         if (this.type == "variable")
             return VariableTable.instance.readVariable(this);
-        return this.data;
+        return this;
     }
 
     read(str) {

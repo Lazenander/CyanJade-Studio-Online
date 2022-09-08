@@ -12,7 +12,6 @@ export default class BlockLibraryManager {
         basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream) => {
             let ds = new DataStream();
             ds = innerInput[0];
-            console.log(innerInput[0], ds)
             if (ds.type != "variable") {
                 ErrorManager.error(1, ds.data);
                 return {
@@ -20,7 +19,6 @@ export default class BlockLibraryManager {
                     dataOutput: [new DataStream()]
                 }
             }
-            console.log(preDataStream);
             VariableTable.instance.assignVariable(ds, preDataStream[0].dataOutput[0]);
             return {
                 logicport: 0,
@@ -28,13 +26,7 @@ export default class BlockLibraryManager {
             }
         });
         basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 2, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream) => {
-            let ds = new DataStream();
-            console.log(innerInput);
-            ds.data = innerInput[0].readData();
-            if (innerInput[0].type == "variable")
-                ds.type = innerInput[0].data.type;
-            else
-                ds.type = innerInput[0].type;
+            let ds = innerInput[0].readData();
             return {
                 logicport: -1,
                 dataOutput: [ds]
@@ -47,15 +39,16 @@ export default class BlockLibraryManager {
             }
         });
         basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "if", "sys_lib_basic", { width: 2, height: 3 }, 1, 3, 1, 0, (innerInput, preDataStream) => {
-            if (preDataStream.type == "boolean" && preDataStream.data == true || preDataStream.type == "number" && preDataStream.data != 0 || preDataStream.type == "string" && preDataStream.data != "")
+            let ds = preDataStream[0].dataOutput[0].readData();
+            if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
                 return { logicport: 0, dataOutput: [] };
             return { logicport: 1, dataOutput: [] };
         });
         basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "while", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream) => {
-            return {
-                logicport: -1,
-                dataOutput: []
-            }
+            let ds = preDataStream[0].dataOutput[0].readData();
+            if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
+                return { logicport: 0, dataOutput: [] };
+            return { logicport: 1, dataOutput: [] };
         });
         this.libraries["sys_lib_basic"] = basic;
         basic = new BlockLibrary("sys_lib_math", { "English": "Math", "Chinese": "数学指令" }, "#2c9678");

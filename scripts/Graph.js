@@ -19,6 +19,7 @@ class Block {
     }
 
     searchLogicImport(index) {
+        index = parseInt(index);
         for (let i = 0; i < this.blockMould.logicImportNum; i++)
             if (this.logicImports[i].indexOf(index) != -1)
                 return i;
@@ -26,6 +27,7 @@ class Block {
     }
 
     searchLogicExport(index) {
+        index = parseInt(index);
         for (let i = 0; i < this.blockMould.logicExportNum; i++)
             if (this.logicExports[i].indexOf(index) != -1)
                 return i;
@@ -33,6 +35,7 @@ class Block {
     }
 
     searchDataImport(index) {
+        index = parseInt(index);
         for (let i = 0; i < this.blockMould.dataImportNum; i++)
             if (this.dataImports[i] == index)
                 return i;
@@ -40,6 +43,7 @@ class Block {
     }
 
     searchDataExport(index) {
+        index = parseInt(index);
         for (let i = 0; i < this.blockMould.dataExportNum; i++)
             if (this.dataExports[i].indexOf(index) != -1)
                 return i;
@@ -104,7 +108,6 @@ export default class Graph {
     }
 
     delLogicConnection(index1, port1, index2, port2) {
-        console.log(index1, port1, index2, port2);
         let delIndex1 = this.blocks[index1].logicExports[port1].indexOf(index2);
         let delIndex2 = this.blocks[index2].logicImports[port2].indexOf(index1);
         if (delIndex1 == -1 || delIndex2 == -1)
@@ -116,12 +119,10 @@ export default class Graph {
 
     delDataConnection(index1, port1, index2, port2) {
         let delIndex1 = this.blocks[index1].dataExports[port1].indexOf(index2);
-        console.log(this.blocks[index2].dataImports);
         if (delIndex1 == -1 || this.blocks[index2].dataImports[port2] != index1)
             return;
         this.blocks[index1].dataExports[port1].splice(delIndex1, 1);
         this.blocks[index2].dataImports[port2] = -1;
-        console.log(this.blocks[index2].dataImports);
         console.log(`Delete Data Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 
@@ -136,7 +137,11 @@ export default class Graph {
                     q.push(this.blocks[index].logicImports[i][j]);
         while (q.length != 0) {
             let tindex = q.shift();
-            if (this.blocks[tindex].blockMould.type == "if")
+            if (this.blocks[tindex].blockMould.type == "if" && this.blocks[tindex].searchLogicExport(index) == 0)
+                return tindex + "_1";
+            if (this.blocks[tindex].blockMould.type == "if" && this.blocks[tindex].searchLogicExport(index) == 1)
+                return tindex + "_2";
+            if (this.blocks[tindex].blockMould.type == "while")
                 return tindex;
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
                 if (this.blocks[tindex].dataImports[i] != -1 && q.indexOf(this.blocks[tindex].dataImports[i]) == -1)
@@ -150,7 +155,6 @@ export default class Graph {
     }
 
     isConnectionAvailable(index1, index2, dataImport = -1, dataExport = -1, type = "logic") {
-        console.log(1, this.blocks[index2].dataImports, type);
         if (type == "logic") {
             for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
                 if (this.blocks[index2].logicImports[i].indexOf(index1) != -1)
@@ -159,7 +163,6 @@ export default class Graph {
                 if (this.blocks[index1].logicExports[i].indexOf(index2) != -1)
                     return false;
         } else {
-            console.log(dataExport);
             if (dataImport != -1 && this.blocks[index2].dataImports.length != 0 && this.blocks[index2].dataImports[dataImport] != -1)
                 return false;
             if (this.blocks[index1].dataExports[dataExport].length >= 1)
@@ -167,11 +170,9 @@ export default class Graph {
             for (let i = 0; i < this.blocks[index1].dataExports.length; i++)
                 if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
                     return false;
-            console.log(1);
         }
         let region1 = this.checkRegion(index1),
             region2 = this.checkRegion(index2);
-        console.log(region1, region2);
 
         function isEmpty(arr) {
             for (let i = 0; i < arr.length; i++) {
@@ -180,13 +181,11 @@ export default class Graph {
             }
             return true;
         }
-        console.log(this.blocks[index2].logicImports, isEmpty(this.blocks[index2].logicImports));
         if (type == "logic" && region1 != region2 && isEmpty(this.blocks[index2].logicImports) == false)
             return false;
         if (type == "data" && region1 != region2 && isEmpty(this.blocks[index1].logicImports) == false)
             return false;
         let q = [];
-        console.log(this.blocks[index1].logicImports, this.blocks[index1].dataImports);
         for (let i = 0; i < this.blocks[index1].blockMould.dataImportNum; i++)
             if (this.blocks[index1].dataImports[i] != -1 && q.indexOf(this.blocks[index1].dataImports[i]) == -1)
                 q.push(this.blocks[index1].dataImports[i]);
@@ -196,7 +195,6 @@ export default class Graph {
                     q.push(this.blocks[index1].logicImports[i][j]);
         while (q.length != 0) {
             let tindex = q.shift();
-            console.log(tindex);
             if (tindex == index2)
                 return false;
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
@@ -207,7 +205,6 @@ export default class Graph {
                     if (this.blocks[tindex].logicImports[i][j] != -1 && q.indexOf(this.blocks[tindex].logicImports[i][j]) == -1)
                         q.push(this.blocks[tindex].logicImports[i][j]);
         }
-        console.log("checked")
         return true;
     }
 

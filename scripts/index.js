@@ -41,7 +41,6 @@ function renderLink(index1, port1, index2, port2, type) {
     let x0, x1, y0, y1;
     let linkType = 0,
         linkY = 0;
-    console.log(y1b);
     x0 = (CodeManager.instance.graph.blocks[index1].x + CodeManager.instance.graph.blocks[index1].blockMould.size.width) * 50 + 75;
     y0 = (CodeManager.instance.graph.blocks[index1].y + y1b) * 50 + 75;
     x1 = (CodeManager.instance.graph.blocks[index2].x) * 50 + 25;
@@ -204,7 +203,6 @@ function renderBlock(index) {
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
-            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "logicImport",
@@ -238,7 +236,6 @@ function renderBlock(index) {
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {
-            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "dataImport",
@@ -272,7 +269,6 @@ function renderBlock(index) {
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
-            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "logicExport",
@@ -306,7 +302,6 @@ function renderBlock(index) {
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {
-            console.log(port1);
             if (port1.type == "none") {
                 port1 = {
                     type: "dataExport",
