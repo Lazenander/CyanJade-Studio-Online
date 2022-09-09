@@ -5,12 +5,15 @@ import VariableTable from "./VariableTable.js";
 
 let isCodeRunning = false;
 let userStop = false;
+let currentBlock = 0;
 let inDegree = {};
 let originalRegionDegrees = 0;
 let regionFinished = {};
 let regionCount = {};
 let regions = {};
+let regionTree = {};
 let ifRegions = {};
+let ifRegionsCount = {};
 
 const lockArea = document.getElementById('lockArea');
 const img_runButton = document.getElementById('img_runButton');
@@ -31,14 +34,29 @@ function runCalculation(index) {
         }
     }
     let res = CodeManager.instance.graph.blocks[index].blockMould.forward(innerDataStream, MemoryManager.instance.inputMemory[index]);
-    console.log(res);
     MemoryManager.instance.outputMemory[index] = res;
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].dataExports.length; i++)
-        MemoryManager.instance.inputMemory[CodeManager.instance.graph.blocks[index].dataExports[i][0]].push(res);
-    console.log("Finish Calculating " + index);
+        MemoryManager.instance.inputMemory[CodeManager.instance.graph.blocks[index].dataExports[i][0]][CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][0]].searchDataImport(index)] = res.dataOutput[i];
+}
+
+function restoreRegions(index) {
+    if (!regionTree[index])
+        return;
+    for (let i = 0; i < regionTree[index].length; i++) {
+        regionFinished = regionCount[regionTree[index][i]];
+        if (CodeManager.instance.graph.blocks[regionTree[index][i]].blockMould.type == "if")
+            ifRegions[regionTree[index][i]] = ifRegionsCount[regionTree[index][i]];
+    }
 }
 
 async function forward(index) {
+    currentBlock++;
+    if (userStop) {
+        currentBlock--;
+        if (currentBlock == 0)
+            codeRunFinished();
+        return;
+    }
     console.log("Running " + index);
     let innerDataStream = [];
     if (CodeManager.instance.graph.blocks[index].blockMould.type == "assign") {
@@ -52,17 +70,18 @@ async function forward(index) {
             continue;
         runCalculation(CodeManager.instance.graph.blocks[index].dataImports[i]);
     }
-    console.log(index);
     let res = CodeManager.instance.graph.blocks[index].blockMould.forward(innerDataStream, MemoryManager.instance.inputMemory[index]);
-    console.log(res);
+    console.log(index, res);
     MemoryManager.instance.outputMemory[index] = res;
     if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
         let outputBlock = document.getElementById("out" + index);
-        console.log(index);
-        if (MemoryManager.instance.inputMemory[index][0].dataOutput[0].type == "string")
-            outputBlock.innerText = "\"" + MemoryManager.instance.inputMemory[index][0].dataOutput[0].data + "\"";
+        console.log(MemoryManager.instance.inputMemory[index][0]);
+        if (MemoryManager.instance.inputMemory[index][0].type == "string")
+            outputBlock.innerText = "\"" + MemoryManager.instance.inputMemory[index][0].data + "\"";
+        else if (MemoryManager.instance.inputMemory[index][0].type == "number")
+            outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data.toFixed(6);
         else
-            outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].dataOutput[0].data + "";
+            outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data;
         console.log(outputBlock.innerText);
     }
     if (res.logicport != -1) {
@@ -82,8 +101,6 @@ async function forward(index) {
             }
         }
     }
-    console.log(regions[index], originalRegionDegrees)
-    console.log(index, regions[index], ifRegions);
     if (regions[index] == -1) {
         originalRegionDegrees--;
         if (originalRegionDegrees == 0)
@@ -95,10 +112,9 @@ async function forward(index) {
             ifRegions[regions[index]][block.searchLogicExport(index)]--;
         console.log(index, regions[index], regionFinished, ifRegions, block.searchLogicExport(index))
         if (block.blockMould.type == "while" && regionFinished[regions[index]] == 0) {
-            regionFinished[regions[index]] = regionCount[regions[index]];
+            restoreRegions(index);
             forward(regions[index]);
         } else if (block.blockMould.type == "if" && ifRegions[regions[index]][block.searchLogicExport(index)] == 0) {
-            console.log(1);
             for (let i = 0; i < block.logicExports[2].length; i++) {
                 inDegree[block.logicExports[2][i]]--;
                 if (inDegree[block.logicExports[2][i]] == 0)
@@ -107,6 +123,9 @@ async function forward(index) {
         }
     }
     console.log("Finish Running " + index);
+    currentBlock--;
+    if (userStop == true && currentBlock == 0)
+        codeRunFinished();
 };
 
 function codeInitialize() {
@@ -115,12 +134,15 @@ function codeInitialize() {
     regionCount = {};
     regions = {};
     ifRegions = {};
+    ifRegionsCount = {};
     VariableTable.instance.clearVariableTable();
     MemoryManager.instance.clearOutputMemory();
     MemoryManager.instance.clearInputMemory();
     for (let i in CodeManager.instance.graph.blocks) {
         MemoryManager.instance.inputMemory[i] = [];
         MemoryManager.instance.outputMemory[i] = [];
+        for (let j = 0; j < CodeManager.instance.graph.blocks[i].dataImports.length; j++)
+            MemoryManager.instance.inputMemory[i].push(new DataStream());
         regions[i] = CodeManager.instance.graph.checkRegion(i);
         if (CodeManager.instance.graph.blocks[i].blockMould.generalType == "logic") {
             if (!regionCount[regions[i]])
@@ -128,20 +150,26 @@ function codeInitialize() {
             regionCount[regions[i]]++;
             if (regions[i] != -1 && CodeManager.instance.graph.blocks[regions[i]].blockMould.type == "if") {
                 console.log(regions[i], CodeManager.instance.graph.blocks, CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i))
-                if (!ifRegions[regions[i]])
-                    ifRegions[regions[i]] = [0, 0];
-                ifRegions[regions[i]][CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i)]++;
+                if (!ifRegionsCount[regions[i]])
+                    ifRegionsCount[regions[i]] = [0, 0];
+                ifRegionsCount[regions[i]][CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i)]++;
+            }
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "if" || CodeManager.instance.graph.blocks[i].blockMould.type == "while") {
+                if (!regionTree[regions[i]])
+                    regionTree[regions[i]] = [];
+                regionTree[regions[i]].push(i);
             }
         }
         if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
             document.getElementById("out" + i).innerText = "";
         inDegree[i] = 0;
-        for (let j = 0; j < CodeManager.instance.graph.blocks[i].logicImports.length; j++) {
+        for (let j = 0; j < CodeManager.instance.graph.blocks[i].logicImports.length; j++)
             inDegree[i] += CodeManager.instance.graph.blocks[i].logicImports[j].length;
-        }
     }
+    console.log(regionTree);
     calcoriginalRegionDegrees();
     regionFinished = {...regionCount };
+    ifRegions = {...ifRegionsCount };
 }
 
 function calcoriginalRegionDegrees() {
