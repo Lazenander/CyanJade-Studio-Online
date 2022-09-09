@@ -137,7 +137,7 @@ export default class Graph {
                     q.push(this.blocks[index].logicImports[i][j]);
         while (q.length != 0) {
             let tindex = q.shift();
-            if (this.blocks[tindex].blockMould.type == "if" && this.blocks[tindex].searchLogicExport(index) != 2 || this.blocks[tindex].blockMould.type == "while")
+            if (this.blocks[tindex].blockMould.type == "if" && this.blocks[tindex].searchLogicExport(index) != 2 || this.blocks[tindex].blockMould.type == "while" && this.blocks[tindex].searchLogicExport(index) != 1)
                 return tindex;
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
                 if (this.blocks[tindex].dataImports[i] != -1 && q.indexOf(this.blocks[tindex].dataImports[i]) == -1)

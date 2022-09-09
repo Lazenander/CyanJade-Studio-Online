@@ -41,7 +41,8 @@ function runCalculation(index) {
 }
 
 function restoreRegions(index) {
-    let Rindex = regions[index];
+    let Rindex = index;
+    console.log(Rindex);
     regionFinished[Rindex] = regionCount[Rindex];
     for (let i = 0; i < regionsProjection[Rindex].length; i++) {
         inDegree[regionsProjection[Rindex][i]] = 0;
@@ -78,18 +79,18 @@ async function forward(index) {
         runCalculation(CodeManager.instance.graph.blocks[index].dataImports[i]);
     }
     let res = CodeManager.instance.graph.blocks[index].blockMould.forward(innerDataStream, MemoryManager.instance.inputMemory[index]);
-    console.log(index, res);
+    //console.log(index, res);
     MemoryManager.instance.outputMemory[index] = res;
     if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
         let outputBlock = document.getElementById("out" + index);
-        console.log(MemoryManager.instance.inputMemory[index][0]);
+        //console.log(MemoryManager.instance.inputMemory[index][0]);
         if (MemoryManager.instance.inputMemory[index][0].type == "string")
             outputBlock.innerText = "\"" + MemoryManager.instance.inputMemory[index][0].data + "\"";
         else if (MemoryManager.instance.inputMemory[index][0].type == "number")
             outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data.toPrecision(6);
         else
             outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data;
-        console.log(outputBlock.innerText);
+        //console.log(outputBlock.innerText);
     }
     if (res.logicport != -1) {
         let flag = false;
@@ -117,9 +118,10 @@ async function forward(index) {
         let block = CodeManager.instance.graph.blocks[regions[index]];
         if (block.blockMould.type == "if")
             ifRegions[regions[index]][block.searchLogicExport(index)]--;
-        console.log(block.blockMould.type, index, regions[index]);
+        //console.log(block.blockMould.type, index, regions[index], regionFinished);
         if (block.blockMould.type == "while" && regionFinished[regions[index]] == 0) {
-            restoreRegions(index);
+            restoreRegions(regions[index]);
+            //console.log(block.blockMould.type, index, regions[index], regionFinished);
             forward(regions[index]);
         } else if (block.blockMould.type == "if" && ifRegions[regions[index]][block.searchLogicExport(index)] == 0) {
             for (let i = 0; i < block.logicExports[2].length; i++) {
@@ -135,10 +137,14 @@ async function forward(index) {
 };
 
 function codeInitialize() {
+    currentBlock = 0;
+    inDegree = {};
     originalRegionDegrees = 0;
     regionFinished = {};
     regionCount = {};
     regions = {};
+    regionsProjection = {};
+    regionTree = {};
     ifRegions = {};
     ifRegionsCount = {};
     VariableTable.instance.clearVariableTable();
@@ -150,6 +156,7 @@ function codeInitialize() {
         for (let j = 0; j < CodeManager.instance.graph.blocks[i].dataImports.length; j++)
             MemoryManager.instance.inputMemory[i].push(new DataStream());
         regions[i] = CodeManager.instance.graph.checkRegion(i);
+        regionsProjection[i] = [];
         if (!regionsProjection[regions[i]])
             regionsProjection[regions[i]] = [];
         regionsProjection[regions[i]].push(i);
@@ -158,7 +165,7 @@ function codeInitialize() {
                 regionCount[regions[i]] = 0;
             regionCount[regions[i]]++;
             if (regions[i] != -1 && CodeManager.instance.graph.blocks[regions[i]].blockMould.type == "if") {
-                console.log(regions[i], CodeManager.instance.graph.blocks, CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i))
+                //console.log(regions[i], CodeManager.instance.graph.blocks, CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i))
                 if (!ifRegionsCount[regions[i]])
                     ifRegionsCount[regions[i]] = [0, 0];
                 ifRegionsCount[regions[i]][CodeManager.instance.graph.blocks[regions[i]].searchLogicExport(i)]++;

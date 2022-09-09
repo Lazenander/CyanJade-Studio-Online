@@ -16,7 +16,7 @@ export default class VariableTable {
             ErrorManager.error(1, variable.data);
             return;
         }
-        this._storage[variable] = data.readData();
+        this._storage[variable.data] = data.readData();
     }
 
     changeVariable(variable, data) {
@@ -24,7 +24,7 @@ export default class VariableTable {
             ErrorManager.error(2, variable.data);
             return;
         }
-        this._storage[variable] = data.readData();
+        this._storage[variable.data] = data.readData();
     }
 
     readVariable(variable) {
@@ -32,6 +32,6 @@ export default class VariableTable {
             ErrorManager.error(3, variable.data);
             return;
         }
-        return this._storage[variable];
+        return this._storage[variable.data];
     }
 }

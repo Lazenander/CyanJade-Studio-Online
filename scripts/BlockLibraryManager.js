@@ -10,8 +10,8 @@ export default class BlockLibraryManager {
         this.libraries = {};
         let basic = new BlockLibrary("sys_lib_basic", { "English": "Basic", "Chinese": "基础指令" }, "#2c9678");
         basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream) => {
-            let ds = new DataStream();
-            ds = innerInput[0];
+            let ds = innerInput[0];
+            console.log(ds, preDataStream);
             if (ds.type != "variable") {
                 ErrorManager.error(1, ds.data);
                 return {
@@ -22,7 +22,7 @@ export default class BlockLibraryManager {
             VariableTable.instance.assignVariable(ds, preDataStream[0]);
             return {
                 logicport: 0,
-                dataOutput: [ds]
+                dataOutput: [0]
             }
         });
         basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 2, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream) => {
@@ -61,7 +61,7 @@ export default class BlockLibraryManager {
                 return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data + ds2.data)] };
         });
         math.BlockMoulds["minus"] = new BlockMould("minus", { "English": "-", "Chinese": "-" }, "data", "minus", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream) => {
-            console.log(preDataStream);
+            console.log(preDataStream[1]);
             let ds1 = preDataStream[0].readData();
             let ds2 = preDataStream[1].readData();
             if (ds1.type == "number" && ds2.type == "number")
