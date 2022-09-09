@@ -86,6 +86,44 @@ export default class BlockLibraryManager {
             if (ds1.type == "number")
                 return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.abs(ds1.data))] };
         });
+        math.BlockMoulds["sqrt"] = new BlockMould("sqrt", { "English": "sqrt", "Chinese": "sqrt" }, "data", "sqrt", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            if (ds1.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.sqrt(ds1.data))] };
+        });
+        math.BlockMoulds["constant_e"] = new BlockMould("constant_e", { "English": "constant e", "Chinese": "常数e" }, "data", "constant_e", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 0, 1, (innerInput, preDataStream) => {
+            return { logicport: -1, dataOutput: [new DataStream("number", Math.E)] };
+        });
+        math.BlockMoulds["exp"] = new BlockMould("exp", { "English": "exp", "Chinese": "exp" }, "data", "exp", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            if (ds1.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.exp(ds1.data))] };
+        });
+        math.BlockMoulds["pow"] = new BlockMould("pow", { "English": "pow", "Chinese": "pow" }, "data", "pow", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            let ds2 = preDataStream[1].readData();
+            if (ds1.type == "number" && ds2.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.pow(ds1.data, ds2.data))] };
+        });
+        math.BlockMoulds["ln"] = new BlockMould("ln", { "English": "ln", "Chinese": "ln" }, "data", "ln", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            if (ds1.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.log(ds1.data))] };
+        });
+        math.BlockMoulds["log"] = new BlockMould("log", { "English": "log", "Chinese": "log" }, "data", "log", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            let ds2 = preDataStream[1].readData();
+            if (ds1.type == "number" && ds2.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.log(ds1.data) / Math.log(ds2.data))] };
+        });
+        math.BlockMoulds["constant_pi"] = new BlockMould("constant_pi", { "English": "constant π", "Chinese": "常数π" }, "data", "constant_pi", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 0, 1, (innerInput, preDataStream) => {
+            return { logicport: -1, dataOutput: [new DataStream("number", Math.PI)] };
+        });
         math.BlockMoulds["sin"] = new BlockMould("sin", { "English": "sin", "Chinese": "sin" }, "data", "sin", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
             console.log(preDataStream);
             let ds1 = preDataStream[0].readData();
@@ -103,6 +141,23 @@ export default class BlockLibraryManager {
             let ds1 = preDataStream[0].readData();
             if (ds1.type == "number")
                 return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.tan(ds1.data))] };
+        });
+        math.BlockMoulds["asin"] = new BlockMould("asin", { "English": "asin", "Chinese": "asin" }, "data", "asin", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.asin(ds1.data))] };
+        });
+        math.BlockMoulds["acos"] = new BlockMould("acos", { "English": "acos", "Chinese": "acos" }, "data", "acos", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            if (ds1.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.acos(ds1.data))] };
+        });
+        math.BlockMoulds["atan"] = new BlockMould("atan", { "English": "atan", "Chinese": "atan" }, "data", "atan", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 1, 1, (innerInput, preDataStream) => {
+            console.log(preDataStream);
+            let ds1 = preDataStream[0].readData();
+            if (ds1.type == "number")
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.atan(ds1.data))] };
         });
         this.libraries["sys_lib_math"] = math;
     }

@@ -79,7 +79,7 @@ async function forward(index) {
         if (MemoryManager.instance.inputMemory[index][0].type == "string")
             outputBlock.innerText = "\"" + MemoryManager.instance.inputMemory[index][0].data + "\"";
         else if (MemoryManager.instance.inputMemory[index][0].type == "number")
-            outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data.toFixed(6);
+            outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data.toPrecision(6);
         else
             outputBlock.innerText = "" + MemoryManager.instance.inputMemory[index][0].data;
         console.log(outputBlock.innerText);
