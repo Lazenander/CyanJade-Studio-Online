@@ -46,6 +46,7 @@ export default class BlockLibraryManager {
         });
         basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "while", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream) => {
             let ds = preDataStream[0].readData();
+            console.log(ds);
             if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
                 return { logicport: 0, dataOutput: [] };
             return { logicport: 1, dataOutput: [] };

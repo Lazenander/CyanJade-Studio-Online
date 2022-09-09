@@ -13,7 +13,7 @@ export default class DataStream {
     }
 
     read(str) {
-        if (str == "null") {
+        if (str == "null" || str == "") {
             this.type = "null";
             this.data = null;
             return;

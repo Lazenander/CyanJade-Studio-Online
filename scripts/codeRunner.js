@@ -11,6 +11,7 @@ let originalRegionDegrees = 0;
 let regionFinished = {};
 let regionCount = {};
 let regions = {};
+let regionsProjection = {};
 let regionTree = {};
 let ifRegions = {};
 let ifRegionsCount = {};
@@ -40,13 +41,19 @@ function runCalculation(index) {
 }
 
 function restoreRegions(index) {
-    if (!regionTree[index])
-        return;
-    for (let i = 0; i < regionTree[index].length; i++) {
-        regionFinished = regionCount[regionTree[index][i]];
-        if (CodeManager.instance.graph.blocks[regionTree[index][i]].blockMould.type == "if")
-            ifRegions[regionTree[index][i]] = ifRegionsCount[regionTree[index][i]];
+    let Rindex = regions[index];
+    regionFinished[Rindex] = regionCount[Rindex];
+    for (let i = 0; i < regionsProjection[Rindex].length; i++) {
+        inDegree[regionsProjection[Rindex][i]] = 0;
+        for (let j = 0; j < CodeManager.instance.graph.blocks[regionsProjection[Rindex][i]].logicImports.length; j++)
+            inDegree[regionsProjection[Rindex][i]] += CodeManager.instance.graph.blocks[regionsProjection[Rindex][i]].logicImports[j].length;
     }
+    if (CodeManager.instance.graph.blocks[Rindex].blockMould.type == "if")
+        ifRegions[Rindex] = ifRegionsCount[Rindex];
+    if (!regionTree[Rindex])
+        return;
+    for (let i = 0; i < regionTree[Rindex].length; i++)
+        restoreRegions(regionTree[Rindex][i]);
 }
 
 async function forward(index) {
@@ -110,7 +117,7 @@ async function forward(index) {
         let block = CodeManager.instance.graph.blocks[regions[index]];
         if (block.blockMould.type == "if")
             ifRegions[regions[index]][block.searchLogicExport(index)]--;
-        console.log(index, regions[index], regionFinished, ifRegions, block.searchLogicExport(index))
+        console.log(block.blockMould.type, index, regions[index]);
         if (block.blockMould.type == "while" && regionFinished[regions[index]] == 0) {
             restoreRegions(index);
             forward(regions[index]);
@@ -122,7 +129,6 @@ async function forward(index) {
             }
         }
     }
-    console.log("Finish Running " + index);
     currentBlock--;
     if (userStop == true && currentBlock == 0)
         codeRunFinished();
@@ -144,6 +150,9 @@ function codeInitialize() {
         for (let j = 0; j < CodeManager.instance.graph.blocks[i].dataImports.length; j++)
             MemoryManager.instance.inputMemory[i].push(new DataStream());
         regions[i] = CodeManager.instance.graph.checkRegion(i);
+        if (!regionsProjection[regions[i]])
+            regionsProjection[regions[i]] = [];
+        regionsProjection[regions[i]].push(i);
         if (CodeManager.instance.graph.blocks[i].blockMould.generalType == "logic") {
             if (!regionCount[regions[i]])
                 regionCount[regions[i]] = 0;
