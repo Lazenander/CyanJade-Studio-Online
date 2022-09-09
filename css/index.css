@@ -273,6 +273,7 @@ body {
     background-color: var(--primaryColor);
     box-shadow: 0px 0px 5px var(--darkShadow);
     border-radius: 20px;
+    border: solid 2px var(--secondaryColor);
     z-index: 5;
     user-select: none;
     -webkit-user-select: none;
@@ -336,6 +337,7 @@ body {
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;
+    border-radius: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
@@ -350,6 +352,7 @@ body {
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;
+    border-radius: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
