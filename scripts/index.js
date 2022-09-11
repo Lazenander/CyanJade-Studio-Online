@@ -198,8 +198,8 @@ function renderBlock(index) {
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
         let port = document.createElement("div");
-        port.style.left = "5px";
-        port.style.top = i * 50 + 25 + 16 + "px";
+        port.style.left = "4px";
+        port.style.top = i * 50 + 25 + 17.5 + "px";
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
@@ -231,8 +231,8 @@ function renderBlock(index) {
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
         let port = document.createElement("div");
-        port.style.left = "5px";
-        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 18.5 + "px";
+        port.style.left = "4px";
+        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 17.5 + "px";
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {
@@ -264,8 +264,8 @@ function renderBlock(index) {
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
         let port = document.createElement("div");
-        port.style.right = "5px";
-        port.style.top = i * 50 + 25 + 16 + "px";
+        port.style.right = "4px";
+        port.style.top = i * 50 + 25 + 17.5 + "px";
         port.classList.add("logicport");
         port.classList.add("logicportHover");
         port.onclick = () => {
@@ -297,8 +297,8 @@ function renderBlock(index) {
     }
     for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
         let port = document.createElement("div");
-        port.style.right = "7px";
-        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 18.5 + "px";
+        port.style.right = "4px";
+        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 17.5 + "px";
         port.classList.add("dataport");
         port.classList.add("dataportHover");
         port.onclick = () => {

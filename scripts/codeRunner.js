@@ -120,6 +120,7 @@ async function forward(index) {
             ifRegions[regions[index]][block.searchLogicExport(index)]--;
         //console.log(block.blockMould.type, index, regions[index], regionFinished);
         if (block.blockMould.type == "while" && regionFinished[regions[index]] == 0) {
+            originalRegionDegrees++;
             restoreRegions(regions[index]);
             //console.log(block.blockMould.type, index, regions[index], regionFinished);
             forward(regions[index]);

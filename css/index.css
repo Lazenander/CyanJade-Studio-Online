@@ -271,9 +271,9 @@ body {
 .block {
     position: absolute;
     background-color: var(--primaryColor);
-    box-shadow: 0px 0px 5px var(--darkShadow);
     border-radius: 20px;
-    border: solid 2px var(--secondaryColor);
+    box-shadow: 6px 6px 15px var(--lightShadow), -6px -6px 15px var(--lightLight);
+    border: solid 0.1px var(--secondaryColor);
     z-index: 5;
     user-select: none;
     -webkit-user-select: none;
@@ -281,18 +281,21 @@ body {
 
 .logicport {
     position: absolute;
-    width: 0;
-    height: 0;
-    border-left: 15px solid var(--secondaryColor);
-    border-top: 9px solid transparent;
-    border-bottom: 9px solid transparent;
+    width: 15px;
+    height: 15px;
+    background-color: var(--primaryColor);
+    box-shadow: 3px 3px 7px var(--lightShadow), -3px -3px 7px var(--lightLight);
+    border: solid 0.1px var(--secondaryColor);
 }
 
 .dataport {
     position: absolute;
-    width: 0;
-    height: 0;
-    border: 6.5px solid var(--secondaryColor);
+    width: 15px;
+    height: 15px;
+    background-color: var(--primaryColor);
+    border-radius: 15px;
+    box-shadow: 3px 3px 7px var(--lightShadow), -3px -3px 7px var(--lightLight);
+    border: solid 0.1px var(--secondaryColor);
 }
 
 .blockdiv {
@@ -321,19 +324,21 @@ body {
 }
 
 .inputBorder {
-    border: solid 2px var(--secondaryColor);
+    border: solid 0.1px var(--secondaryColor);
+    box-shadow: inset 3px 3px 7px var(--lightShadow), inset -3px -3px 7px var(--lightLight);
 }
 
 .inputTransBorder {
-    border: solid 2px transparent;
+    border: solid 0.1px var(--secondaryColor);
+    box-shadow: inset 3px 3px 7px transparent, inset -3px -3px 7px transparent;
 }
 
 .blockInput {
-    width: calc(100% - 10px);
-    min-height: 36px;
+    width: calc(100% - 0px);
+    height: 100%;
     font-family: "SHSCN-Regular";
     color: var(--textColor);
-    background-color: transparent;
+    background: var(--primaryColor);
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;
@@ -344,11 +349,11 @@ body {
 }
 
 .blockAssign {
-    width: calc(100% - 10px);
-    min-height: 72px;
+    width: calc(100% - 0px);
+    height: 100%;
     font-family: "SHSCN-Regular";
     color: var(--textColor);
-    background-color: transparent;
+    background: var(--primaryColor);
     font-size: 24px;
     line-height: 36px;
     overflow: hidden;
