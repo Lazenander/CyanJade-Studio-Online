@@ -283,7 +283,6 @@ body {
     position: absolute;
     width: 15px;
     height: 15px;
-    background-color: var(--primaryColor);
     box-shadow: 3px 3px 7px var(--lightShadow), -3px -3px 7px var(--lightLight);
     border: solid 0.1px var(--secondaryColor);
 }
@@ -292,7 +291,6 @@ body {
     position: absolute;
     width: 15px;
     height: 15px;
-    background-color: var(--primaryColor);
     border-radius: 15px;
     box-shadow: 3px 3px 7px var(--lightShadow), -3px -3px 7px var(--lightLight);
     border: solid 0.1px var(--secondaryColor);
@@ -364,19 +362,23 @@ body {
 }
 
 .logicportHover {
-    border-left-color: var(--secondaryColor);
+    border-color: var(--secondaryColor);
+    background-color: var(--primaryColor);
 }
 
 .logicportHover:hover {
-    border-left-color: var(--lightShadow);
+    border-color: var(--darkShadow);
+    background-color: var(--secondaryColor);
 }
 
 .dataportHover {
     border-color: var(--secondaryColor);
+    background-color: var(--primaryColor);
 }
 
 .dataportHover:hover {
-    border-color: var(--lightShadow);
+    border-color: var(--darkShadow);
+    background-color: var(--secondaryColor);
 }
 
 .connection {

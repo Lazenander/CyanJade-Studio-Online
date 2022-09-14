@@ -25,11 +25,13 @@ let shadowActivated = false;
 let dragType = "";
 let canvasSize = { width: Math.max(px2grid(window.screen.availWidth * 2), 500), height: Math.max(px2grid(window.screen.availHeight * 2), 500) };
 let resX, resY;
+let worker = undefined;
 let port1 = {
     type: "none",
     blockIndex: -1,
     portIndex: -1
 };
+let isCodeRunning = false;
 
 function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
@@ -606,6 +608,20 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
     p.setAttribute("name", blockLib);
     div.appendChild(p);
     opBlockSelector.appendChild(div);
+}
+
+window.rtButtonClicked = (event) => {
+    if (isCodeRunning == false) {
+        worker = new Worker("./scripts/codeRunner.js");
+        console.log(5);
+        worker.postMessage("");
+        isCodeRunning = true;
+    } else {
+        worker.terminate();
+        worker = undefined;
+        console.log(10);
+        isCodeRunning = false;
+    }
 }
 
 window.onresize = () => {

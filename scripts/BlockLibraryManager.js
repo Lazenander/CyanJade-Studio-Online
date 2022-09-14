@@ -38,13 +38,13 @@ export default class BlockLibraryManager {
                 dataOutput: []
             }
         });
-        basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "if", "sys_lib_basic", { width: 2, height: 3 }, 1, 3, 1, 0, (innerInput, preDataStream) => {
+        basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "switch", "sys_lib_basic", { width: 2, height: 3 }, 1, 3, 1, 0, (innerInput, preDataStream) => {
             let ds = preDataStream[0].readData();
             if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
                 return { logicport: 0, dataOutput: [] };
             return { logicport: 1, dataOutput: [] };
         });
-        basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "while", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream) => {
+        basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "loop", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream) => {
             let ds = preDataStream[0].readData();
             console.log(ds);
             if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
