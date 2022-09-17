@@ -1,5 +1,6 @@
 import BlockLibraryManager from "./BlockLibraryManager.js";
 import CodeManager from "./codeManager.js";
+import DataStream from "./DataStream.js";
 import LanguageManager from "./language.js";
 import px2grid from "./projector.js";
 
@@ -15,6 +16,7 @@ const playgroundContainer = document.getElementById("playgroundContainer");
 const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
+const img_runButton = document.getElementById("img_runButton");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -76,7 +78,7 @@ function renderLink(index1, port1, index2, port2, type) {
         pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
         path.setAttribute("d", pathstr);
         path.setAttribute("stroke", "var(--lightShadow)");
-        path.setAttribute("stroke-width", "5px")
+        path.setAttribute("stroke-width", "5px");
         path.setAttribute("fill", "none");
         path.onmouseup = (event) => {
             if (event.button == 2) {
@@ -611,17 +613,56 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
 }
 
 window.rtButtonClicked = (event) => {
-    if (isCodeRunning == false) {
-        worker = new Worker("./scripts/codeRunner.js");
-        console.log(5);
-        worker.postMessage("");
+    function codeEncoder() {
+        let blocks = {},
+            inputs = {};
+        for (let i in CodeManager.instance.graph.blocks) {
+            blocks[i] = {};
+            blocks[i].index = CodeManager.instance.graph.blocks[i].index;
+            blocks[i].generalType = CodeManager.instance.graph.blocks[i].blockMould.generalType;
+            blocks[i].type = CodeManager.instance.graph.blocks[i].blockMould.type;
+            blocks[i].logicImports = CodeManager.instance.graph.blocks[i].logicImports;
+            blocks[i].logicExports = CodeManager.instance.graph.blocks[i].logicExports;
+            blocks[i].dataImports = CodeManager.instance.graph.blocks[i].dataImports;
+            blocks[i].dataExports = CodeManager.instance.graph.blocks[i].dataExports;
+            blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input")
+                inputs[i] = [document.getElementById("b" + i).lastChild.firstChild.value];
+        }
+        return { blocks: blocks, inputs: inputs };
+    }
+
+    function runCodeInit() {
+        console.log("start");
+        img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
         isCodeRunning = true;
-    } else {
+        worker = new Worker("./scripts/codeRunner.js", { type: 'module' });
+        worker.postMessage(JSON.stringify(codeEncoder()));
+        worker.onmessage = (e) => {
+            switch (e.data.type) {
+                case "signal":
+                    switch (e.data.data) {
+                        case "End":
+                            runCodeEnd();
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
+    function runCodeEnd() {
+        console.log("end");
         worker.terminate();
         worker = undefined;
-        console.log(10);
+        img_runButton.setAttribute("src", "./res/svg/feather_cyan/play.svg");
         isCodeRunning = false;
     }
+
+    if (isCodeRunning == false)
+        runCodeInit();
+    else
+        runCodeEnd();
 }
 
 window.onresize = () => {

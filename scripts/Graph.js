@@ -137,7 +137,7 @@ export default class Graph {
                     q.push(this.blocks[index].logicImports[i][j]);
         while (q.length != 0) {
             let tindex = q.shift();
-            if (this.blocks[tindex].blockMould.type == "if" && this.blocks[tindex].searchLogicExport(index) != 2 || this.blocks[tindex].blockMould.type == "while" && this.blocks[tindex].searchLogicExport(index) != 1)
+            if (this.blocks[tindex].blockMould.type == "switch" && this.blocks[tindex].searchLogicExport(index) != 2 || this.blocks[tindex].blockMould.type == "loop" && this.blocks[tindex].searchLogicExport(index) != 1)
                 return tindex;
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
                 if (this.blocks[tindex].dataImports[i] != -1 && q.indexOf(this.blocks[tindex].dataImports[i]) == -1)
@@ -151,6 +151,9 @@ export default class Graph {
     }
 
     isConnectionAvailable(index1, index2, dataImport = -1, dataExport = -1, type = "logic") {
+        if (index1 == index2)
+            return false;
+
         if (type == "logic") {
             for (let i = 0; i < this.blocks[index2].logicImports.length; i++)
                 if (this.blocks[index2].logicImports[i].indexOf(index1) != -1)
@@ -167,6 +170,7 @@ export default class Graph {
                 if (this.blocks[index1].dataExports[i].indexOf(index2) != -1)
                     return false;
         }
+
         let region1 = this.checkRegion(index1),
             region2 = this.checkRegion(index2);
 
@@ -177,10 +181,12 @@ export default class Graph {
             }
             return true;
         }
+
         if (type == "logic" && region1 != region2 && isEmpty(this.blocks[index2].logicImports) == false)
             return false;
         if (type == "data" && region1 != region2 && isEmpty(this.blocks[index1].logicImports) == false)
             return false;
+
         let q = [];
         for (let i = 0; i < this.blocks[index1].blockMould.dataImportNum; i++)
             if (this.blocks[index1].dataImports[i] != -1 && q.indexOf(this.blocks[index1].dataImports[i]) == -1)
@@ -189,6 +195,7 @@ export default class Graph {
             for (let j = 0; j < this.blocks[index1].logicImports[i].length; j++)
                 if (this.blocks[index1].logicImports[i][j] != -1 && q.indexOf(this.blocks[index1].logicImports[i][j]) == -1)
                     q.push(this.blocks[index1].logicImports[i][j]);
+
         while (q.length != 0) {
             let tindex = q.shift();
             if (tindex == index2)
