@@ -647,6 +647,9 @@ window.rtButtonClicked = (event) => {
                             break;
                     }
                     break;
+                case "output":
+                    document.getElementById("out" + e.data.data.index).innerText = e.data.data.context;
+                    break;
             }
         }
     }
@@ -676,4 +679,4 @@ canvasArea.style.width = canvasSize.width * 50 + "px";
 canvasArea.style.height = canvasSize.height * 50 + "px";
 playgroundContainer.scrollTop = (canvasSize.height * 50 - window.innerHeight) / 2;
 playgroundContainer.scrollLeft = (canvasSize.width * 50 - window.innerWidth) / 2;
-LanguageManager.changeLanguage("English");
+LanguageManager.changeLanguage(navigator.language == "zh-CN" ? "Chinese" : "English");

@@ -137,8 +137,10 @@ export default class Graph {
                     q.push(this.blocks[index].logicImports[i][j]);
         while (q.length != 0) {
             let tindex = q.shift();
-            if (this.blocks[tindex].blockMould.type == "switch" && this.blocks[tindex].searchLogicExport(index) != 2 || this.blocks[tindex].blockMould.type == "loop" && this.blocks[tindex].searchLogicExport(index) != 1)
+            if (this.blocks[tindex].blockMould.type == "loop" && this.blocks[tindex].searchLogicExport(index) != 1)
                 return tindex;
+            if (this.blocks[tindex].blockMould.type == "switch" && this.blocks[tindex].searchLogicExport(index) != 2)
+                return tindex + "_" + this.blocks[tindex].searchLogicExport(index);
             for (let i = 0; i < this.blocks[tindex].blockMould.dataImportNum; i++)
                 if (this.blocks[tindex].dataImports[i] != -1 && q.indexOf(this.blocks[tindex].dataImports[i]) == -1)
                     q.push(this.blocks[tindex].dataImports[i]);

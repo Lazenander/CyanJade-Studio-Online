@@ -28,7 +28,8 @@ export default class DataStream {
             this.data = false;
             return;
         }
-        if (str[0] == "\"" && str[str.length - 1] == "\"") {
+        console.log(str, str[0], str[str.length - 1])
+        if (str[0] == "\"" && str[str.length - 1] == "\"" || str[0] == "\'" && str[str.length - 1] == "\'") {
             this.type = "string";
             this.data = str.substr(1, str.length - 2);
             return;
