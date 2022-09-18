@@ -1,14 +1,21 @@
 import DataStream from "./DataStream.js";
 import VariableTable from "./VariableTable.js";
 
+let constIndegree = {};
+let constRegionCnt = {};
+let regionTable = {},
+    region2Table = {};
+let regionTree = {};
+
+let blocks, inputs;
+
 function calculateDataBlock(index) {
-    console.log("Calculating " + index);
+    console.log("Calculating" + index);
     let innerDataStream = [];
     let inputDataStream = [];
     if (blocks[index].type == "input") {
         let ds = new DataStream();
         ds.read(inputs[index][0]);
-        console.log(ds);
         innerDataStream.push(ds);
     } else {
         for (let i = 0; i < blocks[index].dataImports.length; i++) {
@@ -22,34 +29,126 @@ function calculateDataBlock(index) {
     return blocks[index].forward(innerDataStream, inputDataStream);
 }
 
-let constIndegree = {};
-let constRegionCnt = {};
-let regionTable = {},
-    region2Table = {};
-let regionTree = {};
+function forwardSwitch(index) {
+    let inputDataStream = [];
+    for (let i = 0; i < blocks[index].dataImports.length; i++) {
+        if (blocks[index].dataImports[i] == -1) {
+            inputDataStream.push(new DataStream());
+            continue;
+        }
+        inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i]).dataOutput[0]);
+    }
+    let res = blocks[index].forward([], inputDataStream);
+    forwardGraph([...blocks[index].logicExports[res.logicport]]);
+}
 
-function initialize(q) {
+function forwardLoop(index) {
+    console.log("Running" + index);
+    let inputDataStream = [];
+    while (1) {
+        inputDataStream = [];
+        for (let i = 0; i < blocks[index].dataImports.length; i++) {
+            if (blocks[index].dataImports[i] == -1) {
+                inputDataStream.push(new DataStream());
+                continue;
+            }
+            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i]).dataOutput[0]);
+        }
+        console.log(inputDataStream);
+        let res = blocks[index].forward([], inputDataStream);
+        if (res.logicport == blocks[index].logicExports.length - 1)
+            break;
+        forwardGraph([...blocks[index].logicExports[res.logicport]]);
+    }
+}
+
+function forwardGraph(q) {
     let calIndegree = {...constIndegree };
 
     while (q.length) {
         let currentIndex = q.shift();
 
-        for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
-            for (let j = 0; j < blocks[currentIndex].logicImports[i].length; j++) {
-                calIndegree[blocks[currentIndex].logicExports[i][j]]--;
+        let innerDataStream = [],
+            inputDataStream = [];
 
-                if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
-                    q.push(blocks[currentIndex].logicExports[i][j]);
-            }
+        switch (blocks[currentIndex].type) {
+            case "output":
+                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                    if (blocks[currentIndex].dataImports[i] == -1) {
+                        inputDataStream.push(new DataStream());
+                        continue;
+                    }
+                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i]).dataOutput[0]);
+                }
+                if (inputDataStream[0].type == "string")
+                    postMessage({ type: "output", data: { index: currentIndex, context: "\"" + inputDataStream[0].data + "\"" } });
+                else if (inputDataStream[0].type == "number")
+                    postMessage({ type: "output", data: { index: currentIndex, context: "" + Math.round(inputDataStream[0].data * 1e6) / 1e6 } });
+                else
+                    postMessage({ type: "output", data: { index: currentIndex, context: "" + inputDataStream[0].data } });
+                break;
+            case "switch":
+                forwardSwitch(currentIndex);
+                for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
+                    calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
+                    if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
+                        q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
+                }
+                break;
+            case "loop":
+                forwardLoop(currentIndex);
+                for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
+                    calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
+                    if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
+                        q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
+                }
+                break;
+            case "assign":
+                let ds = new DataStream();
+                ds.read(inputs[currentIndex][0]);
+                innerDataStream.push(ds);
+                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                    if (blocks[currentIndex].dataImports[i] == -1) {
+                        inputDataStream.push(new DataStream());
+                        continue;
+                    }
+                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i]).dataOutput[0]);
+                }
+                blocks[currentIndex].forward(innerDataStream, inputDataStream);
+                for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+                    for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                        calIndegree[blocks[currentIndex].logicExports[i][j]]--;
+
+                        if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
+                            q.push(blocks[currentIndex].logicExports[i][j]);
+                    }
+                }
+                break;
+            default:
+                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                    if (blocks[currentIndex].dataImports[i] == -1) {
+                        inputDataStream.push(new DataStream());
+                        continue;
+                    }
+                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i]).dataOutput[0]);
+                }
+                blocks[currentIndex].forward([], inputDataStream);
+                for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+                    for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                        calIndegree[blocks[currentIndex].logicExports[i][j]]--;
+
+                        if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
+                            q.push(blocks[currentIndex].logicExports[i][j]);
+                    }
+                }
+                break;
         }
     }
 }
 
-function forwardGraph(q) {}
-
 self.onmessage = (e) => {
-    let blocks = JSON.parse(e.data).blocks;
-    let inputs = JSON.parse(e.data).inputs;
+    blocks = JSON.parse(e.data).blocks;
+    inputs = JSON.parse(e.data).inputs;
 
     let q = [];
 
@@ -67,7 +166,6 @@ self.onmessage = (e) => {
     constRegionCnt[-1] = 0;
 
     for (let i in blocks) {
-        console.log(i, blocks);
         if (constIndegree[i] == 0) {
             q.push(i);
             regionTable[i] = -1;
@@ -77,9 +175,8 @@ self.onmessage = (e) => {
 
     while (q.length > 0) {
         let currentIndex = q.shift();
-        console.log(currentIndex);
         for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
-            for (let j = 0; j < blocks[currentIndex].logicImports[i].length; j++) {
+            for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
                 calIndegree[blocks[currentIndex].logicExports[i][j]] -= 1;
 
                 if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0) {
@@ -113,63 +210,11 @@ self.onmessage = (e) => {
         }
     }
 
-    console.log(constRegionCnt, regionTable, region2Table, regionTree);
-
-    calIndegree = {...constIndegree };
-    let calRegionCnt = {...constRegionCnt };
-
     for (let i in blocks)
         if (constIndegree[i] == 0)
             q.push(i);
 
-    while (q.length > 0) {
-        let currentIndex = q.shift();
-        let innerDataStream = [],
-            inputDataStream = [];
-        let currentRegion = parseInt(regionTable[currentIndex])
-        if (blocks[currentIndex] != "loop")
-            calRegionCnt[currentRegion]--;
-        if (blocks[currentIndex] == "assign") {
-            let ds = new DataStream();
-            ds.read(inputs[index]);
-            innerDataStream.push(ds);
-        }
-        for (let i = 0; i < blocks[currentIndex].dataImports.length; i++)
-            if (blocks[currentIndex].dataImports[i] != -1)
-                inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i]).dataOutput[0]);
-        let res = blocks[currentIndex].forward(innerDataStream, inputDataStream);
-        if (blocks[currentIndex] == "loop" && res.logicport == blocks[currentIndex].logicExports.length - 1)
-            calRegionCnt[currentRegion]--;
-        console.log(inputDataStream[0].data);
-        if (blocks[currentIndex].type == "output") {
-            if (inputDataStream[0].type == "string")
-                postMessage({ type: "output", data: { index: currentIndex, context: "\"" + inputDataStream[0].data + "\"" } });
-            else if (inputDataStream[0].type == "number")
-                postMessage({ type: "output", data: { index: currentIndex, context: inputDataStream[0].data.toPrecision(6) } });
-            else
-                postMessage({ type: "output", data: { index: currentIndex, context: "" + inputDataStream[0].data } });
-        }
-
-        for (let i = 0; i < blocks[currentIndex].logicExports[res.logicport].length; i++)
-            q.push(blocks[currentIndex].logicExports[res.logicport][0]);
-
-        if (currentRegion != -1 && calRegionCnt[currentRegion] == 0) {
-            if (blocks[currentRegion].type == "switch")
-                for (let i = 0; i < blocks[currentRegion].logicExports[blocks[currentRegion].logicExports.length - 1].length; i++)
-                    q.push(blocks[currentRegion].logicExports[blocks[currentRegion].logicExports.length - 1][i]);
-            else if (blocks[currentRegion].type == "loop") {
-                function clearRegion(index) {
-                    calRegionCnt[index] = constRegionCnt[index];
-                    for (let i = 0; i < region2Table[index].length; i++)
-                        calIndegree[region2Table[index][i]] = constIndegree[region2Table[index][i]];
-                    for (let i in regionTree[index])
-                        clearRegion(regionTree[index][i]);
-                }
-                clearRegion(currentRegion);
-                q.push(currentRegion);
-            }
-        }
-    }
+    forwardGraph(q);
 
     postMessage({ type: "signal", data: "End" });
 }
