@@ -626,8 +626,12 @@ window.rtButtonClicked = (event) => {
             blocks[i].dataImports = CodeManager.instance.graph.blocks[i].dataImports;
             blocks[i].dataExports = CodeManager.instance.graph.blocks[i].dataExports;
             blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
-            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input")
-                inputs[i] = [document.getElementById("b" + i).lastChild.firstChild.value];
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                let block = document.getElementById("b" + i);
+                inputs[i] = [block.lastChild.firstChild.value];
+            }
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
+                document.getElementById("out" + i).innerText = "";
         }
         return { blocks: blocks, inputs: inputs };
     }
@@ -636,6 +640,15 @@ window.rtButtonClicked = (event) => {
         console.log("start");
         img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
         isCodeRunning = true;
+        lockArea.classList.add("display");
+        lockArea.classList.remove("notDisplay");
+        for (let i in CodeManager.instance.graph.blocks) {
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                let block = document.getElementById("b" + i);
+                block.lastChild.firstChild.classList.remove("inputBorder");
+                block.lastChild.firstChild.classList.add("inputTransBorder");
+            }
+        }
         worker = new Worker("./scripts/codeRunner.js", { type: 'module' });
         worker.postMessage(JSON.stringify(codeEncoder()));
         worker.onmessage = (e) => {
@@ -659,6 +672,15 @@ window.rtButtonClicked = (event) => {
         worker.terminate();
         worker = undefined;
         img_runButton.setAttribute("src", "./res/svg/feather_cyan/play.svg");
+        lockArea.classList.remove("display");
+        lockArea.classList.add("notDisplay");
+        for (let i in CodeManager.instance.graph.blocks) {
+            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                let block = document.getElementById("b" + i);
+                block.lastChild.firstChild.classList.add("inputBorder");
+                block.lastChild.firstChild.classList.remove("inputTransBorder");
+            }
+        }
         isCodeRunning = false;
     }
 
