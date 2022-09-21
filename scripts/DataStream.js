@@ -6,9 +6,12 @@ export default class DataStream {
         this.data = data;
     }
 
-    readData() {
+    readData(variableTables) {
+        console.log(variableTables);
         if (this.type == "variable")
-            return VariableTable.instance.readVariable(this);
+            for (let i = variableTables.length - 1; i >= 0; i--)
+                if (variableTables[i].existVariable(this))
+                    return variableTables[i].readVariable(this);
         return this;
     }
 
@@ -41,6 +44,7 @@ export default class DataStream {
         }
         this.type = "variable";
         this.data = str;
+        console.log("Variable " + str + " readed");
         return;
     }
 }
