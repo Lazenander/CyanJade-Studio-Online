@@ -1,6 +1,7 @@
 import BlockLibraryManager from "./BlockLibraryManager.js";
 import CodeManager from "./codeManager.js";
 import DataStream from "./DataStream.js";
+import FileOperator from "./FileOperator.js";
 import LanguageManager from "./language.js";
 import px2grid from "./projector.js";
 
@@ -34,6 +35,7 @@ let port1 = {
     portIndex: -1
 };
 let isCodeRunning = false;
+let fileName = "Untitled";
 
 function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
@@ -439,6 +441,29 @@ window.contentElementSettingClicked = () => {
         opSettingSelector.classList.add("selectorAppear");
         activated = "setting";
     }
+}
+
+window.openFileClicked = () => {
+    let input = FileOperator.openFile();
+    let reader = new FileReader();
+    input.onchange = () => {
+        console.log(input.files[0]);
+        reader.readAsText(input.files[0]);
+        reader.onload = () => {
+            let res = reader.result;
+            console.log(res);
+        }
+    };
+    input.click();
+}
+
+window.saveFileClicked = () => {
+    let strJson = {};
+    let currentDate = new Date();
+    let datestr = "" + currentDate.getUTCFullYear() + "-" + currentDate.getUTCMonth() + "-" + currentDate.getUTCDate() + "-" + currentDate.getUTCHours() + "-" + currentDate.getUTCMinutes() + "-" + currentDate.getUTCSeconds();
+    console.log(datestr);
+    strJson["date"] = datestr;
+    FileOperator.saveFile(fileName + "-" + datestr + ".cjade", JSON.stringify(strJson));
 }
 
 window.changeTheme = () => {
