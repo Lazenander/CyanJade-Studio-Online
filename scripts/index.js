@@ -366,7 +366,7 @@ function renderBlock(index) {
             break;
     }
     div.appendChild(divblock);
-    div.title = LanguageManager.phrases[block.blockMould.nameID]["English"];
+    div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
     div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
     div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
     div.style.left = block.x * 50 + 25 + "px";
@@ -488,6 +488,7 @@ window.newFileClicked = () => {
 window.openFileClicked = () => {
     let input = FileOperator.openFile();
     let reader = new FileReader();
+    initCode();
     input.onchange = () => {
         console.log(input.files[0]);
         reader.readAsText(input.files[0]);
@@ -526,7 +527,6 @@ window.openFileClicked = () => {
 
             obj2graph(res);
 
-            clearRender();
             renderAll();
 
             for (let i in CodeManager.instance.graph.blocks) {
