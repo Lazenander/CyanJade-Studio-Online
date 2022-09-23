@@ -1,55 +1,4 @@
-class Block {
-    constructor(index, x, y, blockMould) {
-        this.index = index;
-        this.x = x;
-        this.y = y;
-        this.blockMould = blockMould;
-        this.logicImports = [];
-        this.logicExports = [];
-        this.dataImports = [];
-        this.dataExports = [];
-        for (let i = 0; i < blockMould.logicImportNum; i++)
-            this.logicImports.push([]);
-        for (let i = 0; i < blockMould.logicExportNum; i++)
-            this.logicExports.push([]);
-        for (let i = 0; i < blockMould.dataImportNum; i++)
-            this.dataImports.push(-1);
-        for (let i = 0; i < blockMould.dataExportNum; i++)
-            this.dataExports.push([]);
-    }
-
-    searchLogicImport(index) {
-        index = parseInt(index);
-        for (let i = 0; i < this.blockMould.logicImportNum; i++)
-            if (this.logicImports[i].indexOf(index) != -1)
-                return i;
-        return -1;
-    }
-
-    searchLogicExport(index) {
-        index = parseInt(index);
-        for (let i = 0; i < this.blockMould.logicExportNum; i++)
-            if (this.logicExports[i].indexOf(index) != -1)
-                return i;
-        return -1;
-    }
-
-    searchDataImport(index) {
-        index = parseInt(index);
-        for (let i = 0; i < this.blockMould.dataImportNum; i++)
-            if (this.dataImports[i] == index)
-                return i;
-        return -1;
-    }
-
-    searchDataExport(index) {
-        index = parseInt(index);
-        for (let i = 0; i < this.blockMould.dataExportNum; i++)
-            if (this.dataExports[i].indexOf(index) != -1)
-                return i;
-        return -1;
-    }
-}
+import Block from "./Block.js";
 
 export default class Graph {
     constructor() {
@@ -82,8 +31,7 @@ export default class Graph {
             if (this.blocks[index].dataImports[i] == -1)
                 continue;
             this.delDataConnection(this.blocks[index].dataImports[i],
-                this.blocks[this.blocks[index].dataImports[i]].searchDataExport(index),
-                index, i);
+                this.blocks[this.blocks[index].dataImports[i]].searchDataExport(index), index, i);
         }
         for (let i = 0; i < this.blocks[index].blockMould.dataExportNum; i++)
             for (let j = 0; j < this.blocks[index].dataExports[i].length; j++)

@@ -55,7 +55,7 @@ function formBasic() {
         return { logicport: 1, dataOutput: [] };
     });
 
-    basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "loop", "sys_lib_basic", { width: 1, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream, variableTables) => {
+    basic.BlockMoulds["while"] = new BlockMould("while", { "English": "while", "Chinese": "循环" }, "logic", "loop", "sys_lib_basic", { width: 2, height: 2 }, 1, 2, 1, 0, (innerInput, preDataStream, variableTables) => {
         let ds = preDataStream[0].readData(variableTables);
         if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")
             return { logicport: 0, dataOutput: [] };
@@ -248,6 +248,42 @@ function formLogic() {
     logic.BlockMoulds["not"] = new BlockMould("not", { "English": "not", "Chinese": "非" }, "data", "not", "sys_lib_logic", { width: 1, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables);
         return { logicport: -1, dataOutput: [new DataStream("boolean", (!ds1.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["equal"] = new BlockMould("equal", { "English": "equal", "Chinese": "等于" }, "data", "equal", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data == ds2.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["unequal"] = new BlockMould("unequal", { "English": "unequal", "Chinese": "不等于" }, "data", "unequal", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data != ds2.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["greater"] = new BlockMould("greater", { "English": "greater", "Chinese": "大于" }, "data", "greater", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data > ds2.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["egreater"] = new BlockMould("egreater", { "English": "eq-greater", "Chinese": "大于等于" }, "data", "egreater", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data >= ds2.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["less"] = new BlockMould("less", { "English": "less", "Chinese": "小于" }, "data", "less", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data < ds2.data) ? true : false)] };
+    });
+
+    logic.BlockMoulds["eless"] = new BlockMould("eless", { "English": "eq-less", "Chinese": "小于等于" }, "data", "eless", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables);
+        let ds2 = preDataStream[1].readData(variableTables);
+        return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data <= ds2.data) ? true : false)] };
     });
 
     return logic;

@@ -1,4 +1,6 @@
 import BlockLibraryManager from "./BlockLibraryManager.js";
+import Block from "./Block.js";
+import Graph from "./Graph.js";
 import CodeManager from "./codeManager.js";
 import DataStream from "./DataStream.js";
 import FileOperator from "./FileOperator.js";
@@ -372,6 +374,32 @@ function renderBlock(index) {
     return div;
 }
 
+function clearRender() {}
+
+function renderAll() {
+    for (let i in CodeManager.instance.graph.blocks) {
+        let block = CodeManager.instance.graph.blocks[i];
+        blockArea.appendChild(renderBlock(i));
+        console.log(block, block.logicExports, block.logicExports.length, block.dataExports, block.dataExports.length);
+        for (let j = 0; j < block.logicExports.length; j++) {
+            for (let k = 0; k < block.logicExports[j].length; k++) {
+                let nxtIndex = block.logicExports[j][k];
+                console.log(CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(i));
+                renderLink(i, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(i), "logic");
+            }
+        }
+        for (let j = 0; j < block.dataExports.length; j++) {
+            console.log(block.dataExports[j].length);
+            for (let k = 0; k < block.dataExports[j].length; k++) {
+                let nxtIndex = block.dataExports[j][k];
+                console.log(nxtIndex);
+                console.log(CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(i));
+                renderLink(i, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(i), "data");
+            }
+        }
+    }
+}
+
 function eraseBlockLibDisplay() {
     opBlockElementSelector.innerText = "";
 }
@@ -450,7 +478,50 @@ window.openFileClicked = () => {
         console.log(input.files[0]);
         reader.readAsText(input.files[0]);
         reader.onload = () => {
-            let res = reader.result;
+            let res = JSON.parse(reader.result);
+
+            function obj2graph(obj) {
+                console.log(obj);
+                CodeManager.instance.graph.size = obj.graph.size;
+                CodeManager.instance.graph.emptyIndex = obj.graph.emptyIndex;
+                for (let i in obj.graph.blocks) {
+                    let block = obj.graph.blocks[i];
+                    console.log(block);
+                    if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
+                        console.log(BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                        CodeManager.instance.graph.blocks[i] = new Block(i, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                        CodeManager.instance.blockCoords[i] = ({
+                            x1: block.x,
+                            x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
+                            y1: block.y,
+                            y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
+                        });
+                    } else {
+                        CodeManager.instance.graph.blocks = {};
+                        CodeManager.instance.graph.size = 0;
+                        CodeManager.instance.graph.emptyIndex = [];
+                        return false;
+                    }
+                    CodeManager.instance.graph.blocks[i].logicImports = block.logicImports;
+                    CodeManager.instance.graph.blocks[i].logicExports = block.logicExports;
+                    CodeManager.instance.graph.blocks[i].dataImports = block.dataImports;
+                    CodeManager.instance.graph.blocks[i].dataExports = block.dataExports;
+                }
+                return true;
+            }
+
+            console.log(CodeManager.instance.graph)
+
+            obj2graph(res);
+
+            renderAll();
+
+            for (let i in CodeManager.instance.graph.blocks) {
+                console.log(res.graph.blocks[i]);
+                if (CodeManager.instance.graph.blocks[i].blockMould.type == "input" || CodeManager.instance.graph.blocks[i].blockMould.type == "assign")
+                    document.getElementById("b" + i).lastChild.firstChild.value = res.graph.blocks[i].input;
+            }
+
             console.log(res);
         }
     };
@@ -458,11 +529,35 @@ window.openFileClicked = () => {
 }
 
 window.saveFileClicked = () => {
+    function graph2obj() {
+        let graph = { blocks: {}, emptyIndex: CodeManager.instance.graph.emptyIndex, size: CodeManager.instance.graph.size };
+        for (let i in CodeManager.instance.graph.blocks) {
+            let block = CodeManager.instance.graph.blocks[i];
+            console.log(block.blockMould.type);
+            graph.blocks[i] = {
+                nameID: block.blockMould.nameID,
+                library: block.blockMould.lib,
+                index: block.index,
+                x: block.x,
+                y: block.y,
+                logicImports: block.logicImports,
+                logicExports: block.logicExports,
+                dataImports: block.dataImports,
+                dataExports: block.dataExports
+            }
+            if (block.blockMould.type == "input" || block.blockMould.type == "assign") {
+                graph.blocks[i]["input"] = document.getElementById("b" + i).lastChild.firstChild.value;
+                console.log(document.getElementById("b" + i).lastChild.firstChild.value);
+            }
+        }
+        return graph;
+    }
     let strJson = {};
     let currentDate = new Date();
     let datestr = "" + currentDate.getUTCFullYear() + "-" + currentDate.getUTCMonth() + "-" + currentDate.getUTCDate() + "-" + currentDate.getUTCHours() + "-" + currentDate.getUTCMinutes() + "-" + currentDate.getUTCSeconds();
     console.log(datestr);
     strJson["date"] = datestr;
+    strJson["graph"] = graph2obj();
     FileOperator.saveFile(fileName + "-" + datestr + ".cjade", JSON.stringify(strJson));
 }
 
