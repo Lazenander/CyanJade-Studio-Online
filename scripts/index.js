@@ -374,7 +374,17 @@ function renderBlock(index) {
     return div;
 }
 
-function clearRender() {}
+function clearRender() {
+    console.log(blockArea.children);
+    for (; blockArea.children.length > 1;)
+        blockArea.removeChild(blockArea.children[1]);
+}
+
+function initCode() {
+    clearRender();
+    CodeManager.instance.graph = new Graph();
+    CodeManager.instance.blockCoords = {};
+}
 
 function renderAll() {
     for (let i in CodeManager.instance.graph.blocks) {
@@ -471,6 +481,10 @@ window.contentElementSettingClicked = () => {
     }
 }
 
+window.newFileClicked = () => {
+    initCode();
+}
+
 window.openFileClicked = () => {
     let input = FileOperator.openFile();
     let reader = new FileReader();
@@ -497,9 +511,7 @@ window.openFileClicked = () => {
                             y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
                         });
                     } else {
-                        CodeManager.instance.graph.blocks = {};
-                        CodeManager.instance.graph.size = 0;
-                        CodeManager.instance.graph.emptyIndex = [];
+                        initCode();
                         return false;
                     }
                     CodeManager.instance.graph.blocks[i].logicImports = block.logicImports;
@@ -514,6 +526,7 @@ window.openFileClicked = () => {
 
             obj2graph(res);
 
+            clearRender();
             renderAll();
 
             for (let i in CodeManager.instance.graph.blocks) {
