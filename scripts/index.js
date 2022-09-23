@@ -89,6 +89,7 @@ function renderLink(index1, port1, index2, port2, type) {
         path.onmouseup = (event) => {
             if (event.button == 2) {
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                console.log(index1, port1, index2, port2);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
                     CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
@@ -110,6 +111,7 @@ function renderLink(index1, port1, index2, port2, type) {
         path1.onmouseup = (event) => {
             if (event.button == 2) {
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                console.log(index1, port1, index2, port2);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
                     CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
@@ -129,6 +131,7 @@ function renderLink(index1, port1, index2, port2, type) {
         path2.setAttribute("fill", "none");
         path2.onmouseup = (event) => {
             if (event.button == 2) {
+                console.log(index1, port1, index2, port2);
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
@@ -378,12 +381,26 @@ function renderBlock(index) {
 }
 
 function clearRender() {
-    console.log(blockArea.children);
     for (; blockArea.children.length > 1;)
         blockArea.removeChild(blockArea.children[1]);
 }
 
 function initCode() {
+    blockLibDisplay = "disabled";
+    chosedBlockMould = null;
+    chosedBlockIndex = null;
+    shadowActivated = false;
+    dragType = "";
+    if (worker)
+        worker.terminate();
+    worker = undefined;
+    port1 = {
+        type: "none",
+        blockIndex: -1,
+        portIndex: -1
+    };
+    isCodeRunning = false;
+    fileName = "Untitled";
     clearRender();
     CodeManager.instance.graph = new Graph();
     CodeManager.instance.blockCoords = {};
@@ -392,23 +409,20 @@ function initCode() {
 
 function renderAll() {
     for (let i in CodeManager.instance.graph.blocks) {
+        let numI = parseInt(i);
+        console.log(numI);
         let block = CodeManager.instance.graph.blocks[i];
-        blockArea.appendChild(renderBlock(i));
-        console.log(block, block.logicExports, block.logicExports.length, block.dataExports, block.dataExports.length);
+        blockArea.appendChild(renderBlock(numI));
         for (let j = 0; j < block.logicExports.length; j++) {
             for (let k = 0; k < block.logicExports[j].length; k++) {
                 let nxtIndex = block.logicExports[j][k];
-                console.log(CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(i));
-                renderLink(i, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(i), "logic");
+                renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(numI), "logic");
             }
         }
         for (let j = 0; j < block.dataExports.length; j++) {
-            console.log(block.dataExports[j].length);
             for (let k = 0; k < block.dataExports[j].length; k++) {
                 let nxtIndex = block.dataExports[j][k];
-                console.log(nxtIndex);
-                console.log(CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(i));
-                renderLink(i, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(i), "data");
+                renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(numI), "data");
             }
         }
     }
@@ -494,23 +508,21 @@ window.openFileClicked = () => {
     let reader = new FileReader();
     initCode();
     input.onchange = () => {
-        console.log(input.files[0]);
         reader.readAsText(input.files[0]);
         reader.onload = () => {
             let res = JSON.parse(reader.result);
 
             function obj2graph(obj) {
-                console.log(obj);
                 CodeManager.instance.graph.size = obj.graph.size;
                 pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
                 CodeManager.instance.graph.emptyIndex = obj.graph.emptyIndex;
                 for (let i in obj.graph.blocks) {
-                    let block = obj.graph.blocks[i];
-                    console.log(block);
+                    let numI = parseInt(i);
+                    console.log(numI);
+                    let block = obj.graph.blocks[numI];
                     if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
-                        console.log(BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
-                        CodeManager.instance.graph.blocks[i] = new Block(i, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
-                        CodeManager.instance.blockCoords[i] = ({
+                        CodeManager.instance.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                        CodeManager.instance.blockCoords[numI] = ({
                             x1: block.x,
                             x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
                             y1: block.y,
@@ -520,27 +532,25 @@ window.openFileClicked = () => {
                         initCode();
                         return false;
                     }
-                    CodeManager.instance.graph.blocks[i].logicImports = block.logicImports;
-                    CodeManager.instance.graph.blocks[i].logicExports = block.logicExports;
-                    CodeManager.instance.graph.blocks[i].dataImports = block.dataImports;
-                    CodeManager.instance.graph.blocks[i].dataExports = block.dataExports;
+                    CodeManager.instance.graph.blocks[numI].logicImports = block.logicImports;
+                    CodeManager.instance.graph.blocks[numI].logicExports = block.logicExports;
+                    CodeManager.instance.graph.blocks[numI].dataImports = block.dataImports;
+                    CodeManager.instance.graph.blocks[numI].dataExports = block.dataExports;
                 }
+                console.log(CodeManager.instance.graph);
                 return true;
             }
-
-            console.log(CodeManager.instance.graph)
 
             obj2graph(res);
 
             renderAll();
 
             for (let i in CodeManager.instance.graph.blocks) {
-                console.log(res.graph.blocks[i]);
-                if (CodeManager.instance.graph.blocks[i].blockMould.type == "input" || CodeManager.instance.graph.blocks[i].blockMould.type == "assign")
-                    document.getElementById("b" + i).lastChild.firstChild.value = res.graph.blocks[i].input;
+                let numI = parseInt(i);
+                console.log(numI);
+                if (CodeManager.instance.graph.blocks[numI].blockMould.type == "input" || CodeManager.instance.graph.blocks[numI].blockMould.type == "assign")
+                    document.getElementById("b" + numI).lastChild.firstChild.value = res.graph.blocks[numI].input;
             }
-
-            console.log(res);
         }
     };
     input.click();
@@ -551,7 +561,6 @@ window.saveFileClicked = () => {
         let graph = { blocks: {}, emptyIndex: CodeManager.instance.graph.emptyIndex, size: CodeManager.instance.graph.size };
         for (let i in CodeManager.instance.graph.blocks) {
             let block = CodeManager.instance.graph.blocks[i];
-            console.log(block.blockMould.type);
             graph.blocks[i] = {
                 nameID: block.blockMould.nameID,
                 library: block.blockMould.lib,
@@ -565,7 +574,6 @@ window.saveFileClicked = () => {
             }
             if (block.blockMould.type == "input" || block.blockMould.type == "assign") {
                 graph.blocks[i]["input"] = document.getElementById("b" + i).lastChild.firstChild.value;
-                console.log(document.getElementById("b" + i).lastChild.firstChild.value);
             }
         }
         return graph;
@@ -573,7 +581,6 @@ window.saveFileClicked = () => {
     let strJson = {};
     let currentDate = new Date();
     let datestr = "" + currentDate.getUTCFullYear() + "-" + currentDate.getUTCMonth() + "-" + currentDate.getUTCDate() + "-" + currentDate.getUTCHours() + "-" + currentDate.getUTCMinutes() + "-" + currentDate.getUTCSeconds();
-    console.log(datestr);
     strJson["date"] = datestr;
     strJson["graph"] = graph2obj();
     FileOperator.saveFile(fileName + "-" + datestr + ".cjade", JSON.stringify(strJson));

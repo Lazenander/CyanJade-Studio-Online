@@ -43,6 +43,18 @@ export default class LanguageManager {
         "l_sel_language": {
             "Chinese": "Use English",
             "English": "使用简体中文"
+        },
+        "l_i_studio": {
+            "Chinese": "青玉案",
+            "English": "CyanJade Studio"
+        },
+        "l_i_status": {
+            "Chinese": "状态",
+            "English": "Status"
+        },
+        "l_i_blocks": {
+            "Chinese": "指令数",
+            "English": "Blocks"
         }
     };
     static currentLanguage = "English";
