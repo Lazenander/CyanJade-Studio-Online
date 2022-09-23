@@ -20,6 +20,8 @@ const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
 const img_runButton = document.getElementById("img_runButton");
+const pstatus = document.getElementById("pstatus");
+const pblocks = document.getElementById("pblocks");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -193,6 +195,7 @@ function renderBlock(index) {
             }
             blockArea.removeChild(tmpblock);
             CodeManager.instance.delBlock(index);
+            pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
         }
     }
     div.ondragend = () => {
@@ -384,6 +387,7 @@ function initCode() {
     clearRender();
     CodeManager.instance.graph = new Graph();
     CodeManager.instance.blockCoords = {};
+    pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
 }
 
 function renderAll() {
@@ -498,6 +502,7 @@ window.openFileClicked = () => {
             function obj2graph(obj) {
                 console.log(obj);
                 CodeManager.instance.graph.size = obj.graph.size;
+                pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
                 CodeManager.instance.graph.emptyIndex = obj.graph.emptyIndex;
                 for (let i in obj.graph.blocks) {
                     let block = obj.graph.blocks[i];
@@ -634,6 +639,7 @@ window.dragAreaDropDetected = (event) => {
     if (dragType == "mould") {
         let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
         blockArea.appendChild(renderBlock(newIndex));
+        pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
     } else {
         let tmpblock = document.getElementById("b" + chosedBlockIndex);
         CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
@@ -771,6 +777,7 @@ window.rtButtonClicked = (event) => {
 
     function runCodeInit() {
         console.log("start");
+        pstatus.innerText = "Status: " + "Busy";
         img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
         isCodeRunning = true;
         lockArea.classList.add("display");
@@ -789,6 +796,11 @@ window.rtButtonClicked = (event) => {
                 case "signal":
                     switch (e.data.data) {
                         case "End":
+                            pstatus.innerText = "Status: " + "Normal";
+                            runCodeEnd();
+                            break;
+                        case "Error":
+                            pstatus.innerText = "Status: " + "Error at block " + e.data.index;
                             runCodeEnd();
                             break;
                     }
