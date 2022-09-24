@@ -74,78 +74,83 @@ function forwardGraph(q, variableTables = []) {
 
         let innerDataStream = [],
             inputDataStream = [];
+        try {
+            switch (blocks[currentIndex].type) {
+                case "output":
+                    for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                        if (blocks[currentIndex].dataImports[i] == -1) {
+                            inputDataStream.push(new DataStream());
+                            continue;
+                        }
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0].readData(variableTables));
+                    }
+                    if (inputDataStream[0].type == "string")
+                        postMessage({ type: "output", data: { index: currentIndex, context: "\"" + inputDataStream[0].data + "\"" } });
+                    else if (inputDataStream[0].type == "number")
+                        postMessage({ type: "output", data: { index: currentIndex, context: "" + Math.round(inputDataStream[0].data * 1e6) / 1e6 } });
+                    else
+                        postMessage({ type: "output", data: { index: currentIndex, context: "" + inputDataStream[0].data } });
+                    break;
+                case "switch":
+                    forwardSwitch(currentIndex, variableTables);
+                    for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
+                        calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
+                        if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
+                            q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
+                    }
+                    break;
+                case "loop":
+                    forwardLoop(currentIndex, variableTables);
+                    for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
+                        calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
+                        if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
+                            q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
+                    }
+                    break;
+                case "assign":
+                    let ds = new DataStream();
+                    ds.read(inputs[currentIndex][0]);
+                    innerDataStream.push(ds);
+                    for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                        if (blocks[currentIndex].dataImports[i] == -1) {
+                            inputDataStream.push(new DataStream());
+                            continue;
+                        }
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0]);
+                    }
+                    blocks[currentIndex].forward(innerDataStream, inputDataStream, variableTables);
+                    for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+                        for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                            calIndegree[blocks[currentIndex].logicExports[i][j]]--;
 
-        switch (blocks[currentIndex].type) {
-            case "output":
-                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
-                    if (blocks[currentIndex].dataImports[i] == -1) {
-                        inputDataStream.push(new DataStream());
-                        continue;
+                            if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
+                                q.push(blocks[currentIndex].logicExports[i][j]);
+                        }
                     }
-                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0].readData(variableTables));
-                }
-                if (inputDataStream[0].type == "string")
-                    postMessage({ type: "output", data: { index: currentIndex, context: "\"" + inputDataStream[0].data + "\"" } });
-                else if (inputDataStream[0].type == "number")
-                    postMessage({ type: "output", data: { index: currentIndex, context: "" + Math.round(inputDataStream[0].data * 1e6) / 1e6 } });
-                else
-                    postMessage({ type: "output", data: { index: currentIndex, context: "" + inputDataStream[0].data } });
-                break;
-            case "switch":
-                forwardSwitch(currentIndex, variableTables);
-                for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
-                    calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
-                    if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
-                        q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
-                }
-                break;
-            case "loop":
-                forwardLoop(currentIndex, variableTables);
-                for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
-                    calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
-                    if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
-                        q.push(blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]);
-                }
-                break;
-            case "assign":
-                let ds = new DataStream();
-                ds.read(inputs[currentIndex][0]);
-                innerDataStream.push(ds);
-                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
-                    if (blocks[currentIndex].dataImports[i] == -1) {
-                        inputDataStream.push(new DataStream());
-                        continue;
+                    break;
+                default:
+                    for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
+                        if (blocks[currentIndex].dataImports[i] == -1) {
+                            inputDataStream.push(new DataStream());
+                            continue;
+                        }
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0]);
                     }
-                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0]);
-                }
-                blocks[currentIndex].forward(innerDataStream, inputDataStream, variableTables);
-                for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
-                    for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
-                        calIndegree[blocks[currentIndex].logicExports[i][j]]--;
+                    blocks[currentIndex].forward([], inputDataStream, variableTables);
+                    for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+                        for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                            calIndegree[blocks[currentIndex].logicExports[i][j]]--;
 
-                        if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
-                            q.push(blocks[currentIndex].logicExports[i][j]);
+                            if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
+                                q.push(blocks[currentIndex].logicExports[i][j]);
+                        }
                     }
-                }
-                break;
-            default:
-                for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
-                    if (blocks[currentIndex].dataImports[i] == -1) {
-                        inputDataStream.push(new DataStream());
-                        continue;
-                    }
-                    inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0]);
-                }
-                blocks[currentIndex].forward([], inputDataStream, variableTables);
-                for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
-                    for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
-                        calIndegree[blocks[currentIndex].logicExports[i][j]]--;
-
-                        if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
-                            q.push(blocks[currentIndex].logicExports[i][j]);
-                    }
-                }
-                break;
+                    break;
+            }
+        } catch {
+            postMessage({ type: "signal", data: "Error", index: currentIndex });
+            console.log(currentIndex);
+            terminate();
         }
     }
 }

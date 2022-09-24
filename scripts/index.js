@@ -22,6 +22,7 @@ const shadowBlock = document.getElementById("shadowBlock");
 const img_runButton = document.getElementById("img_runButton");
 const pstatus = document.getElementById("pstatus");
 const pblocks = document.getElementById("pblocks");
+const infoContainer = document.getElementById("infoContainer");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -198,7 +199,7 @@ function renderBlock(index) {
             }
             blockArea.removeChild(tmpblock);
             CodeManager.instance.delBlock(index);
-            pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
+            pblocks.innerText = CodeManager.instance.graph.size;
         }
     }
     div.ondragend = () => {
@@ -404,7 +405,7 @@ function initCode() {
     clearRender();
     CodeManager.instance.graph = new Graph();
     CodeManager.instance.blockCoords = {};
-    pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
+    pblocks.innerText = CodeManager.instance.graph.size;
 }
 
 function renderAll() {
@@ -514,7 +515,7 @@ window.openFileClicked = () => {
 
             function obj2graph(obj) {
                 CodeManager.instance.graph.size = obj.graph.size;
-                pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
+                pblocks.innerText = CodeManager.instance.graph.size;
                 CodeManager.instance.graph.emptyIndex = obj.graph.emptyIndex;
                 for (let i in obj.graph.blocks) {
                     let numI = parseInt(i);
@@ -609,6 +610,8 @@ window.changeTheme = () => {
 
 window.changeLanguage = () => {
     LanguageManager.changeLanguage(LanguageManager.currentLanguage == "English" ? "Chinese" : "English");
+    pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+    infoContainer.style.backgroundColor = "var(--thirdColor)";
 }
 
 window.dragAreaDragDetected = (event) => {
@@ -646,7 +649,7 @@ window.dragAreaDropDetected = (event) => {
     if (dragType == "mould") {
         let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
         blockArea.appendChild(renderBlock(newIndex));
-        pblocks.innerText = "Blocks: " + CodeManager.instance.graph.size;
+        pblocks.innerText = CodeManager.instance.graph.size;
     } else {
         let tmpblock = document.getElementById("b" + chosedBlockIndex);
         CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
@@ -784,7 +787,8 @@ window.rtButtonClicked = (event) => {
 
     function runCodeInit() {
         console.log("start");
-        pstatus.innerText = "Status: " + "Busy";
+        pstatus.innerText = LanguageManager.getPhrase("l_i_s_busy");
+        infoContainer.style.backgroundColor = "var(--busyColor)";
         img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
         isCodeRunning = true;
         lockArea.classList.add("display");
@@ -803,12 +807,14 @@ window.rtButtonClicked = (event) => {
                 case "signal":
                     switch (e.data.data) {
                         case "End":
-                            pstatus.innerText = "Status: " + "Normal";
+                            pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+                            infoContainer.style.backgroundColor = "var(--thirdColor)";
                             runCodeEnd();
                             break;
                         case "Error":
-                            pstatus.innerText = "Status: " + "Error at block " + e.data.index;
-                            runCodeEnd();
+                            pstatus.innerText = LanguageManager.getPhrase("l_i_s_errorat") + e.data.index;
+                            infoContainer.style.backgroundColor = "var(--errorColor)";
+                            runCodeEnd(false);
                             break;
                     }
                     break;
@@ -819,10 +825,14 @@ window.rtButtonClicked = (event) => {
         }
     }
 
-    function runCodeEnd() {
+    function runCodeEnd(isNormal = true) {
         console.log("end");
         worker.terminate();
         worker = undefined;
+        if (isNormal) {
+            pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+            infoContainer.style.backgroundColor = "var(--thirdColor)";
+        }
         img_runButton.setAttribute("src", "./res/svg/feather_cyan/play.svg");
         lockArea.classList.remove("display");
         lockArea.classList.add("notDisplay");
@@ -854,3 +864,5 @@ canvasArea.style.height = canvasSize.height * 50 + "px";
 playgroundContainer.scrollTop = (canvasSize.height * 50 - window.innerHeight) / 2;
 playgroundContainer.scrollLeft = (canvasSize.width * 50 - window.innerWidth) / 2;
 LanguageManager.changeLanguage(navigator.language == "zh-CN" ? "Chinese" : "English");
+pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+infoContainer.style.backgroundColor = "var(--thirdColor)";

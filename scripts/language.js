@@ -52,6 +52,26 @@ export default class LanguageManager {
             "Chinese": "状态",
             "English": "Status"
         },
+        "l_i_s_normal": {
+            "Chinese": "正常",
+            "English": "Normal"
+        },
+        "l_i_s_busy": {
+            "Chinese": "忙碌中",
+            "English": "Busy"
+        },
+        "l_i_s_error": {
+            "Chinese": "错误",
+            "English": "Error"
+        },
+        "l_i_s_warning": {
+            "Chinese": "警告",
+            "English": "Warning"
+        },
+        "l_i_s_errorat": {
+            "Chinese": "错误出现在指令",
+            "English": "Error occurred at Block "
+        },
         "l_i_blocks": {
             "Chinese": "指令数",
             "English": "Blocks"
@@ -71,5 +91,8 @@ export default class LanguageManager {
     }
     static addPhrase(phraseID, Tphrase) {
         LanguageManager.phrases[phraseID] = Tphrase;
+    }
+    static getPhrase(phraseID) {
+        return LanguageManager.phrases[phraseID][LanguageManager.currentLanguage];
     }
 }
