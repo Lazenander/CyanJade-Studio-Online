@@ -23,6 +23,7 @@ const img_runButton = document.getElementById("img_runButton");
 const pstatus = document.getElementById("pstatus");
 const pblocks = document.getElementById("pblocks");
 const infoContainer = document.getElementById("infoContainer");
+const fileNameInput = document.getElementById("fileNameInput");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -402,6 +403,7 @@ function initCode() {
     };
     isCodeRunning = false;
     fileName = "Untitled";
+    fileNameInput.setAttribute("value", fileName);
     clearRender();
     CodeManager.instance.graph = new Graph();
     CodeManager.instance.blockCoords = {};
@@ -542,6 +544,9 @@ window.openFileClicked = () => {
                 return true;
             }
 
+            fileName = res.fileName;
+            fileNameInput.setAttribute("value", fileName);
+
             obj2graph(res);
 
             renderAll();
@@ -582,6 +587,8 @@ window.saveFileClicked = () => {
     let strJson = {};
     let currentDate = new Date();
     let datestr = "" + currentDate.getUTCFullYear() + "-" + currentDate.getUTCMonth() + "-" + currentDate.getUTCDate() + "-" + currentDate.getUTCHours() + "-" + currentDate.getUTCMinutes() + "-" + currentDate.getUTCSeconds();
+    fileName = fileNameInput.value;
+    strJson["fileName"] = fileName;
     strJson["date"] = datestr;
     strJson["graph"] = graph2obj();
     FileOperator.saveFile(fileName + "-" + datestr + ".cjade", JSON.stringify(strJson));
@@ -866,3 +873,4 @@ playgroundContainer.scrollLeft = (canvasSize.width * 50 - window.innerWidth) / 2
 LanguageManager.changeLanguage(navigator.language == "zh-CN" ? "Chinese" : "English");
 pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
 infoContainer.style.backgroundColor = "var(--thirdColor)";
+fileNameInput.setAttribute("value", fileName);

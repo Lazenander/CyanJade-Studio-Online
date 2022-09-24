@@ -150,7 +150,7 @@ function forwardGraph(q, variableTables = []) {
         } catch {
             postMessage({ type: "signal", data: "Error", index: currentIndex });
             console.log(currentIndex);
-            terminate();
+            close();
         }
     }
 }
@@ -226,4 +226,5 @@ self.onmessage = (e) => {
     forwardGraph(q, [new VariableTable()]);
 
     postMessage({ type: "signal", data: "End" });
+    close();
 }
