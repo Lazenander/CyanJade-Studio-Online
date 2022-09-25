@@ -7,10 +7,13 @@ export default class DataStream {
     }
 
     readData(variableTables) {
-        if (this.type == "variable")
+        if (this.type == "variable") {
             for (let i = variableTables.length - 1; i >= 0; i--)
                 if (variableTables[i].existVariable(this))
                     return variableTables[i].readVariable(this);
+            ErrorManager.error(3, variable.data);
+            return this;
+        }
         return this;
     }
 
@@ -28,6 +31,10 @@ export default class DataStream {
     }
 
     read(str) {
+        while (str[0] == " ")
+            str = str.slice(1);
+        while (str[str.length - 1] == " ")
+            str = str.slice(0, str.length - 1);
         if (str == "null" || str == "") {
             this.type = "null";
             this.data = null;
@@ -51,11 +58,59 @@ export default class DataStream {
         } else if (this.isVariable(str)) {
             this.type = "variable";
             this.data = str;
-        } else {
-            this.type = "null";
-            this.data = null;
+            return;
+        } else if (str[0] == "[" && str[str.length - 1] == "]") {
+            this.type = "array";
+            this.data = [];
+            let tmpstr = "";
+            let br = 0;
+            for (let i = 1; i < str.length - 1; i++) {
+                if (str[i] == "[")
+                    br++;
+                if (str[i] == "]")
+                    br--;
+                if (str[i] == "," && br == 0) {
+                    let tmpDS = new DataStream();
+                    tmpDS.read(tmpstr)
+                    this.data.push(tmpDS);
+                    tmpstr = "";
+                } else
+                    tmpstr += str[i];
+            }
+            let tmpDS = new DataStream();
+            tmpDS.read(tmpstr)
+            this.data.push(tmpDS);
+            console.log(this.data);
             return;
         }
+        this.type = "unknown";
+        this.data = str;
         return;
+    }
+
+    toString() {
+        switch (this.type) {
+            case "string":
+                return "\"" + this.data + "\"";
+            case "variable":
+                return "" + this.data;
+            case "number":
+                return "" + Math.round(this.data * 1e6) / 1e6;
+            case "boolean":
+                return "" + this.data;
+            case "unknown":
+                return "" + this.data;
+            case "array":
+                let str = "[";
+                for (let i = 0; i < this.data.length; i++) {
+                    str += this.data[i].toString();
+                    if (i != this.data.length - 1)
+                        str += ", ";
+                }
+                str += "]";
+                return str;
+            default:
+                return "" + this.data
+        }
     }
 }
