@@ -42,11 +42,11 @@ export default class VariableTable {
                         currentData = currentData.data[variable.data.address[i].data];
                         break;
                     case "variable":
-                        currentData = currentData[this.readVariable(variable.data.address[i])];
+                        currentData = currentData.data[this.readVariable(variable.data.address[i])];
                         console.log(currentData);
                         break;
                     case "variableArrayElement":
-                        currentData = currentData[this.readVariable(variable.data.address[i])];
+                        currentData = currentData.data[this.readVariable(variable.data.address[i])];
                         console.log(currentData);
                         break;
                     default:
