@@ -30,7 +30,6 @@ export default class VariableTable {
             ErrorManager.error(3, variable.data);
             return;
         }
-        console.log(variable.data, this._storage);
         return this._storage[variable.data];
     }
 
@@ -39,7 +38,6 @@ export default class VariableTable {
             ErrorManager.error(4, variable.data);
             return;
         }
-        console.log(variable.data, this._storage);
         return variable.data in this._storage;
     }
 }

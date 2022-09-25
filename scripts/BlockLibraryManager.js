@@ -9,7 +9,6 @@ function formBasic() {
 
     basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream, variableTables) => {
         let ds = innerInput[0];
-        console.log("11", preDataStream);
         if (ds.type != "variable") {
             ErrorManager.error(1, ds.data);
             return {
@@ -34,7 +33,6 @@ function formBasic() {
 
     basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 3, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream, variableTables) => {
         let ds = innerInput[0].readData(variableTables);
-        console.log("35", ds);
         return {
             logicport: -1,
             dataOutput: [ds]
@@ -75,10 +73,8 @@ function formMath() {
     });
 
     math.BlockMoulds["minus"] = new BlockMould("minus", { "English": "-", "Chinese": "-" }, "data", "minus", "sys_lib_math", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
-        console.log("72", preDataStream);
         let ds1 = preDataStream[0].readData(variableTables);
         let ds2 = preDataStream[1].readData(variableTables);
-        console.log("75", ds1, ds2);
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data - ds2.data)] };
     });
@@ -296,6 +292,5 @@ export default class BlockLibraryManager {
         this.libraries["sys_lib_basic"] = formBasic();
         this.libraries["sys_lib_math"] = formMath();
         this.libraries["sys_lib_logic"] = formLogic();
-        console.log(this);
     }
 }

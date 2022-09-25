@@ -27,7 +27,6 @@ function calculateDataBlock(index, variableTables = []) {
         }
     }
     let res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
-    console.log(res);
     return res;
 }
 
@@ -57,7 +56,6 @@ function forwardLoop(index, variableTables = []) {
             }
             inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], variableTables).dataOutput[0]);
         }
-        console.log(inputDataStream);
         let thisVariableTables = [...variableTables, new VariableTable()];
         let res = blocks[index].forward([], inputDataStream, thisVariableTables);
         if (res.logicport == blocks[index].logicExports.length - 1)
@@ -149,7 +147,6 @@ function forwardGraph(q, variableTables = []) {
             }
         } catch {
             postMessage({ type: "signal", data: "Error", index: currentIndex });
-            console.log(currentIndex);
             close();
         }
     }

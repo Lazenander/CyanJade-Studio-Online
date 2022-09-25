@@ -91,7 +91,6 @@ function renderLink(index1, port1, index2, port2, type) {
         path.onmouseup = (event) => {
             if (event.button == 2) {
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
-                console.log(index1, port1, index2, port2);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
                     CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
@@ -113,7 +112,6 @@ function renderLink(index1, port1, index2, port2, type) {
         path1.onmouseup = (event) => {
             if (event.button == 2) {
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
-                console.log(index1, port1, index2, port2);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
                     CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
@@ -133,7 +131,6 @@ function renderLink(index1, port1, index2, port2, type) {
         path2.setAttribute("fill", "none");
         path2.onmouseup = (event) => {
             if (event.button == 2) {
-                console.log(index1, port1, index2, port2);
                 let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
                 blockArea.removeChild(delsvg);
                 if (type == "logic")
@@ -413,7 +410,6 @@ function initCode() {
 function renderAll() {
     for (let i in CodeManager.instance.graph.blocks) {
         let numI = parseInt(i);
-        console.log(numI);
         let block = CodeManager.instance.graph.blocks[i];
         blockArea.appendChild(renderBlock(numI));
         for (let j = 0; j < block.logicExports.length; j++) {
@@ -521,7 +517,6 @@ window.openFileClicked = () => {
                 CodeManager.instance.graph.emptyIndex = obj.graph.emptyIndex;
                 for (let i in obj.graph.blocks) {
                     let numI = parseInt(i);
-                    console.log(numI);
                     let block = obj.graph.blocks[numI];
                     if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
                         CodeManager.instance.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
@@ -540,7 +535,6 @@ window.openFileClicked = () => {
                     CodeManager.instance.graph.blocks[numI].dataImports = block.dataImports;
                     CodeManager.instance.graph.blocks[numI].dataExports = block.dataExports;
                 }
-                console.log(CodeManager.instance.graph);
                 return true;
             }
 
@@ -553,7 +547,6 @@ window.openFileClicked = () => {
 
             for (let i in CodeManager.instance.graph.blocks) {
                 let numI = parseInt(i);
-                console.log(numI);
                 if (CodeManager.instance.graph.blocks[numI].blockMould.type == "input" || CodeManager.instance.graph.blocks[numI].blockMould.type == "assign")
                     document.getElementById("b" + numI).lastChild.firstChild.value = res.graph.blocks[numI].input;
             }
