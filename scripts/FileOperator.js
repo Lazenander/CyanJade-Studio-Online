@@ -11,8 +11,9 @@ export default class FileOperator {
         input.type = 'file';
         return input;
     }
+
     static saveFile(filename, text) {
-        var output = document.createElement('a');
+        let output = document.createElement('a');
         output.style.width = "0";
         output.style.height = "0";
         output.style.opacity = "0";
