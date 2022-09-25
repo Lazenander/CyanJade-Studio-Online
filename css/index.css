@@ -64,7 +64,7 @@ body {
 
 .fileNameContainer input {
     height: 20px;
-    width: 100px;
+    width: 200px;
     border: 0;
     background-color: transparent;
     font-family: "SHSCN-Heavy";
@@ -74,11 +74,13 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    outline: 0;
 }
 
 .fileNameContainer p {
     margin: 0;
     padding: 0;
+    width: 100px;
     font-family: "SHSCN-Heavy";
     color: var(--textColor);
     user-select: none;
@@ -372,9 +374,15 @@ body {
     width: calc(100% - 50px);
     height: calc(100% - 50px);
     display: flex;
+    overflow: scroll;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.blockdiv::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .blockp {
@@ -384,8 +392,6 @@ body {
     color: var(--textColor);
     font-size: 24px;
     line-height: 36px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
 }
@@ -401,8 +407,8 @@ body {
 }
 
 .blockInput {
-    width: calc(100% - 0px);
-    height: 100%;
+    width: calc(100% - 5px);
+    height: calc(100% - 5px);
     font-family: "SHSCN-Regular";
     color: var(--textColor);
     background: var(--primaryColor);
@@ -413,11 +419,12 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
+    outline: none;
 }
 
 .blockAssign {
-    width: calc(100% - 0px);
-    height: 100%;
+    width: calc(100% - 5px);
+    height: calc(100% - 5px);
     font-family: "SHSCN-Regular";
     color: var(--textColor);
     background: var(--primaryColor);
@@ -428,6 +435,7 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     text-align: center;
+    outline: none;
 }
 
 .logicportHover {
