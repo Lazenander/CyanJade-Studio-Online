@@ -69,6 +69,7 @@ function forwardGraph(q, variableTables = []) {
 
     while (q.length) {
         let currentIndex = q.shift();
+        console.log(q);
 
         let innerDataStream = [],
             inputDataStream = [];

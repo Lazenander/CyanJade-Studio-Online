@@ -11,10 +11,16 @@ export default class DataStream {
             for (let i = variableTables.length - 1; i >= 0; i--)
                 if (variableTables[i].existVariable(this))
                     return variableTables[i].readVariable(this);
-            ErrorManager.error(3, variable.data);
-            return this;
+            ErrorManager.error(3, this.data);
+            return new DataStream(this.type, this.data);
+        } else if (this.type == "variableArrayElement") {
+            for (let i = variableTables.length - 1; i >= 0; i--)
+                if (variableTables[i].existVariable(this))
+                    return variableTables[i].readVariable(this);
+            ErrorManager.error(3, this.data);
+            return new DataStream(this.type, this.data);
         }
-        return this;
+        return new DataStream(this.type, this.data);
     }
 
     isNumber(str) {

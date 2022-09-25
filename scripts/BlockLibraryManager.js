@@ -9,30 +9,38 @@ function formBasic() {
 
     basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream, variableTables) => {
         let ds = innerInput[0];
-        if (ds.type != "variable") {
-            ErrorManager.error(1, ds.data);
-            return {
-                logicport: 0,
-                dataOutput: [new DataStream()]
-            }
-        }
-        let flag = false;
-        for (let i = variableTables.length - 2; i >= 0; i--)
-            if (variableTables[i].existVariable(ds)) {
-                variableTables[i].changeVariable(ds, preDataStream[0]);
-                flag = true;
-                break;
-            }
-        if (!flag)
-            variableTables[variableTables.length - 1].assignVariable(ds, preDataStream[0]);
-        return {
-            logicport: 0,
-            dataOutput: []
+        switch (ds.type) {
+            case "variable":
+                let flag = false;
+                for (let i = variableTables.length - 2; i >= 0; i--)
+                    if (variableTables[i].existVariable(ds)) {
+                        variableTables[i].changeVariable(ds, preDataStream[0]);
+                        flag = true;
+                        break;
+                    }
+                if (!flag)
+                    variableTables[variableTables.length - 1].assignVariable(ds, preDataStream[0]);
+                return {
+                    logicport: 0,
+                    dataOutput: []
+                };
+            case "variableArrayElement":
+                return {
+                    logicport: 0,
+                    dataOutput: []
+                };
+            default:
+                ErrorManager.error(1, ds.data);
+                return {
+                    logicport: 0,
+                    dataOutput: []
+                };
         }
     });
 
     basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 3, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream, variableTables) => {
         let ds = innerInput[0].readData(variableTables);
+        console.log(ds);
         return {
             logicport: -1,
             dataOutput: [ds]
