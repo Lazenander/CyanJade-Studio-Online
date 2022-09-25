@@ -31,10 +31,16 @@ export default class DataStream {
     }
 
     read(str) {
-        while (str[0] == " ")
-            str = str.slice(1);
-        while (str[str.length - 1] == " ")
-            str = str.slice(0, str.length - 1);
+        function cutSpace(s) {
+            while (s[0] == " ")
+                s = s.slice(1);
+            while (s[s.length - 1] == " ")
+                s = s.slice(0, s.length - 1);
+            return s;
+        }
+
+        str = cutSpace(str);
+
         if (str == "null" || str == "") {
             this.type = "null";
             this.data = null;
@@ -74,13 +80,34 @@ export default class DataStream {
                     tmpDS.read(tmpstr)
                     this.data.push(tmpDS);
                     tmpstr = "";
-                } else
+                } else if (str[i])
                     tmpstr += str[i];
             }
             let tmpDS = new DataStream();
             tmpDS.read(tmpstr)
             this.data.push(tmpDS);
-            console.log(this.data);
+            return;
+        } else if (this.isVariable(str.split('[')[0])) {
+            this.type = "variableArrayElement";
+            this.data = { name: str.split('[')[0], address: [] };
+            let tmpstr = "";
+            let flag = false;
+            let br = 0;
+            for (let i = str.split('[')[0].length; i < str.length; i++) {
+                if (str[i] == "[")
+                    br++;
+                if (str[i] == "]")
+                    br--;
+                tmpstr += str[i];
+                if (br == 0) {
+                    let tmpDS = new DataStream();
+                    tmpDS.read(tmpstr.slice(1, tmpstr.length - 1));
+                    this.data.address.push(tmpDS);
+                    tmpstr = "";
+                }
+            }
+            for (let i = 0; i < this.data.address.length; i++)
+                console.log(this.data.address[i]);
             return;
         }
         this.type = "unknown";
