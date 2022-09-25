@@ -145,7 +145,8 @@ function forwardGraph(q, variableTables = []) {
                     }
                     break;
             }
-        } catch {
+        } catch (err) {
+            console.error(err);
             postMessage({ type: "signal", data: "Error", index: currentIndex });
             close();
         }
