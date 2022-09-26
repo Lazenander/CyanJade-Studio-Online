@@ -9,9 +9,9 @@ function formBasic() {
 
     basic.BlockMoulds["assign"] = new BlockMould("assign", { "English": "assign", "Chinese": "赋值" }, "logic", "assign", "sys_lib_basic", { width: 2, height: 2 }, 1, 1, 1, 0, (innerInput, preDataStream, variableTables) => {
         let ds = innerInput[0];
+        let flag = false;
         switch (ds.type) {
             case "variable":
-                let flag = false;
                 for (let i = variableTables.length - 2; i >= 0; i--)
                     if (variableTables[i].existVariable(ds)) {
                         variableTables[i].changeVariable(ds, preDataStream[0]);
@@ -25,6 +25,14 @@ function formBasic() {
                     dataOutput: []
                 };
             case "variableArrayElement":
+                for (let i = variableTables.length - 2; i >= 0; i--)
+                    if (variableTables[i].existVariable(ds)) {
+                        variableTables[i].changeVariable(ds, preDataStream[0]);
+                        flag = true;
+                        break;
+                    }
+                if (!flag)
+                    variableTables[variableTables.length - 1].changeVariable(ds, preDataStream[0]);
                 return {
                     logicport: 0,
                     dataOutput: []

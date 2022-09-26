@@ -97,7 +97,6 @@ export default class DataStream {
             this.type = "variableArrayElement";
             this.data = { name: str.split('[')[0], address: [] };
             let tmpstr = "";
-            let flag = false;
             let br = 0;
             for (let i = str.split('[')[0].length; i < str.length; i++) {
                 if (str[i] == "[")

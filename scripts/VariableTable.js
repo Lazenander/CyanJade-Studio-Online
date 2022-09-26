@@ -19,11 +19,16 @@ export default class VariableTable {
     }
 
     changeVariable(variable, data) {
-        if (variable.type != "variable") {
-            ErrorManager.error(2, variable.data);
-            return;
+        if (variable.type == "variable")
+            this._storage[variable.data] = data.readData([this]);
+        else if (variable.type == "variableArrayElement") {
+            let currentData = this._storage[variable.data.name];
+            for (let i = 0; i < variable.data.address.length - 1; i++)
+                currentData = currentData[variable.data.address[i]];
+            currentData[variable.data.address[variable.data.address.length - 1]] = data.readData([this]);
         }
-        this._storage[variable.data] = data.readData([this]);
+        ErrorManager.error(2, variable.data);
+        return;
     }
 
     readVariable(variable) {
@@ -67,6 +72,7 @@ export default class VariableTable {
             ErrorManager.error(4, variable.data);
             return;
         }
+        console.log(this._storage);
         if (variable.type == "variable")
             return variable.data in this._storage;
         if (variable.type == "variableArrayElement")
