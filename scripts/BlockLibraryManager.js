@@ -12,7 +12,7 @@ function formBasic() {
         let flag = false;
         switch (ds.type) {
             case "variable":
-                for (let i = variableTables.length - 2; i >= 0; i--)
+                for (let i = variableTables.length - 1; i >= 0; i--)
                     if (variableTables[i].existVariable(ds)) {
                         variableTables[i].changeVariable(ds, preDataStream[0]);
                         flag = true;
@@ -25,14 +25,15 @@ function formBasic() {
                     dataOutput: []
                 };
             case "variableArrayElement":
-                for (let i = variableTables.length - 2; i >= 0; i--)
+                for (let i = variableTables.length - 1; i >= 0; i--)
                     if (variableTables[i].existVariable(ds)) {
+                        console.log(variableTables[i], ds.type, ds.data, ds.data.address, ds.data.address[0], preDataStream[0]);
                         variableTables[i].changeVariable(ds, preDataStream[0]);
                         flag = true;
                         break;
                     }
                 if (!flag)
-                    variableTables[variableTables.length - 1].changeVariable(ds, preDataStream[0]);
+                    ErrorManager.error(4, ds.data.name);
                 return {
                     logicport: 0,
                     dataOutput: []
