@@ -386,6 +386,8 @@ body {
 }
 
 .blockp {
+    margin: 0;
+    padding: 0;
     width: 100%;
     min-height: 36px;
     font-family: "SHSCN-Regular";
