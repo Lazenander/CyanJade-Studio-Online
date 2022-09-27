@@ -38,7 +38,6 @@ export default class Graph {
                 this.delDataConnection(index, i, this.blocks[index].dataExports[i][j],
                     this.blocks[this.blocks[index].dataExports[i][j]].searchDataImport(index));
         delete this.blocks[index];
-        console.log(this.blocks);
         this.emptyIndex.push(index);
         this.size--;
         return;

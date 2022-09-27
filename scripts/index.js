@@ -200,9 +200,7 @@ function renderBlock(index) {
             pblocks.innerText = CodeManager.instance.graph.size;
         } else {
             if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
-                console.log(1);
                 var text = document.getElementById("out" + index).innerText;
-                console.log(text);
                 navigator.clipboard.writeText(text);
             }
         }

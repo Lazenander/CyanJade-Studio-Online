@@ -26,8 +26,6 @@ export default class VariableTable {
             for (let i = 0; i < variable.data.address.length - 1; i++)
                 currentData = currentData.data[variable.data.address[i]];
             currentData.data[variable.data.address[variable.data.address.length - 1]] = data.readData([this]);
-            console.log(currentData);
-            console.log(data.readData([this]));
         } else
             ErrorManager.error(2, variable.data);
         return;
@@ -37,34 +35,25 @@ export default class VariableTable {
         if (variable.type == "variable")
             return this._storage[variable.data];
         else if (variable.type == "variableArrayElement") {
-            console.log(variable.data);
             let currentData = this._storage[variable.data.name];
-            console.log(this._storage);
-            console.log(currentData);
             for (let i = 0; i < variable.data.address.length; i++) {
-                console.log(variable.data.address[i]);
                 switch (variable.data.address[i].type) {
                     case "number":
-                        console.log(variable.data.address[i].data, currentData);
                         currentData = currentData.data[variable.data.address[i].data];
                         break;
                     case "variable":
                         currentData = currentData.data[this.readVariable(variable.data.address[i])];
-                        console.log(currentData);
                         break;
                     case "variableArrayElement":
                         currentData = currentData.data[this.readVariable(variable.data.address[i])];
-                        console.log(currentData);
                         break;
                     default:
                         ErrorManager.error(3, variable.data);
                         return;
                 }
-                console.log(currentData);
             }
             return currentData;
         }
-        console.log(currentData);
         ErrorManager.error(3, variable.data);
         return;
     }
@@ -74,8 +63,6 @@ export default class VariableTable {
             ErrorManager.error(4, variable.data);
             return;
         }
-        console.log(this._storage);
-        console.log(variable.data.name in this._storage);
         if (variable.type == "variable")
             return variable.data in this._storage;
         if (variable.type == "variableArrayElement")

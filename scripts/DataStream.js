@@ -111,8 +111,6 @@ export default class DataStream {
                     tmpstr = "";
                 }
             }
-            for (let i = 0; i < this.data.address.length; i++)
-                console.log(this.data.address[i]);
             return;
         }
         this.type = "unknown";
@@ -144,5 +142,9 @@ export default class DataStream {
             default:
                 return "" + this.data
         }
+    }
+
+    duplicate() {
+        return new DataStream(this.type, this.data);
     }
 }
