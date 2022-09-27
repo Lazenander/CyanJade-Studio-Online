@@ -544,6 +544,7 @@ window.openFileClicked = () => {
             }
 
             fileName = res.fileName;
+            console.log("Open file: ", fileName);
             fileNameInput.setAttribute("value", fileName);
 
             obj2graph(res);
