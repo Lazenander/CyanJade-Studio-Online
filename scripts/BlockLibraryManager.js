@@ -773,6 +773,13 @@ function formArray() {
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
+    array.BlockMoulds["length"] = new BlockMould("length", { "English": "length", "Chinese": "数列长度" }, "data", "length", "sys_lib_array", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        if (ds1.type == "array")
+            return { logicport: -1, dataOutput: [new DataStream("number", ds1.data.length)] };
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
     return array;
 }
 
