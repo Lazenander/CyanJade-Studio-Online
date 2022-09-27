@@ -85,13 +85,18 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data + ds2.data)] };
-        else if (ds1.type == "array" && ds2.type == "array")
-            return { logicport: -1, dataOutput: [new DataStream(ds1.type, [...ds1.data, ...ds2.data])] };
         else if (ds1.type == "array" && ds2.type == "number") {
-            let lst = [...ds1.data];
-            for (let i = 0; i < lst.length; i++)
-                lst[i] += ds2.data;
-            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lst)] };
+            function lstAddNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data += ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstAddNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAddNum([...ds1.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -101,13 +106,18 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data - ds2.data)] };
-        else if (ds1.type == "array" && ds2.type == "array")
-            return { logicport: -1, dataOutput: [new DataStream(ds1.type, [...ds1.data, ...ds2.data])] };
         else if (ds1.type == "array" && ds2.type == "number") {
-            let lst = [...ds1.data];
-            for (let i = 0; i < lst.length; i++)
-                lst[i] -= ds2.data;
-            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lst)] };
+            function lstMinusNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data -= ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstMinusNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMinusNum([...ds1.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -117,6 +127,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data * ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstMultiplyNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data *= ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstMultiplyNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMultiplyNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -125,6 +148,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data / ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstDivideNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data /= ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstDivideNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstDivideNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -133,6 +169,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data % ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstModNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data %= ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstModNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstModNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -140,6 +189,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.abs(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstAbs(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.abs(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstAbs([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAbs([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -147,6 +209,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.sqrt(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstSqrt(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.sqrt(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstSqrt([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSqrt([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -158,6 +233,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.exp(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstExp(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.exp(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstExp([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstExp([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -166,6 +254,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.pow(ds1.data, ds2.data))] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstPowNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.pow(lst[i].data, ds2.data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstPowNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstPowNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -173,6 +274,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.log(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstIn(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.ln(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstIn([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstIn([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -181,6 +295,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.log(ds1.data) / Math.log(ds2.data))] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstLogNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.log(lst[i].data, ds2.data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstLogNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstLogNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -188,6 +315,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ~ds1.data)] };
+        else if (ds1.type == "array") {
+            function lstBnot(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ~lst[i].data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstBnot([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBnot([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -196,6 +336,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data & ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstBandNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data & ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstBandNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBandNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -204,6 +357,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data | ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstBorNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data | ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstBorNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBorNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -212,6 +378,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data ^ ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstBxorNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data ^ ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstBxorNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBxorNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -220,6 +399,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data << ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstSHLNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data << ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstSHLNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSHLNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -228,6 +420,19 @@ function formMath() {
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "number" && ds2.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, ds1.data >> ds2.data)] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstSHRNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data >> ds2.data;
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstSHRNum([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSHRNum([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -239,6 +444,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.sin(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstSin(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.sin(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstSin([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSin([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -246,6 +464,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.cos(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstCos(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.cos(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstCos([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstCos([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -253,6 +484,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.tan(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstTan(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.tan(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstTan([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstTan([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -260,6 +504,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.asin(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstAsin(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.asin(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstAsin([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAsin([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -267,6 +524,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.acos(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstAcos(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.acos(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstAcos([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAcos([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -274,6 +544,19 @@ function formMath() {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.atan(ds1.data))] };
+        else if (ds1.type == "array") {
+            function lstAtan(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.atan(lst[i].data);
+                    if (lst[i].type == "array") {
+                        lst[i].data = lstAtan([...lst[i].data]);
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAtan([...ds1.data]))] };
+        }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
     return math;
