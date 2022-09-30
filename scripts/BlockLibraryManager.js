@@ -180,6 +180,46 @@ function formMath() {
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
+    math.BlockMoulds["max"] = new BlockMould("max", { "English": "max", "Chinese": "最大值" }, "data", "max", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "number" && ds2.type == "number")
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.max(ds1.data, ds2.data))] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstMaxNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.max(lst[i].data, ds2.data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMaxNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMaxNum([...ds1.data]))] };
+        }
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    math.BlockMoulds["min"] = new BlockMould("min", { "English": "min", "Chinese": "最小值" }, "data", "min", "sys_lib_math", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "number" && ds2.type == "number")
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, Math.min(ds1.data, ds2.data))] };
+        else if (ds1.type == "array" && ds2.type == "number") {
+            function lstMinNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.min(lst[i].data, ds2.data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMinNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMinNum([...ds1.data]))] };
+        }
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
     math.BlockMoulds["abs"] = new BlockMould("abs", { "English": "abs", "Chinese": "绝对值" }, "data", "abs", "sys_lib_math", { width: 1, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "number")

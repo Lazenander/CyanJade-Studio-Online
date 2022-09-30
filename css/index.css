@@ -226,7 +226,8 @@ body {
 }
 
 .selectorElement {
-    width: 100%;
+    margin-left: 5%;
+    width: 95%;
     height: 40px;
     display: flex;
     flex-direction: column;

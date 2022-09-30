@@ -652,6 +652,7 @@ window.dragAreaDragDetected = (event) => {
 }
 
 window.dragAreaDropDetected = (event) => {
+    console.log(100);
     if (dragType == "mould") {
         let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
         blockArea.appendChild(renderBlock(newIndex));
@@ -745,6 +746,20 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
                 dragDivArea.classList.add("display");
                 chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
             };
+            div2.onclick = () => {
+                console.log(1);
+            }
+            div2.ontouchstart = (e) => {
+                e.preventDefault();
+                dragType = "mould";
+                dragDivArea.classList.remove("notDisplay");
+                dragDivArea.classList.add("display");
+                console.log(2);
+                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+            };
+            div2.ontouchmove = (e) => {
+                console.log(e);
+            }
             div2.ondragend = () => {
                 dragDivArea.classList.remove("display");
                 dragDivArea.classList.add("notDisplay");
@@ -752,6 +767,15 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
                 shadowBlock.classList.add("notDisplay");
                 shadowActivated = false;
             }
+            div2.ontouchend = (e) => {
+                e.preventDefault();
+                console.log(10);
+                dragDivArea.classList.remove("display");
+                dragDivArea.classList.add("notDisplay");
+                shadowBlock.classList.remove("display");
+                shadowBlock.classList.add("notDisplay");
+            }
+
             let p2 = document.createElement("p");
             p2.setAttribute("name", blockMould);
             p2.innerText = LanguageManager.phrases[blockMould][LanguageManager.currentLanguage];
