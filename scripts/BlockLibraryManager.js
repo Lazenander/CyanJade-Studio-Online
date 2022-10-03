@@ -96,6 +96,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAddNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstAddNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data += ds1.data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstAddNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstAddNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -116,6 +127,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMinusNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstMinusNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ds1.data - lst[i].data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMinusNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstMinusNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -136,6 +158,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMultiplyNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstMultiplyNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data *= ds1.data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMultiplyNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstMultiplyNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -156,6 +189,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstDivideNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstDivideNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ds1.data / lst[i].data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstDivideNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstDivideNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -176,6 +220,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstModNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstModNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ds2.data % lst[i].data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstModNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstModNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -196,6 +251,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMaxNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstMaxNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.max(lst[i].data, ds2.data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMaxNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstMaxNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -216,6 +282,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstMinNum([...ds1.data]))] };
+        } else if (ds1.type == "array" && ds2.type == "number") {
+            function lstMinNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.min(lst[i].data, ds2.data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstMinNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstMinNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -297,6 +374,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstPowNum([...ds1.data]))] };
+        } else if (ds1.type == "array" && ds2.type == "number") {
+            function lstPowNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.pow(ds1.data, lst[i].data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstPowNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstPowNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -336,6 +424,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstLogNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstLogNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = Math.log(ds1.data, lst[i].data);
+                    if (lst[i].type == "array")
+                        lst[i].data = lstLogNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstLogNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -375,6 +474,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBandNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstBandNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data & ds2.data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstBandNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstBandNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -395,6 +505,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBorNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstBorNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data | ds2.data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstBorNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstBorNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -415,6 +536,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstBxorNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstBxorNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = lst[i].data ^ ds2.data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstBxorNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstBxorNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -435,6 +567,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSHLNum([...ds1.data]))] };
+        } else if (ds1.type == "number" && ds2.type == "array") {
+            function lstSHLNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ds1.data << lst[i].data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstSHLNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstSHLNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -455,6 +598,17 @@ function formMath() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstSHRNum([...ds1.data]))] };
+        } else if (ds1.type == "array" && ds2.type == "number") {
+            function lstSHRNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "number")
+                        lst[i].data = ds1.data >> lst[i].data;
+                    if (lst[i].type == "array")
+                        lst[i].data = lstSHRNum([...lst[i].data]);
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstSHRNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
@@ -598,6 +752,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstAndNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstAndNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstAndNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst[i].data && ds1.data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstAndNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data && ds2.data) ? true : false)] };
     });
@@ -619,6 +786,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstOrNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstOrNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstOrNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst[i].data || ds1.data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstOrNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data || ds2.data) ? true : false)] };
     });
@@ -659,6 +839,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstEqualNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstEqualNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstEqualNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst[i].data == ds1.data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstEqualNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data == ds2.data) ? true : false)] };
     });
@@ -679,6 +872,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstUnequalNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstUnequalNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstUnequalNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst[i].data != ds1.data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstUnequalNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data != ds2.data) ? true : false)] };
     });
@@ -699,6 +905,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstGreaterNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstGreaterNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstGreaterNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (ds1.data > lst[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstGreaterNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data > ds2.data) ? true : false)] };
     });
@@ -719,6 +938,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstEgreaterNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstEgreaterNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstEgreaterNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (ds1.data >= lst[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstEgreaterNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data >= ds2.data) ? true : false)] };
     });
@@ -739,6 +971,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstLessNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstLessNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstLessNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (ds1.data < lst[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstLessNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data < ds2.data) ? true : false)] };
     });
@@ -759,6 +1004,19 @@ function formLogic() {
                 return lst;
             }
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstElessNum([...ds1.data]))] };
+        } else if (ds2.type == "array") {
+            function lstElessNum(lst) {
+                for (let i = 0; i < lst.length; i++) {
+                    if (lst[i].type == "array")
+                        lst[i].data = lstElessNum([...lst[i].data]);
+                    else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (ds1.data <= lst[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds2.type, lstElessNum([...ds2.data]))] };
         }
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data <= ds2.data) ? true : false)] };
     });
