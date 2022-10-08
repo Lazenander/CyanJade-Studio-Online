@@ -41,6 +41,7 @@ let port1 = {
     portIndex: -1
 };
 let isCodeRunning = false;
+let navigatorType = 0;
 let fileName = "Untitled";
 
 function renderLink(index1, port1, index2, port2, type) {
@@ -740,40 +741,41 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
             div2.classList.add("selectorElement");
             div2.classList.add("contentHover");
             div2.draggable = true;
-            div2.ondragstart = () => {
-                dragType = "mould";
-                dragDivArea.classList.remove("notDisplay");
-                dragDivArea.classList.add("display");
-                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
-            };
-            div2.onclick = () => {
-                console.log(1);
-            }
-            div2.ontouchstart = (e) => {
-                e.preventDefault();
-                dragType = "mould";
-                dragDivArea.classList.remove("notDisplay");
-                dragDivArea.classList.add("display");
-                console.log(2);
-                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
-            };
-            div2.ontouchmove = (e) => {
-                console.log(e);
-            }
-            div2.ondragend = () => {
-                dragDivArea.classList.remove("display");
-                dragDivArea.classList.add("notDisplay");
-                shadowBlock.classList.remove("display");
-                shadowBlock.classList.add("notDisplay");
-                shadowActivated = false;
-            }
-            div2.ontouchend = (e) => {
-                e.preventDefault();
-                console.log(10);
-                dragDivArea.classList.remove("display");
-                dragDivArea.classList.add("notDisplay");
-                shadowBlock.classList.remove("display");
-                shadowBlock.classList.add("notDisplay");
+            if (navigatorType) {
+                div2.ondragstart = () => {
+                    dragType = "mould";
+                    dragDivArea.classList.remove("notDisplay");
+                    dragDivArea.classList.add("display");
+                    chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+                };
+                div2.ondragend = () => {
+                    dragDivArea.classList.remove("display");
+                    dragDivArea.classList.add("notDisplay");
+                    shadowBlock.classList.remove("display");
+                    shadowBlock.classList.add("notDisplay");
+                    shadowActivated = false;
+                }
+            } else {
+                div2.ontouchstart = (e) => {
+                    e.preventDefault();
+                    dragType = "mould";
+                    dragDivArea.classList.remove("notDisplay");
+                    dragDivArea.classList.add("display");
+                    console.log(2);
+                    chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+                };
+                div2.ontouchmove = (e) => {
+                    console.log(e);
+                }
+                div2.ontouchend = (e) => {
+                    e.preventDefault();
+                    console.log(10);
+                    dragDivArea.classList.remove("display");
+                    dragDivArea.classList.add("notDisplay");
+                    shadowBlock.classList.remove("display");
+                    shadowBlock.classList.add("notDisplay");
+                    shadowActivated = false;
+                }
             }
 
             let p2 = document.createElement("p");
@@ -897,3 +899,9 @@ LanguageManager.changeLanguage(navigator.language == "zh-CN" ? "Chinese" : "Engl
 pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
 infoContainer.style.backgroundColor = "var(--thirdColor)";
 fileNameInput.setAttribute("value", fileName);
+if (navigator.userAgent.match(
+        /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+    ))
+    navigatorType = 1;
+else
+    navigatorType = 0;
