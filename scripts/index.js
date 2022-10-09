@@ -741,41 +741,132 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
             div2.classList.add("selectorElement");
             div2.classList.add("contentHover");
             div2.draggable = true;
-            if (navigatorType) {
-                div2.ondragstart = () => {
-                    dragType = "mould";
-                    dragDivArea.classList.remove("notDisplay");
-                    dragDivArea.classList.add("display");
-                    chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
-                };
-                div2.ondragend = () => {
-                    dragDivArea.classList.remove("display");
-                    dragDivArea.classList.add("notDisplay");
-                    shadowBlock.classList.remove("display");
-                    shadowBlock.classList.add("notDisplay");
-                    shadowActivated = false;
+
+            // Desktop
+            div2.ondragstart = () => {
+                dragType = "mould";
+                dragDivArea.classList.remove("notDisplay");
+                dragDivArea.classList.add("display");
+                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+            };
+            div2.ondragend = () => {
+                dragDivArea.classList.remove("display");
+                dragDivArea.classList.add("notDisplay");
+                shadowBlock.classList.remove("display");
+                shadowBlock.classList.add("notDisplay");
+                shadowActivated = false;
+            }
+            div2.ontouchstart = (e) => {
+                e.preventDefault();
+                dragType = "mould";
+                dragDivArea.classList.remove("notDisplay");
+                dragDivArea.classList.add("display");
+                console.log(2);
+                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
+            };
+
+            // mobile devices
+            div2.ontouchmove = (e) => {
+                let posX = Math.max(playgroundContainer.scrollLeft + e.pageX, 0);
+                let posY = Math.max(playgroundContainer.scrollTop + e.pageY - 30, 0);
+                if (shadowActivated == false) {
+                    shadowBlock.classList.remove("notDisplay");
+                    shadowBlock.classList.add("display");
+                    if (dragType == "mould") {
+                        shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
+                        shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+                    } else {
+                        shadowBlock.style.width = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
+                        shadowBlock.style.height = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
+                    }
+                    shadowActivated = true;
                 }
-            } else {
-                div2.ontouchstart = (e) => {
-                    e.preventDefault();
-                    dragType = "mould";
-                    dragDivArea.classList.remove("notDisplay");
-                    dragDivArea.classList.add("display");
-                    console.log(2);
-                    chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
-                };
-                div2.ontouchmove = (e) => {
-                    console.log(e);
+                let calC = { x: -1, y: -1 }
+                if (dragType == "mould")
+                    calC = CodeManager.instance.calCoor(
+                        px2grid(posX) - Math.round(chosedBlockMould.size.width / 2) - 1,
+                        px2grid(posY) - Math.round(chosedBlockMould.size.height / 2) - 1,
+                        chosedBlockMould, canvasSize);
+                else
+                    calC = CodeManager.instance.calCoor(
+                        px2grid(posX) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
+                        px2grid(posY) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
+                        CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
+                resX = calC.x;
+                resY = calC.y;
+                shadowBlock.style.left = resX * 50 + 25 + "px";
+                shadowBlock.style.top = resY * 50 + 25 + "px";
+                console.log(posX, posY);
+            }
+            div2.ontouchend = (e) => {
+                e.preventDefault();
+                if (dragType == "mould") {
+                    let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
+                    blockArea.appendChild(renderBlock(newIndex));
+                    pblocks.innerText = CodeManager.instance.graph.size;
+                } else {
+                    let tmpblock = document.getElementById("b" + chosedBlockIndex);
+                    CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
+                    CodeManager.instance.graph.blocks[chosedBlockIndex].y = resY;
+                    tmpblock.style.left = resX * 50 + 25 + "px";
+                    tmpblock.style.top = resY * 50 + 25 + "px";
+                    tmpblock.style.zIndex = 5;
+                    CodeManager.instance.blockCoords[chosedBlockIndex] = {
+                        x1: resX,
+                        x2: resX + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
+                        y1: resY,
+                        y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
+                    };
+                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
+                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
+                            let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
+                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
+                                "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+                            blockArea.removeChild(link);
+                            renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
+                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
+                                chosedBlockIndex, i, "logic");
+                        }
+                    }
+                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
+                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
+                            let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                                "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
+                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
+                                "_" + "logic");
+                            blockArea.removeChild(link);
+                            renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
+                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
+                        }
+                    }
+                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
+                        if (CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
+                            continue;
+                        let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
+                            "_" + chosedBlockIndex + "_" + i + "_" + "data");
+                        blockArea.removeChild(link);
+                        renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
+                            CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
+                            chosedBlockIndex, i, "data");
+                    }
+                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
+                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
+                            let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                                "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
+                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
+                                "_" + "data");
+                            blockArea.removeChild(link);
+                            renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
+                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
+                        }
+                    }
                 }
-                div2.ontouchend = (e) => {
-                    e.preventDefault();
-                    console.log(10);
-                    dragDivArea.classList.remove("display");
-                    dragDivArea.classList.add("notDisplay");
-                    shadowBlock.classList.remove("display");
-                    shadowBlock.classList.add("notDisplay");
-                    shadowActivated = false;
-                }
+                dragDivArea.classList.remove("display");
+                dragDivArea.classList.add("notDisplay");
+                shadowBlock.classList.remove("display");
+                shadowBlock.classList.add("notDisplay");
+                shadowActivated = false;
             }
 
             let p2 = document.createElement("p");
@@ -899,9 +990,4 @@ LanguageManager.changeLanguage(navigator.language == "zh-CN" ? "Chinese" : "Engl
 pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
 infoContainer.style.backgroundColor = "var(--thirdColor)";
 fileNameInput.setAttribute("value", fileName);
-if (navigator.userAgent.match(
-        /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
-    ))
-    navigatorType = 1;
-else
-    navigatorType = 0;
+console.log(navigatorType);
