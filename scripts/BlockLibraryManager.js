@@ -61,6 +61,13 @@ function formBasic() {
         }
     });
 
+    basic.BlockMoulds["Loutput"] = new BlockMould("Loutput", { "English": "Loutput", "Chinese": "长输出" }, "logic", "output", "sys_lib_basic", { width: 8, height: 10 }, 1, 0, 1, 0, (innerInput, preDataStream, variableTables) => {
+        return {
+            logicport: -1,
+            dataOutput: []
+        }
+    });
+
     basic.BlockMoulds["if"] = new BlockMould("if", { "English": "if", "Chinese": "如果" }, "logic", "switch", "sys_lib_basic", { width: 1, height: 3 }, 1, 3, 1, 0, (innerInput, preDataStream, variableTables) => {
         let ds = preDataStream[0].readData(variableTables);
         if (ds.type == "boolean" && ds.data == true || ds.type == "number" && ds.data != 0 || ds.type == "string" && ds.data != "")

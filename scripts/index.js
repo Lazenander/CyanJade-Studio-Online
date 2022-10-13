@@ -363,11 +363,19 @@ function renderBlock(index) {
             divblock.appendChild(assign);
             break;
         case "output":
-            let output = document.createElement("p");
-            output.className = "blockp";
-            output.id = "out" + index;
-            divblock.appendChild(output);
-            break;
+            if (block.blockMould.nameID == "output") {
+                let output = document.createElement("p");
+                output.className = "blockp";
+                output.id = "out" + index;
+                divblock.appendChild(output);
+                break;
+            } else if (block.blockMould.nameID == "Loutput") {
+                let output = document.createElement("p");
+                output.className = "blocklp";
+                output.id = "out" + index;
+                divblock.appendChild(output);
+                break;
+            }
         default:
             let p = document.createElement("p");
             p.className = "blockp";

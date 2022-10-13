@@ -399,6 +399,20 @@ body {
     text-align: center;
 }
 
+.blocklp {
+    margin: 0;
+    padding: 0;
+    width: calc(100% - 10px);
+    min-height: 100%;
+    max-width: 100%;
+    font-family: "SHSCN-Regular";
+    color: var(--textColor);
+    font-size: 16px;
+    word-wrap: break-word;
+    line-height: 18px;
+    text-align: left;
+}
+
 .inputBorder {
     border: solid 0.1px var(--secondaryColor);
     box-shadow: inset 3px 3px 7px var(--lightShadow), inset -3px -3px 7px var(--lightLight);
