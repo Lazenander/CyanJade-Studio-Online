@@ -950,6 +950,7 @@ window.rtButtonClicked = (event) => {
                     }
                     break;
                 case "output":
+                    console.log(e.data.data.context);
                     document.getElementById("out" + e.data.data.index).innerText = e.data.data.context;
                     break;
             }

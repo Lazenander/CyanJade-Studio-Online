@@ -125,7 +125,25 @@ export default class DataStream {
             case "variable":
                 return "" + this.data;
             case "number":
-                return "" + Math.round(this.data * 1e6) / 1e6;
+                let strNum = "" + this.data;
+                console.log(strNum);
+                if (strNum.includes("e+")) {
+                    let tmpstr = "" + strNum.split("e+")[0];
+                    let num = parseInt("" + strNum.split("e+")[1]);
+                    if (tmpstr.split(".").length == 2)
+                        tmpstr = "" + tmpstr.split(".")[0] + tmpstr.split(".")[1];
+                    while (tmpstr.length < num + 1)
+                        tmpstr += "0";
+                    return tmpstr;
+                } else if (strNum.includes("e-")) {
+                    let tmpstr = strNum.split("e-")[0];
+                    let num = parseInt(strNum.split("e-")[1]);
+                    let tmpstr2 = "";
+                    while (tmpstr2.length < num - 1)
+                        tmpstr2 += "0";
+                    return "0." + tmpstr2 + tmpstr.split(".")[0] + tmpstr.split(".")[1];
+                } else
+                    return strNum;
             case "boolean":
                 return "" + this.data;
             case "unknown":

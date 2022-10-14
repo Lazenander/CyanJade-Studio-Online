@@ -80,7 +80,7 @@ function forwardGraph(q, variableTables = []) {
                         }
                         inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], variableTables).dataOutput[0].readData(variableTables));
                     }
-                    postMessage({ type: "output", data: { index: currentIndex, context: "" + inputDataStream[0].toString() } });
+                    postMessage({ type: "output", data: { index: currentIndex, context: inputDataStream[0].toString() } });
                     break;
                 case "switch":
                     forwardSwitch(currentIndex, variableTables);
@@ -113,7 +113,6 @@ function forwardGraph(q, variableTables = []) {
                     for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
                         for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
                             calIndegree[blocks[currentIndex].logicExports[i][j]]--;
-
                             if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0)
                                 q.push(blocks[currentIndex].logicExports[i][j]);
                         }
