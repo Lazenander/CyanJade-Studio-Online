@@ -6,6 +6,7 @@ import DataStream from "./DataStream.js";
 import FileOperator from "./FileOperator.js";
 import LanguageManager from "./language.js";
 import px2grid from "./projector.js";
+import BlockLibrary from "./BlockLibrary.js";
 
 const cssLink = document.getElementById("cssLink");
 const sel_dark = document.getElementById("sel_dark");
@@ -24,6 +25,7 @@ const pstatus = document.getElementById("pstatus");
 const pblocks = document.getElementById("pblocks");
 const infoContainer = document.getElementById("infoContainer");
 const fileNameInput = document.getElementById("fileNameInput");
+const BLibMouldsContainer = document.getElementById("BLibMouldsContainer");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -43,6 +45,8 @@ let port1 = {
 let isCodeRunning = false;
 let navigatorType = 0;
 let fileName = "Untitled";
+let mouldNum = 1;
+let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
 
 function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
@@ -475,6 +479,7 @@ window.contentElementFileClicked = () => {
         activated = "disabled";
     } else {
         deactivate();
+        opFileSelector.scrollTop = 0;
         opFileSelector.classList.remove("selectorDisappear");
         opFileSelector.classList.add("selectorAppear");
         activated = "file";
@@ -491,6 +496,7 @@ window.contentElementBlockClicked = () => {
         blockLibDisplay = "disabled";
     } else {
         deactivate();
+        opBlockSelector.scrollTop = 0;
         opBlockSelector.classList.remove("selectorDisappear");
         opBlockSelector.classList.add("selectorAppear");
         activated = "block";
@@ -506,6 +512,7 @@ window.contentElementSettingClicked = () => {
         activated = "disabled";
     } else {
         deactivate();
+        opSettingSelector.scrollTop = 0;
         opSettingSelector.classList.remove("selectorDisappear");
         opSettingSelector.classList.add("selectorAppear");
         activated = "setting";
@@ -884,12 +891,33 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
             opBlockElementSelector.appendChild(div2);
         }
         opBlockElementSelector.style.top = "95px";
+        opBlockElementSelector.scrollTop = 0;
         return;
     };
     let p = document.createElement("p");
     p.setAttribute("name", blockLib);
     div.appendChild(p);
     opBlockSelector.appendChild(div);
+}
+
+window.addMould = () => {
+    let div = document.createElement("div");
+    div.classList.add("BLibMouldsContent");
+    div.classList.add("contentHover");
+    let p = document.createElement("p");
+    p.innerText = "New Mould " + mouldNum;
+    let thisMouldNum = mouldNum;
+    div.onmouseup = (event) => {
+        console.log(thisMouldNum, event.button);
+        if (event.button == 2) {
+            console.log("delete");
+            BLibMouldsContainer.removeChild(div);
+        }
+    }
+    div.appendChild(p);
+    BLibMouldsContainer.appendChild(div);
+    thisLibrary.addNewMould("New_Mould_" + mouldNum);
+    mouldNum += 1;
 }
 
 window.rtButtonClicked = (event) => {

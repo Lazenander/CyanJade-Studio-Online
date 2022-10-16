@@ -75,6 +75,14 @@ export default class LanguageManager {
         "l_i_blocks": {
             "Chinese": "指令数",
             "English": "Blocks"
+        },
+        "l_BLibContainer": {
+            "Chinese": "指令库",
+            "English": "Block Library"
+        },
+        "l_MainThreadContainer": {
+            "Chinese": "主流程",
+            "English": "Main Flow"
         }
     };
     static currentLanguage = "English";

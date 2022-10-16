@@ -29,7 +29,7 @@ body {
     width: 100%;
     height: 50px;
     background-color: var(--primaryColor);
-    box-shadow: 0px 0px 5px var(--darkShadow);
+    border-bottom: 1px solid var(--lightShadow);
     z-index: 101;
     user-select: none;
     -moz-user-select: none;
@@ -147,8 +147,8 @@ body {
 .playgroundContainer {
     position: absolute;
     top: 50px;
-    left: 0;
-    width: 100%;
+    left: 200px;
+    width: calc(100% - 200px);
     height: calc(100% - 70px);
     background-color: var(--primaryColor);
     overflow: scroll;
@@ -160,6 +160,136 @@ body {
 .playgroundContainer::-webkit-scrollbar {
     width: 0;
     height: 0;
+}
+
+.mouldSelectorContainer {
+    position: absolute;
+    top: 50px;
+    left: 0px;
+    width: 200px;
+    height: calc(100% - 70px);
+    background-color: var(--primaryColor);
+    border-right: 1px solid var(--lightShadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: left;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    z-index: 5;
+    -webkit-user-drag: none;
+}
+
+.mouldSelectorContainer::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.BLibContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.BLibContainer p {
+    margin: 10px;
+    padding: 0;
+    font-size: 15px;
+    color: var(--textColor);
+    line-height: 20px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.BLibContainer img {
+    margin-right: 20px;
+    width: 16px;
+    height: 16px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.BLibMouldsContainer {
+    width: 200px;
+    height: calc(100% - 80px);
+    background-color: var(--primaryColor);
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: left;
+    z-index: 5;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.BLibMouldsContainer::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.BLibMouldsContent {
+    width: 100%;
+    height: 32px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.BLibMouldsContent p {
+    margin: 6px;
+    width: calc(100% - 50px);
+    padding: 0;
+    margin-left: 30px;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--textColor);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.MainThreadContainer {
+    width: 100%;
+    height: 40px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.MainThreadContainer p {
+    margin: 10px;
+    padding: 0;
+    font-size: 15px;
+    line-height: 20px;
+    color: var(--textColor);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .infoContainer {
@@ -226,8 +356,8 @@ body {
 }
 
 .selectorElement {
-    margin-left: 5%;
-    width: 95%;
+    margin-left: 0;
+    width: 100%;
     height: 40px;
     display: flex;
     flex-direction: column;
@@ -263,18 +393,22 @@ body {
 @keyframes moveup {
     from {
         top: 55px;
+        display: auto;
     }
     to {
         top: -180px;
+        display: none;
     }
 }
 
 @keyframes movedown {
     from {
         top: -180px;
+        display: none;
     }
     to {
         top: 55px;
+        display: auto;
     }
 }
 
