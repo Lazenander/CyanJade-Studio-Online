@@ -1,10 +1,11 @@
 :root {
-    --primaryColor: #272b29;
+    --primaryColor: #272b2b;
     --secondaryColor: #151816;
     --thirdColor: #2c9678;
-    --textColor: #707978;
-    --darkShadow: #151515;
-    --lightShadow: #121212;
+    --textColor: #869290;
+    --darkShadow: #121212;
+    --lightShadow: #202020;
+    --lightLight: #202020;
     --warningColor: #fb8b05;
     --busyColor: #058cfb;
     --errorColor: #c02c38;

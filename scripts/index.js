@@ -47,6 +47,7 @@ let navigatorType = 0;
 let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
+let thisLibraryNames = {};
 
 function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
@@ -910,13 +911,17 @@ window.addMould = () => {
     div.onmouseup = (event) => {
         console.log(thisMouldNum, event.button);
         if (event.button == 2) {
-            console.log("delete");
+            console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
+            delete thisLibrary["New_Mould_" + thisMouldNum];
+            delete thisLibraryNames["New_Mould_" + thisMouldNum];
         }
     }
     div.appendChild(p);
     BLibMouldsContainer.appendChild(div);
     thisLibrary.addNewMould("New_Mould_" + mouldNum);
+    thisLibrary.BlockMoulds["New_Mould_" + mouldNum].codeManager = new CodeManager();
+    thisLibrary["New_Mould_" + thisMouldNum] = "New_Mould_" + thisMouldNum;
     mouldNum += 1;
 }
 

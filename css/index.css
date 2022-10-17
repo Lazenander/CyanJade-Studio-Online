@@ -144,7 +144,7 @@ body {
     font-size: 18px;
 }
 
-.playgroundContainer {
+.playgroundContainerMainFlow {
     position: absolute;
     top: 50px;
     left: 200px;
@@ -157,9 +157,64 @@ body {
     -moz-user-select: none;
 }
 
-.playgroundContainer::-webkit-scrollbar {
+.playgroundContainerMainFlow::-webkit-scrollbar {
     width: 0;
     height: 0;
+}
+
+.playgroundContainerMould {
+    position: absolute;
+    top: 50px;
+    left: 200px;
+    width: calc(100% - 400px);
+    height: calc(100% - 70px);
+    background-color: var(--primaryColor);
+    overflow: scroll;
+    z-index: 0;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+.playgroundContainerMould::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.mouldInfoContainer {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 200px;
+    height: calc(100% - 70px);
+    background-color: var(--primaryColor);
+    border-left: 1px solid var(--lightShadow);
+    overflow: scroll;
+    z-index: 5;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+.mouldInfoContainer::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.mouldInfoSelector {
+    height: 40px;
+    width: 100%;
+}
+
+.mouldInfoSelector p {
+    margin: 10px;
+    padding: 0;
+    width: 100%;
+    font-size: 15px;
+    color: var(--textColor);
+    line-height: 20px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .mouldSelectorContainer {

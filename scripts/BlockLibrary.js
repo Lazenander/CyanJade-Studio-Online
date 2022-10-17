@@ -1,3 +1,4 @@
+import BlockMould from "./BlockMould.js";
 import DataStream from "./DataStream.js";
 import LanguageManager from "./language.js";
 

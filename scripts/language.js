@@ -83,6 +83,22 @@ export default class LanguageManager {
         "l_MainThreadContainer": {
             "Chinese": "主流程",
             "English": "Main Flow"
+        },
+        "l_mould_name": {
+            "Chinese": "模块代号",
+            "English": "Mould Name"
+        },
+        "l_mould_type": {
+            "Chinese": "模块类型",
+            "English": "Mould Type"
+        },
+        "l_mould_color": {
+            "Chinese": "模块颜色",
+            "English": "Mould Color"
+        },
+        "l_mould_c": {
+            "Chinese": "模块",
+            "English": "Mould Type"
         }
     };
     static currentLanguage = "English";

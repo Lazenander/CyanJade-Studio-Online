@@ -12,6 +12,7 @@ export default class BlockMould {
         this.logicExportNum = logicExportNum;
         this.dataImportNum = dataImportNum;
         this.dataExportNum = dataExportNum;
+        this.codeManager = null;
         this.forward = forward;
     }
 }
