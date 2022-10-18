@@ -26,6 +26,7 @@ const pblocks = document.getElementById("pblocks");
 const infoContainer = document.getElementById("infoContainer");
 const fileNameInput = document.getElementById("fileNameInput");
 const BLibMouldsContainer = document.getElementById("BLibMouldsContainer");
+const mouldInfoContainer = document.getElementById("mouldInfoContainer");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -48,6 +49,26 @@ let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
 let thisLibraryNames = {};
+let currentCodeGraph = 0;
+
+function changeCodeGraph(index) {
+    if (currentCodeGraph == index)
+        return;
+    console.log(index);
+    if (index == 0) {
+        playgroundContainer.classList.remove("playgroundContainerMould");
+        playgroundContainer.classList.add("playgroundContainerMainFlow");
+        mouldInfoContainer.classList.remove("display");
+        mouldInfoContainer.classList.add("notDisplay");
+    } else {
+        playgroundContainer.classList.remove("playgroundContainerMainFlow");
+        playgroundContainer.classList.add("playgroundContainerMould");
+        mouldInfoContainer.classList.remove("notDisplay");
+        mouldInfoContainer.classList.add("display");
+    }
+    //clearRender();
+    currentCodeGraph = index;
+}
 
 function renderLink(index1, port1, index2, port2, type) {
     let y1b = port1,
@@ -901,6 +922,10 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
     opBlockSelector.appendChild(div);
 }
 
+window.mainFlowClicked = () => {
+    changeCodeGraph(0);
+}
+
 window.addMould = () => {
     let div = document.createElement("div");
     div.classList.add("BLibMouldsContent");
@@ -909,12 +934,14 @@ window.addMould = () => {
     p.innerText = "New Mould " + mouldNum;
     let thisMouldNum = mouldNum;
     div.onmouseup = (event) => {
-        console.log(thisMouldNum, event.button);
         if (event.button == 2) {
             console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
             delete thisLibrary["New_Mould_" + thisMouldNum];
             delete thisLibraryNames["New_Mould_" + thisMouldNum];
+        } else {
+            changeCodeGraph(thisMouldNum);
+            console.log(thisMouldNum, event.button);
         }
     }
     div.appendChild(p);
