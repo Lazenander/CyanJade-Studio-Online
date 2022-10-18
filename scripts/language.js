@@ -96,9 +96,29 @@ export default class LanguageManager {
             "Chinese": "模块颜色",
             "English": "Mould Color"
         },
-        "l_mould_c": {
-            "Chinese": "模块",
-            "English": "Mould Type"
+        "l_mould_size": {
+            "Chinese": "模块大小",
+            "English": "Mould Size"
+        },
+        "l_mould_type_data": {
+            "Chinese": "数据模块",
+            "English": "Data"
+        },
+        "l_mould_type_logic": {
+            "Chinese": "逻辑模块",
+            "English": "Logic"
+        },
+        "l_mould_input": {
+            "Chinese": "输入变量",
+            "English": "Input Variables"
+        },
+        "l_mould_output": {
+            "Chinese": "输出变量",
+            "English": "Output Variables"
+        },
+        "l_mould_output_port": {
+            "Chinese": "输出节点",
+            "English": "Output Port"
         }
     };
     static currentLanguage = "English";

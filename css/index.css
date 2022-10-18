@@ -200,17 +200,68 @@ body {
 }
 
 .mouldInfoSelector {
-    height: 40px;
+    height: 35px;
     width: 100%;
 }
 
 .mouldInfoSelector p {
-    margin: 10px;
+    margin: 0;
+    margin-top: 5px;
+    margin-left: 10px;
     padding: 0;
-    width: 100%;
+    width: calc(100% - 10px);
     font-size: 15px;
     color: var(--textColor);
-    line-height: 20px;
+    line-height: 30px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.mouldInputSelector {
+    height: 35px;
+    width: 100%;
+}
+
+.mouldInputSelector input {
+    margin-top: 5px;
+    margin-left: 10px;
+    height: 24px;
+    width: calc(100% - 25px);
+    border: 1px solid var(--lightShadow);
+    background-color: var(--lightLight);
+    font-size: 13px;
+    font-family: "SHSCN-Regular";
+    color: var(--textColor);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.mouldInputSelectorChoice {
+    margin-top: 5px;
+    margin-left: 10px;
+    height: 24px;
+    width: calc(100% - 25px);
+    border: 1px solid var(--lightShadow);
+    background-color: var(--lightLight);
+    font-size: 13px;
+    color: var(--textColor);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.mouldInputSelectorChoice p {
+    margin: 0;
+    padding: 0;
+    margin-left: 2px;
+    font-size: 13px;
+    line-height: 24px;
+    color: var(--textColor);
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
