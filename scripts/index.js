@@ -424,7 +424,7 @@ function clearRender() {
         blockArea.removeChild(blockArea.children[1]);
 }
 
-function initCode() {
+function initCode(thisMouldNumber = 0) {
     blockLibDisplay = "disabled";
     chosedBlockMould = null;
     chosedBlockIndex = null;
@@ -442,9 +442,15 @@ function initCode() {
     fileName = "Untitled";
     fileNameInput.setAttribute("value", fileName);
     clearRender();
-    CodeManager.instance.graph = new Graph();
-    CodeManager.instance.blockCoords = {};
-    pblocks.innerText = CodeManager.instance.graph.size;
+    if(codeManagerNumber == 0) {
+        CodeManager.instance.graph = new Graph();
+        CodeManager.instance.blockCoords = {};
+        pblocks.innerText = CodeManager.instance.graph.size;
+    }else{
+        thisLibrary.BlockMoulds[thisMouldNumber].codeManager.graph = new Graph();
+        thisLibrary.BlockMoulds[thisMouldNumber].codeManager.blockCoords = {};
+        pblocks.innerText = thisLibrary.BlockMoulds[thisMouldNumber].codeManager.instance.graph.size;
+    }
 }
 
 function renderAll() {
@@ -937,8 +943,8 @@ window.addMould = () => {
         if (event.button == 2) {
             console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
-            delete thisLibrary["New_Mould_" + thisMouldNum];
-            delete thisLibraryNames["New_Mould_" + thisMouldNum];
+            delete thisLibrary[thisMouldNum];
+            delete thisLibraryNames[thisMouldNum];
         } else {
             changeCodeGraph(thisMouldNum);
             console.log(thisMouldNum, event.button);
@@ -946,9 +952,9 @@ window.addMould = () => {
     }
     div.appendChild(p);
     BLibMouldsContainer.appendChild(div);
-    thisLibrary.addNewMould("New_Mould_" + mouldNum);
-    thisLibrary.BlockMoulds["New_Mould_" + mouldNum].codeManager = new CodeManager();
-    thisLibrary["New_Mould_" + thisMouldNum] = "New_Mould_" + thisMouldNum;
+    thisLibrary.addNewMould(mouldNum);
+    thisLibrary.BlockMoulds[mouldNum].codeManager = new CodeManager();
+    thisLibrary[thisMouldNum] = "New_Mould_" + thisMouldNum;
     mouldNum += 1;
 }
 
