@@ -27,6 +27,15 @@ const infoContainer = document.getElementById("infoContainer");
 const fileNameInput = document.getElementById("fileNameInput");
 const BLibMouldsContainer = document.getElementById("BLibMouldsContainer");
 const mouldInfoContainer = document.getElementById("mouldInfoContainer");
+const mouldName = document.getElementById("mouldName");
+const mouldTypeData = document.getElementById("mouldTypeData");
+const mouldTypeLogic = document.getElementById("mouldTypeLogic");
+const mouldColor = document.getElementById("mouldColor");
+const mouldHeight = document.getElementById("mouldHeight");
+const mouldWidth = document.getElementById("mouldWidth");
+const mouldInputs = document.getElementById("mouldInputs");
+const mouldOutputs = document.getElementById("mouldOutputs");
+const mouldOutputPort = document.getElementById("mouldOutputPort");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -48,13 +57,46 @@ let navigatorType = 0;
 let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
-let thisLibraryNames = {};
 let currentCodeGraph = 0;
+
+window.onMouldNameChange = () => {
+    thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage] = mouldName.value;
+    document.getElementById("userdefmould_" + currentCodeGraph).innerText = mouldName.value;
+}
+
+window.onMouldColorChange = () => {
+    thisLibrary.color = mouldColor.value;
+}
+
+window.onMouldWidthChange = () => {
+    thisLibrary.BlockMoulds[currentCodeGraph].size.width = parseInt(mouldWidth.value);
+}
+
+window.onMouldHeightChange = () => {
+    thisLibrary.BlockMoulds[currentCodeGraph].size.height = parseInt(mouldHeight.value);
+}
+
+window.onMouldInputsChange = () => {
+    let inputStrs = mouldInputs.value.split(",");
+    for (let i = 0; i < inputStrs.length; i++)
+        inputStrs[i] = inputStrs[i].replace(" ", "");
+    thisLibrary.BlockMoulds[currentCodeGraph].codeManager.inputVariableNames = inputStrs;
+    console.log(inputStrs);
+}
+
+window.onMouldOutputsChange = () => {
+    let outputStrs = mouldOutputs.value.split(",");
+    for (let i = 0; i < outputStrs.length; i++)
+        outputStrs[i] = outputStrs[i].replace(" ", "");
+    thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputVariableNames = outputStrs;
+    console.log(outputStrs);
+}
 
 function changeCodeGraph(index) {
     if (currentCodeGraph == index)
         return;
     console.log(index);
+    currentCodeGraph = index;
     if (index == 0) {
         playgroundContainer.classList.remove("playgroundContainerMould");
         playgroundContainer.classList.add("playgroundContainerMainFlow");
@@ -65,9 +107,38 @@ function changeCodeGraph(index) {
         playgroundContainer.classList.add("playgroundContainerMould");
         mouldInfoContainer.classList.remove("notDisplay");
         mouldInfoContainer.classList.add("display");
+        mouldName.value = thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage];
+        mouldColor.value = thisLibrary.color;
+        if (thisLibrary.BlockMoulds[currentCodeGraph].type == "userDefData") {
+            mouldTypeLogic.classList.remove("display");
+            mouldTypeLogic.classList.add("notDisplay");
+            mouldTypeData.classList.remove("notDisplay");
+            mouldTypeData.classList.add("display");
+        } else {
+            mouldTypeData.classList.remove("display");
+            mouldTypeData.classList.add("notDisplay");
+            mouldTypeLogic.classList.remove("notDisplay");
+            mouldTypeLogic.classList.add("display");
+        }
+        mouldWidth.value = thisLibrary.BlockMoulds[currentCodeGraph].size.width;
+        mouldHeight.value = thisLibrary.BlockMoulds[currentCodeGraph].size.height;
+        let inputStr = "";
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.inputVariableNames.length; i++) {
+            if (i != 0)
+                inputStr += ", ";
+            inputStr += thisLibrary.BlockMoulds[currentCodeGraph].codeManager.inputVariableNames[i];
+        }
+        mouldInputs.value = inputStr;
+        let outputStr = "";
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputVariableNames.length; i++) {
+            if (i != 0)
+                outputStr += ", ";
+            outputStr += thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputVariableNames[i];
+        }
+        mouldOutputs.value = outputStr;
+        mouldOutputPort.value = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputPort;
     }
     //clearRender();
-    currentCodeGraph = index;
 }
 
 function renderLink(index1, port1, index2, port2, type) {
@@ -424,7 +495,7 @@ function clearRender() {
         blockArea.removeChild(blockArea.children[1]);
 }
 
-function initCode(thisMouldNumber = 0) {
+function initCode() {
     blockLibDisplay = "disabled";
     chosedBlockMould = null;
     chosedBlockIndex = null;
@@ -440,20 +511,18 @@ function initCode(thisMouldNumber = 0) {
     };
     isCodeRunning = false;
     fileName = "Untitled";
+    mouldNum = 1;
+    thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
+    currentCodeGraph = 0;
     fileNameInput.setAttribute("value", fileName);
     clearRender();
-    if(codeManagerNumber == 0) {
-        CodeManager.instance.graph = new Graph();
-        CodeManager.instance.blockCoords = {};
-        pblocks.innerText = CodeManager.instance.graph.size;
-    }else{
-        thisLibrary.BlockMoulds[thisMouldNumber].codeManager.graph = new Graph();
-        thisLibrary.BlockMoulds[thisMouldNumber].codeManager.blockCoords = {};
-        pblocks.innerText = thisLibrary.BlockMoulds[thisMouldNumber].codeManager.instance.graph.size;
-    }
+    CodeManager.instance.graph = new Graph();
+    CodeManager.instance.blockCoords = {};
+    pblocks.innerText = CodeManager.instance.graph.size;
+    changeCodeGraph(0);
 }
 
-function renderAll() {
+function renderMainFlow() {
     for (let i in CodeManager.instance.graph.blocks) {
         let numI = parseInt(i);
         let block = CodeManager.instance.graph.blocks[i];
@@ -498,6 +567,24 @@ function deactivate() {
             break;
     }
     activated = "disabled";
+}
+
+window.changeMouldType = () => {
+    if (currentCodeGraph == 0)
+        return;
+    if (thisLibrary.BlockMoulds[currentCodeGraph].type == "userDefData") {
+        thisLibrary.BlockMoulds[currentCodeGraph].type = "userDefLogic";
+        mouldTypeData.classList.remove("display");
+        mouldTypeData.classList.add("notDisplay");
+        mouldTypeLogic.classList.remove("notDisplay");
+        mouldTypeLogic.classList.add("display");
+    } else {
+        thisLibrary.BlockMoulds[currentCodeGraph].type = "userDefData";
+        mouldTypeLogic.classList.remove("display");
+        mouldTypeLogic.classList.add("notDisplay");
+        mouldTypeData.classList.remove("notDisplay");
+        mouldTypeData.classList.add("display");
+    }
 }
 
 window.contentElementFileClicked = () => {
@@ -593,7 +680,7 @@ window.openFileClicked = () => {
 
             obj2graph(res);
 
-            renderAll();
+            renderMainFlow();
 
             for (let i in CodeManager.instance.graph.blocks) {
                 let numI = parseInt(i);
@@ -937,6 +1024,7 @@ window.addMould = () => {
     div.classList.add("BLibMouldsContent");
     div.classList.add("contentHover");
     let p = document.createElement("p");
+    p.id = "userdefmould_" + mouldNum;
     p.innerText = "New Mould " + mouldNum;
     let thisMouldNum = mouldNum;
     div.onmouseup = (event) => {
@@ -944,7 +1032,6 @@ window.addMould = () => {
             console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
             delete thisLibrary[thisMouldNum];
-            delete thisLibraryNames[thisMouldNum];
         } else {
             changeCodeGraph(thisMouldNum);
             console.log(thisMouldNum, event.button);
@@ -952,9 +1039,8 @@ window.addMould = () => {
     }
     div.appendChild(p);
     BLibMouldsContainer.appendChild(div);
-    thisLibrary.addNewMould(mouldNum);
-    thisLibrary.BlockMoulds[mouldNum].codeManager = new CodeManager();
-    thisLibrary[thisMouldNum] = "New_Mould_" + thisMouldNum;
+    thisLibrary.addNewMould(thisMouldNum);
+    thisLibrary.BlockMoulds[thisMouldNum].codeManager = new CodeManager();
     mouldNum += 1;
 }
 

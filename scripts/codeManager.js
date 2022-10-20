@@ -1,9 +1,13 @@
 import Graph from "./Graph.js";
 
 export default class CodeManager {
-    static instance = new CodeManager();
+    static instance = new CodeManager("mainFlow");
 
-    constructor() {
+    constructor(type = "mould") {
+        this.type = type;
+        this.inputVariableNames = ["a", "b"];
+        this.outputVariableNames = ["c", "d"];
+        this.outputPort = 0;
         this.graph = new Graph();
         this.blockCoords = {};
     }

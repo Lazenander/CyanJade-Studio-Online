@@ -93,8 +93,8 @@ export default class LanguageManager {
             "English": "Mould Type"
         },
         "l_mould_color": {
-            "Chinese": "模块颜色",
-            "English": "Mould Color"
+            "Chinese": "模块库颜色",
+            "English": "MouldLib Color"
         },
         "l_mould_size": {
             "Chinese": "模块大小",

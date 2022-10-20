@@ -91,49 +91,49 @@
                 <p name="l_mould_name"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="Name" />
+                <input id="mouldName" type="text" placeholder="e.g. Add" onchange="onMouldNameChange()" />
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_type"></p>
             </div>
-            <div class="mouldInputSelector">
+            <div class="mouldInputSelector" onclick="changeMouldType()">
                 <div class="mouldInputSelectorChoice contentHover">
-                    <p name="l_mould_type_data" class="display"></p>
-                    <p name="l_mould_type_logic" class="notDisplay"></p>
+                    <p id="mouldTypeData" name="l_mould_type_data" class="display"></p>
+                    <p id="mouldTypeLogic" name="l_mould_type_logic" class="notDisplay"></p>
                 </div>
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_color"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="e.g. #2c9678" />
+                <input id="mouldColor" type="text" placeholder="e.g. #2c9678" onchange="onMouldColorChange()" />
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_size"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="Height" />
+                <input id="mouldWidth" type="text" placeholder="Width: e.g. 1" onchange="onMouldWidthChange()" />
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="Width" />
+                <input id="mouldHeight" type="text" placeholder="Height: e.g. 2" onchange="onMouldHeightChange()" />
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_input"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="e.g. a, b, c" />
+                <input id="mouldInputs" type="text" placeholder="e.g. a, b, c" onchange="onMouldInputsChange()" />
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_output"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="e.g. a, b, c" />
+                <input id="mouldOutputs" type="text" placeholder="e.g. a, b, c" onchange="onMouldOutputsChange()" />
             </div>
             <div class="mouldInfoSelector">
                 <p name="l_mould_output_port"></p>
             </div>
             <div class="mouldInputSelector">
-                <input type="text" placeholder="e.g. a" />
+                <input id="mouldOutputPort" type="text" placeholder="e.g. a" />
             </div>
         </div>
         <div id="infoContainer" class="infoContainer">
