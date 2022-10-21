@@ -1144,104 +1144,203 @@ window.changeLanguage = () => {
 
 window.dragAreaDragDetected = (event) => {
     event.preventDefault();
-    if (shadowActivated == false) {
-        shadowBlock.classList.remove("notDisplay");
-        shadowBlock.classList.add("display");
-        if (dragType == "mould") {
-            shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
-            shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
-        } else {
-            shadowBlock.style.width = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
-            shadowBlock.style.height = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
+    if (currentCodeGraph == 0) {
+        if (shadowActivated == false) {
+            shadowBlock.classList.remove("notDisplay");
+            shadowBlock.classList.add("display");
+            if (dragType == "mould") {
+                shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
+                shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+            } else {
+                shadowBlock.style.width = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
+                shadowBlock.style.height = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
+            }
+            shadowActivated = true;
         }
-        shadowActivated = true;
+        let calC = { x: -1, y: -1 };
+        if (dragType == "mould")
+            calC = CodeManager.instance.calCoor(
+                px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
+                px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
+                chosedBlockMould, canvasSize);
+        else
+            calC = CodeManager.instance.calCoor(
+                px2grid(event.offsetX) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
+                px2grid(event.offsetY) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
+                CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
+        resX = calC.x;
+        resY = calC.y;
+        shadowBlock.style.left = resX * 50 + 25 + "px";
+        shadowBlock.style.top = resY * 50 + 25 + "px";
+    } else {
+        if (shadowActivated == false) {
+            shadowBlock.classList.remove("notDisplay");
+            shadowBlock.classList.add("display");
+            if (dragType == "mould") {
+                shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
+                shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
+            } else {
+                shadowBlock.style.width = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
+                shadowBlock.style.height = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
+            }
+            shadowActivated = true;
+        }
+        let calC = { x: -1, y: -1 };
+        if (dragType == "mould")
+            calC = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.calCoor(
+                px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
+                px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
+                chosedBlockMould, canvasSize);
+        else
+            calC = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.calCoor(
+                px2grid(event.offsetX) - Math.round(thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
+                px2grid(event.offsetY) - Math.round(thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
+                thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
+        resX = calC.x;
+        resY = calC.y;
+        shadowBlock.style.left = resX * 50 + 25 + "px";
+        shadowBlock.style.top = resY * 50 + 25 + "px";
     }
-    let calC = { x: -1, y: -1 };
-    if (dragType == "mould")
-        calC = CodeManager.instance.calCoor(
-            px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
-            px2grid(event.offsetY) - Math.round(chosedBlockMould.size.height / 2) - 1,
-            chosedBlockMould, canvasSize);
-    else
-        calC = CodeManager.instance.calCoor(
-            px2grid(event.offsetX) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
-            px2grid(event.offsetY) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
-            CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
-    resX = calC.x;
-    resY = calC.y;
-    shadowBlock.style.left = resX * 50 + 25 + "px";
-    shadowBlock.style.top = resY * 50 + 25 + "px";
 }
 
 window.dragAreaDropDetected = (event) => {
-    console.log(100);
-    if (dragType == "mould") {
-        let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
-        blockArea.appendChild(renderBlock(newIndex));
-        pblocks.innerText = CodeManager.instance.graph.size;
+    if (currentCodeGraph == 0) {
+        if (dragType == "mould") {
+            let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
+            blockArea.appendChild(renderBlock(newIndex));
+            pblocks.innerText = CodeManager.instance.graph.size;
+        } else {
+            let tmpblock = document.getElementById("b" + chosedBlockIndex);
+            CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
+            CodeManager.instance.graph.blocks[chosedBlockIndex].y = resY;
+            tmpblock.style.left = resX * 50 + 25 + "px";
+            tmpblock.style.top = resY * 50 + 25 + "px";
+            tmpblock.style.zIndex = 5;
+            CodeManager.instance.blockCoords[chosedBlockIndex] = {
+                x1: resX,
+                x2: resX + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
+                y1: resY,
+                y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
+            };
+            for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
+                    let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
+                        "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+                    blockArea.removeChild(link);
+                    renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
+                        CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
+                        chosedBlockIndex, i, "logic");
+                }
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
+                    let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                        "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
+                        "_" + "logic");
+                    blockArea.removeChild(link);
+                    renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
+                        CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
+                }
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
+                if (CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
+                    continue;
+                let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
+                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
+                    "_" + chosedBlockIndex + "_" + i + "_" + "data");
+                blockArea.removeChild(link);
+                renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
+                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
+                    chosedBlockIndex, i, "data");
+            }
+            for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
+                for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
+                    let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                        "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
+                        "_" + "data");
+                    blockArea.removeChild(link);
+                    renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
+                        CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
+                }
+            }
+        }
+        dragDivArea.classList.remove("display");
+        dragDivArea.classList.add("notDisplay");
+        shadowBlock.classList.remove("display");
+        shadowBlock.classList.add("notDisplay");
+        shadowActivated = false;
     } else {
-        let tmpblock = document.getElementById("b" + chosedBlockIndex);
-        CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
-        CodeManager.instance.graph.blocks[chosedBlockIndex].y = resY;
-        tmpblock.style.left = resX * 50 + 25 + "px";
-        tmpblock.style.top = resY * 50 + 25 + "px";
-        tmpblock.style.zIndex = 5;
-        CodeManager.instance.blockCoords[chosedBlockIndex] = {
-            x1: resX,
-            x2: resX + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
-            y1: resY,
-            y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
-        };
-        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
-            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
-                let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
-                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
-                    "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+        if (dragType == "mould") {
+            let newIndex = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.addBlock(chosedBlockMould, resX, resY);
+            blockArea.appendChild(renderBlock(newIndex));
+            pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
+        } else {
+            let tmpblock = document.getElementById("b" + chosedBlockIndex);
+            thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].x = resX;
+            thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].y = resY;
+            tmpblock.style.left = resX * 50 + 25 + "px";
+            tmpblock.style.top = resY * 50 + 25 + "px";
+            tmpblock.style.zIndex = 5;
+            thisLibrary.BlockMoulds[currentCodeGraph].codeManager.blockCoords[chosedBlockIndex] = {
+                x1: resX,
+                x2: resX + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
+                y1: resY,
+                y2: resY + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
+            };
+            for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
+                for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
+                    let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicImports[i][j] +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
+                        "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+                    blockArea.removeChild(link);
+                    renderLink(thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicImports[i][j],
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
+                        chosedBlockIndex, i, "logic");
+                }
+            }
+            for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
+                for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
+                    let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicExports[i][j] +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
+                        "_" + "logic");
+                    blockArea.removeChild(link);
+                    renderLink(chosedBlockIndex, i, thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicExports[i][j],
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
+                }
+            }
+            for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
+                if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
+                    continue;
+                let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataImports[i] +
+                    "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
+                    "_" + chosedBlockIndex + "_" + i + "_" + "data");
                 blockArea.removeChild(link);
-                renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
-                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
-                    chosedBlockIndex, i, "logic");
+                renderLink(thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataImports[i],
+                    thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
+                    chosedBlockIndex, i, "data");
+            }
+            for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
+                for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
+                    let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataExports[i][j] +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
+                        "_" + "data");
+                    blockArea.removeChild(link);
+                    renderLink(chosedBlockIndex, i, thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataExports[i][j],
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
+                }
             }
         }
-        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
-            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
-                let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
-                    "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
-                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
-                    "_" + "logic");
-                blockArea.removeChild(link);
-                renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
-                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
-            }
-        }
-        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
-            if (CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
-                continue;
-            let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
-                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
-                "_" + chosedBlockIndex + "_" + i + "_" + "data");
-            blockArea.removeChild(link);
-            renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
-                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
-                chosedBlockIndex, i, "data");
-        }
-        for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
-            for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
-                let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
-                    "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
-                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
-                    "_" + "data");
-                blockArea.removeChild(link);
-                renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
-                    CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
-            }
-        }
+        dragDivArea.classList.remove("display");
+        dragDivArea.classList.add("notDisplay");
+        shadowBlock.classList.remove("display");
+        shadowBlock.classList.add("notDisplay");
+        shadowActivated = false;
     }
-    dragDivArea.classList.remove("display");
-    dragDivArea.classList.add("notDisplay");
-    shadowBlock.classList.remove("display");
-    shadowBlock.classList.add("notDisplay");
-    shadowActivated = false;
 }
 
 for (let blockLib in BlockLibraryManager.instance.libraries) {
