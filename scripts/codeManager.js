@@ -5,8 +5,8 @@ export default class CodeManager {
 
     constructor(type = "mould") {
         this.type = type;
-        this.inputVariableNames = ["a", "b"];
-        this.outputVariableNames = ["c", "d"];
+        this.inputVariableNames = [];
+        this.outputVariableNames = [];
         this.outputPort = 0;
         this.graph = new Graph();
         this.blockCoords = {};

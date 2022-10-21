@@ -114,7 +114,7 @@ export default class LanguageManager {
         },
         "l_mould_output": {
             "Chinese": "输出变量",
-            "English": "Output Variables"
+            "English": "Output Variable"
         },
         "l_mould_output_port": {
             "Chinese": "输出节点",
