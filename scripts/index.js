@@ -58,6 +58,7 @@ let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
 let currentCodeGraph = 0;
+let inputBuffer = { 0: {} };
 
 window.onMouldNameChange = () => {
     thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage] = mouldName.value;
@@ -95,14 +96,27 @@ window.onMouldOutputsChange = () => {
 function changeCodeGraph(index) {
     if (currentCodeGraph == index)
         return;
-    console.log(index);
-    currentCodeGraph = index;
     if (index == 0) {
         playgroundContainer.classList.remove("playgroundContainerMould");
         playgroundContainer.classList.add("playgroundContainerMainFlow");
         mouldInfoContainer.classList.remove("display");
         mouldInfoContainer.classList.add("notDisplay");
+        inputBuffer[currentCodeGraph] = {};
+        for (let i in thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks) {
+            let block = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[i];
+            if (block.blockMould.type == "input" || block.blockMould.type == "assign")
+                inputBuffer[currentCodeGraph][i] = document.getElementById("b" + i).lastChild.firstChild.value;
+        }
+        pblocks.innerText = CodeManager.instance.graph.size;
+        currentCodeGraph = index;
     } else {
+        inputBuffer[currentCodeGraph] = {};
+        for (let i in CodeManager.instance.graph.blocks) {
+            let block = CodeManager.instance.graph.blocks[i];
+            if (block.blockMould.type == "input" || block.blockMould.type == "assign")
+                inputBuffer[currentCodeGraph][i] = document.getElementById("b" + i).lastChild.firstChild.value;
+        }
+        currentCodeGraph = index;
         playgroundContainer.classList.remove("playgroundContainerMainFlow");
         playgroundContainer.classList.add("playgroundContainerMould");
         mouldInfoContainer.classList.remove("notDisplay");
@@ -135,359 +149,714 @@ function changeCodeGraph(index) {
                 outputStr += ", ";
             outputStr += thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputVariableNames[i];
         }
+        pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
         mouldOutputs.value = outputStr;
         mouldOutputPort.value = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputPort;
     }
-    //clearRender();
+    clearRender();
+    renderCodeGraph();
 }
 
 function renderLink(index1, port1, index2, port2, type) {
-    let y1b = port1,
-        y2b = port2;
-    if (type == "data") {
-        y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
-        y2b += CodeManager.instance.graph.blocks[index2].blockMould.logicImportNum;
-    }
-    let x0, x1, y0, y1;
-    let linkType = 0,
-        linkY = 0;
-    x0 = (CodeManager.instance.graph.blocks[index1].x + CodeManager.instance.graph.blocks[index1].blockMould.size.width) * 50 + 75;
-    y0 = (CodeManager.instance.graph.blocks[index1].y + y1b) * 50 + 75;
-    x1 = (CodeManager.instance.graph.blocks[index2].x) * 50 + 25;
-    y1 = (CodeManager.instance.graph.blocks[index2].y + y2b) * 50 + 75;
-    if (x0 > x1) {
-        let tmp = x0;
-        x0 = x1;
-        x1 = tmp;
-        linkType = 1;
-    }
-    if (y0 > y1) {
-        let tmp = y0;
-        y0 = y1;
-        y1 = tmp;
-        linkY = 1;
-    }
-    x0 -= 27.5;
-    x1 += 27.5;
-    y0 -= 2.5;
-    y1 += 2.5;
-    let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-    svg.id = "l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type;
-    svg.classList.add("connection");
-    svg.style.left = x0 + "px";
-    svg.style.top = y0 + "px";
-    svg.style.width = x1 - x0 + "px";
-    svg.style.height = y1 - y0 + "px";
-    if (linkType == 0) {
-        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-        let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
-        pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
-        path.setAttribute("d", pathstr);
-        path.setAttribute("stroke", "var(--lightShadow)");
-        path.setAttribute("stroke-width", "5px");
-        path.setAttribute("fill", "none");
-        path.onmouseup = (event) => {
-            if (event.button == 2) {
-                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
-                blockArea.removeChild(delsvg);
-                if (type == "logic")
-                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
-                else
-                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
-            }
+    if (currentCodeGraph == 0) {
+        let y1b = port1,
+            y2b = port2;
+        if (type == "data") {
+            y1b += CodeManager.instance.graph.blocks[index1].blockMould.logicExportNum;
+            y2b += CodeManager.instance.graph.blocks[index2].blockMould.logicImportNum;
         }
-        svg.appendChild(path);
+        let x0, x1, y0, y1;
+        let linkType = 0,
+            linkY = 0;
+        x0 = (CodeManager.instance.graph.blocks[index1].x + CodeManager.instance.graph.blocks[index1].blockMould.size.width) * 50 + 75;
+        y0 = (CodeManager.instance.graph.blocks[index1].y + y1b) * 50 + 75;
+        x1 = (CodeManager.instance.graph.blocks[index2].x) * 50 + 25;
+        y1 = (CodeManager.instance.graph.blocks[index2].y + y2b) * 50 + 75;
+        if (x0 > x1) {
+            let tmp = x0;
+            x0 = x1;
+            x1 = tmp;
+            linkType = 1;
+        }
+        if (y0 > y1) {
+            let tmp = y0;
+            y0 = y1;
+            y1 = tmp;
+            linkY = 1;
+        }
+        x0 -= 27.5;
+        x1 += 27.5;
+        y0 -= 2.5;
+        y1 += 2.5;
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+        svg.id = "l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type;
+        svg.classList.add("connection");
+        svg.style.left = x0 + "px";
+        svg.style.top = y0 + "px";
+        svg.style.width = x1 - x0 + "px";
+        svg.style.height = y1 - y0 + "px";
+        if (linkType == 0) {
+            let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
+            path.setAttribute("d", pathstr);
+            path.setAttribute("stroke", "var(--lightShadow)");
+            path.setAttribute("stroke-width", "5px");
+            path.setAttribute("fill", "none");
+            path.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path);
+        } else {
+            let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr1 = "M 27.5 " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr1 += " C " + 2.5 + " " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr1 += " " + 2.5 + " " + (y1 - y0) / 2;
+            pathstr1 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+            path1.setAttribute("d", pathstr1);
+            path1.setAttribute("stroke", "var(--lightShadow)");
+            path1.setAttribute("stroke-width", "5px")
+            path1.setAttribute("fill", "none");
+            path1.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path1);
+            let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr2 = "M " + (x1 - x0 - 27.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+            pathstr2 += " C " + (x1 - x0 - 2.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+            pathstr2 += " " + (x1 - x0 - 2.5) + " " + (y1 - y0) / 2;
+            pathstr2 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+            path2.setAttribute("d", pathstr2);
+            path2.setAttribute("stroke", "var(--lightShadow)");
+            path2.setAttribute("stroke-width", "5px")
+            path2.setAttribute("fill", "none");
+            path2.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path2);
+        }
+        blockArea.appendChild(svg);
     } else {
-        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-        let pathstr1 = "M 27.5 " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
-        pathstr1 += " C " + 2.5 + " " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
-        pathstr1 += " " + 2.5 + " " + (y1 - y0) / 2;
-        pathstr1 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
-        path1.setAttribute("d", pathstr1);
-        path1.setAttribute("stroke", "var(--lightShadow)");
-        path1.setAttribute("stroke-width", "5px")
-        path1.setAttribute("fill", "none");
-        path1.onmouseup = (event) => {
-            if (event.button == 2) {
-                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
-                blockArea.removeChild(delsvg);
-                if (type == "logic")
-                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
-                else
-                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
-            }
+        let y1b = port1,
+            y2b = port2;
+        if (type == "data") {
+            y1b += thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index1].blockMould.logicExportNum;
+            y2b += thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index2].blockMould.logicImportNum;
         }
-        svg.appendChild(path1);
-        let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-        let pathstr2 = "M " + (x1 - x0 - 27.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
-        pathstr2 += " C " + (x1 - x0 - 2.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
-        pathstr2 += " " + (x1 - x0 - 2.5) + " " + (y1 - y0) / 2;
-        pathstr2 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
-        path2.setAttribute("d", pathstr2);
-        path2.setAttribute("stroke", "var(--lightShadow)");
-        path2.setAttribute("stroke-width", "5px")
-        path2.setAttribute("fill", "none");
-        path2.onmouseup = (event) => {
-            if (event.button == 2) {
-                let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
-                blockArea.removeChild(delsvg);
-                if (type == "logic")
-                    CodeManager.instance.graph.delLogicConnection(index1, port1, index2, port2);
-                else
-                    CodeManager.instance.graph.delDataConnection(index1, port1, index2, port2);
-            }
+        let x0, x1, y0, y1;
+        let linkType = 0,
+            linkY = 0;
+        x0 = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index1].x + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index1].blockMould.size.width) * 50 + 75;
+        y0 = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index1].y + y1b) * 50 + 75;
+        x1 = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index2].x) * 50 + 25;
+        y1 = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index2].y + y2b) * 50 + 75;
+        if (x0 > x1) {
+            let tmp = x0;
+            x0 = x1;
+            x1 = tmp;
+            linkType = 1;
         }
-        svg.appendChild(path2);
+        if (y0 > y1) {
+            let tmp = y0;
+            y0 = y1;
+            y1 = tmp;
+            linkY = 1;
+        }
+        x0 -= 27.5;
+        x1 += 27.5;
+        y0 -= 2.5;
+        y1 += 2.5;
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+        svg.id = "l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type;
+        svg.classList.add("connection");
+        svg.style.left = x0 + "px";
+        svg.style.top = y0 + "px";
+        svg.style.width = x1 - x0 + "px";
+        svg.style.height = y1 - y0 + "px";
+        if (linkType == 0) {
+            let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr = "M 27.5 " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr += " C " + ((x1 - x0) / 2) + " " + (linkY == 0 ? 2.5 : ((y1 - y0) - 2.5)) + " " + ((x1 - x0) / 2) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5) + " " + (x1 - x0 - 27.5) + " " + (linkY == 0 ? ((y1 - y0) - 2.5) : 2.5);
+            path.setAttribute("d", pathstr);
+            path.setAttribute("stroke", "var(--lightShadow)");
+            path.setAttribute("stroke-width", "5px");
+            path.setAttribute("fill", "none");
+            path.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path);
+        } else {
+            let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr1 = "M 27.5 " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr1 += " C " + 2.5 + " " + (linkY == 1 ? 2.5 : ((y1 - y0) - 2.5));
+            pathstr1 += " " + 2.5 + " " + (y1 - y0) / 2;
+            pathstr1 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+            path1.setAttribute("d", pathstr1);
+            path1.setAttribute("stroke", "var(--lightShadow)");
+            path1.setAttribute("stroke-width", "5px")
+            path1.setAttribute("fill", "none");
+            path1.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path1);
+            let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            let pathstr2 = "M " + (x1 - x0 - 27.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+            pathstr2 += " C " + (x1 - x0 - 2.5) + " " + (linkY == 1 ? ((y1 - y0) - 2.5) : 2.5);
+            pathstr2 += " " + (x1 - x0 - 2.5) + " " + (y1 - y0) / 2;
+            pathstr2 += " " + ((x1 - x0) / 2) + " " + (y1 - y0) / 2;
+            path2.setAttribute("d", pathstr2);
+            path2.setAttribute("stroke", "var(--lightShadow)");
+            path2.setAttribute("stroke-width", "5px")
+            path2.setAttribute("fill", "none");
+            path2.onmouseup = (event) => {
+                if (event.button == 2) {
+                    let delsvg = document.getElementById("l" + index1 + "_" + port1 + "_" + index2 + "_" + port2 + "_" + type);
+                    blockArea.removeChild(delsvg);
+                    if (type == "logic")
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delLogicConnection(index1, port1, index2, port2);
+                    else
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.delDataConnection(index1, port1, index2, port2);
+                }
+            }
+            svg.appendChild(path2);
+        }
+        blockArea.appendChild(svg);
     }
-    blockArea.appendChild(svg);
 }
 
 function renderBlock(index) {
-    let block = CodeManager.instance.graph.blocks[index];
-    let div = document.createElement('div');
-    div.id = "b" + index;
-    div.classList.add("block");
-    div.draggable = true;
-    div.ondragstart = () => {
-        dragType = "block";
-        let tmpblock = document.getElementById("b" + index);
-        tmpblock.style.zIndex = 20;
-        dragDivArea.classList.remove("notDisplay");
-        dragDivArea.classList.add("display");
-        chosedBlockIndex = index;
-    }
-    div.onmouseup = (event) => {
-        if (event.button == 2) {
+    if (currentCodeGraph == 0) {
+        let block = CodeManager.instance.graph.blocks[index];
+        let div = document.createElement('div');
+        div.id = "b" + index;
+        div.classList.add("block");
+        div.draggable = true;
+        div.ondragstart = () => {
+            dragType = "block";
             let tmpblock = document.getElementById("b" + index);
-            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
-                for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicImports[i].length; j++) {
-                    let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
-                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
-                        "_" + index + "_" + i + "_" + "logic");
+            tmpblock.style.zIndex = 20;
+            dragDivArea.classList.remove("notDisplay");
+            dragDivArea.classList.add("display");
+            chosedBlockIndex = index;
+        }
+        div.onmouseup = (event) => {
+            if (event.button == 2) {
+                let tmpblock = document.getElementById("b" + index);
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicImports[i].length; j++) {
+                        let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                            "_" + index + "_" + i + "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                            "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
+                    if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
+                        continue;
+                    let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                        "_" + index + "_" + i + "_" + "data");
                     blockArea.removeChild(link);
                 }
-            }
-            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
-                for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicExports[i].length; j++) {
-                    let link = document.getElementById("l" + index + "_" + i +
-                        "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
-                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
-                        "_" + "logic");
-                    blockArea.removeChild(link);
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].dataExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                            "_" + "data");
+                        blockArea.removeChild(link);
+                    }
                 }
-            }
-            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
-                if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
-                    continue;
-                let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
-                    "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
-                    "_" + index + "_" + i + "_" + "data");
-                blockArea.removeChild(link);
-            }
-            for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
-                for (let j = 0; j < CodeManager.instance.graph.blocks[index].dataExports[i].length; j++) {
-                    let link = document.getElementById("l" + index + "_" + i +
-                        "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
-                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
-                        "_" + "data");
-                    blockArea.removeChild(link);
-                }
-            }
-            blockArea.removeChild(tmpblock);
-            CodeManager.instance.delBlock(index);
-            pblocks.innerText = CodeManager.instance.graph.size;
-        } else {
-            if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
-                var text = document.getElementById("out" + index).innerText;
-                navigator.clipboard.writeText(text);
-            }
-        }
-    }
-    div.ondragend = () => {
-        let tmpblock = document.getElementById("b" + index);
-        dragDivArea.classList.remove("display");
-        dragDivArea.classList.add("notDisplay");
-        shadowBlock.classList.remove("display");
-        shadowBlock.classList.add("notDisplay");
-        tmpblock.style.zIndex = 5;
-        shadowActivated = false;
-    }
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
-        let port = document.createElement("div");
-        port.style.left = "4px";
-        port.style.top = i * 50 + 25 + 17.5 + "px";
-        port.classList.add("logicport");
-        port.classList.add("logicportHover");
-        port.onclick = () => {
-            if (port1.type == "none") {
-                port1 = {
-                    type: "logicImport",
-                    blockIndex: index,
-                    portIndex: i
-                }
-            } else if (port1.type == "logicExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "logic")) {
-                    CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
-                    renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
-                }
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
-                }
+                blockArea.removeChild(tmpblock);
+                CodeManager.instance.delBlock(index);
+                pblocks.innerText = CodeManager.instance.graph.size;
             } else {
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
+                if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
+                    var text = document.getElementById("out" + index).innerText;
+                    navigator.clipboard.writeText(text);
                 }
             }
         }
-        div.appendChild(port);
-    }
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
-        let port = document.createElement("div");
-        port.style.left = "4px";
-        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 17.5 + "px";
-        port.classList.add("dataport");
-        port.classList.add("dataportHover");
-        port.onclick = () => {
-            if (port1.type == "none") {
-                port1 = {
-                    type: "dataImport",
-                    blockIndex: index,
-                    portIndex: i
-                }
-            } else if (port1.type == "dataExport") {
-                if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "data")) {
-                    CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
-                    renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
-                }
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
-                }
-            } else {
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
+        div.ondragend = () => {
+            let tmpblock = document.getElementById("b" + index);
+            dragDivArea.classList.remove("display");
+            dragDivArea.classList.add("notDisplay");
+            shadowBlock.classList.remove("display");
+            shadowBlock.classList.add("notDisplay");
+            tmpblock.style.zIndex = 5;
+            shadowActivated = false;
+        }
+        for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
+            let port = document.createElement("div");
+            port.style.left = "4px";
+            port.style.top = i * 50 + 25 + 17.5 + "px";
+            port.classList.add("logicport");
+            port.classList.add("logicportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "logicImport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "logicExport") {
+                    if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "logic")) {
+                        CodeManager.instance.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
+                        renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
                 }
             }
+            div.appendChild(port);
         }
-        div.appendChild(port);
-    }
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
-        let port = document.createElement("div");
-        port.style.right = "4px";
-        port.style.top = i * 50 + 25 + 17.5 + "px";
-        port.classList.add("logicport");
-        port.classList.add("logicportHover");
-        port.onclick = () => {
-            if (port1.type == "none") {
-                port1 = {
-                    type: "logicExport",
-                    blockIndex: index,
-                    portIndex: i
-                }
-            } else if (port1.type == "logicImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "logic")) {
-                    CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
-                    renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
-                }
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
-                }
-            } else {
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
+        for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
+            let port = document.createElement("div");
+            port.style.left = "4px";
+            port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 17.5 + "px";
+            port.classList.add("dataport");
+            port.classList.add("dataportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "dataImport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "dataExport") {
+                    if (CodeManager.instance.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "data")) {
+                        CodeManager.instance.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
+                        renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
                 }
             }
+            div.appendChild(port);
         }
-        div.appendChild(port);
-    }
-    for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
-        let port = document.createElement("div");
-        port.style.right = "4px";
-        port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 17.5 + "px";
-        port.classList.add("dataport");
-        port.classList.add("dataportHover");
-        port.onclick = () => {
-            if (port1.type == "none") {
-                port1 = {
-                    type: "dataExport",
-                    blockIndex: index,
-                    portIndex: i
-                }
-            } else if (port1.type == "dataImport") {
-                if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "data")) {
-                    CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
-                    renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
-                }
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
-                }
-            } else {
-                port1 = {
-                    type: "none",
-                    blockIndex: -1,
-                    portIndex: -1
+        for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
+            let port = document.createElement("div");
+            port.style.right = "4px";
+            port.style.top = i * 50 + 25 + 17.5 + "px";
+            port.classList.add("logicport");
+            port.classList.add("logicportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "logicExport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "logicImport") {
+                    if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "logic")) {
+                        CodeManager.instance.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
+                        renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
                 }
             }
+            div.appendChild(port);
         }
-        div.appendChild(port);
-    }
-    let divblock = document.createElement("div");
-    divblock.classList.add("blockdiv");
-    switch (block.blockMould.type) {
-        case "input":
-            let input = document.createElement("input");
-            input.className = "blockInput";
-            input.classList.add("inputBorder");
-            divblock.appendChild(input);
-            break;
-        case "assign":
-            let assign = document.createElement("input");
-            assign.className = "blockAssign";
-            assign.classList.add("inputBorder");
-            divblock.appendChild(assign);
-            break;
-        case "output":
-            if (block.blockMould.nameID == "output") {
-                let output = document.createElement("p");
-                output.className = "blockp";
-                output.id = "out" + index;
-                divblock.appendChild(output);
+        for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
+            let port = document.createElement("div");
+            port.style.right = "4px";
+            port.style.top = (CodeManager.instance.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 17.5 + "px";
+            port.classList.add("dataport");
+            port.classList.add("dataportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "dataExport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "dataImport") {
+                    if (CodeManager.instance.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "data")) {
+                        CodeManager.instance.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
+                        renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+            div.appendChild(port);
+        }
+        let divblock = document.createElement("div");
+        divblock.classList.add("blockdiv");
+        switch (block.blockMould.type) {
+            case "input":
+                let input = document.createElement("input");
+                input.className = "blockInput";
+                input.classList.add("inputBorder");
+                divblock.appendChild(input);
                 break;
-            } else if (block.blockMould.nameID == "Loutput") {
-                let output = document.createElement("p");
-                output.className = "blocklp";
-                output.id = "out" + index;
-                divblock.appendChild(output);
+            case "assign":
+                let assign = document.createElement("input");
+                assign.className = "blockAssign";
+                assign.classList.add("inputBorder");
+                divblock.appendChild(assign);
                 break;
+            case "output":
+                if (block.blockMould.nameID == "output") {
+                    let output = document.createElement("p");
+                    output.className = "blockp";
+                    output.id = "out" + index;
+                    divblock.appendChild(output);
+                    break;
+                } else if (block.blockMould.nameID == "Loutput") {
+                    let output = document.createElement("p");
+                    output.className = "blocklp";
+                    output.id = "out" + index;
+                    divblock.appendChild(output);
+                    break;
+                }
+            default:
+                let p = document.createElement("p");
+                p.className = "blockp";
+                p.setAttribute("name", block.blockMould.nameID);
+                p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+                divblock.appendChild(p);
+                break;
+        }
+        div.appendChild(divblock);
+        if ((block.blockMould.type == "input" || block.blockMould.type == "assign") && index in inputBuffer[currentCodeGraph])
+            div.lastChild.firstChild.value = inputBuffer[currentCodeGraph][index];
+        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
+        div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
+        div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
+        div.style.left = block.x * 50 + 25 + "px";
+        div.style.top = block.y * 50 + 25 + "px";
+        return div;
+    } else {
+        let block = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index];
+        let div = document.createElement('div');
+        div.id = "b" + index;
+        div.classList.add("block");
+        div.draggable = true;
+        div.ondragstart = () => {
+            dragType = "block";
+            let tmpblock = document.getElementById("b" + index);
+            tmpblock.style.zIndex = 20;
+            dragDivArea.classList.remove("notDisplay");
+            dragDivArea.classList.add("display");
+            chosedBlockIndex = index;
+        }
+        div.onmouseup = (event) => {
+            if (event.button == 2) {
+                let tmpblock = document.getElementById("b" + index);
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicImportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i].length; j++) {
+                        let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                            "_" + index + "_" + i + "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicExportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                            "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataImportNum; i++) {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i] == -1)
+                        continue;
+                    let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i] +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                        "_" + index + "_" + i + "_" + "data");
+                    blockArea.removeChild(link);
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataExportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                            "_" + "data");
+                        blockArea.removeChild(link);
+                    }
+                }
+                blockArea.removeChild(tmpblock);
+                thisLibrary.BlockMoulds[currentCodeGraph].codeManager.delBlock(index);
+                pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
+            } else {
+                if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.type == "output") {
+                    var text = document.getElementById("out" + index).innerText;
+                    navigator.clipboard.writeText(text);
+                }
             }
-        default:
-            let p = document.createElement("p");
-            p.className = "blockp";
-            p.setAttribute("name", block.blockMould.nameID);
-            p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
-            divblock.appendChild(p);
-            break;
+        }
+        div.ondragend = () => {
+            let tmpblock = document.getElementById("b" + index);
+            dragDivArea.classList.remove("display");
+            dragDivArea.classList.add("notDisplay");
+            shadowBlock.classList.remove("display");
+            shadowBlock.classList.add("notDisplay");
+            tmpblock.style.zIndex = 5;
+            shadowActivated = false;
+        }
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicImportNum; i++) {
+            let port = document.createElement("div");
+            port.style.left = "4px";
+            port.style.top = i * 50 + 25 + 17.5 + "px";
+            port.classList.add("logicport");
+            port.classList.add("logicportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "logicImport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "logicExport") {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "logic")) {
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.addLogicConnection(port1.blockIndex, port1.portIndex, index, i);
+                        renderLink(port1.blockIndex, port1.portIndex, index, i, "logic");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+            div.appendChild(port);
+        }
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataImportNum; i++) {
+            let port = document.createElement("div");
+            port.style.left = "4px";
+            port.style.top = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicImportNum + i) * 50 + 25 + 17.5 + "px";
+            port.classList.add("dataport");
+            port.classList.add("dataportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "dataImport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "dataExport") {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.isConnectionAvailable(port1.blockIndex, index, i, port1.portIndex, "data")) {
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.addDataConnection(port1.blockIndex, port1.portIndex, index, i);
+                        renderLink(port1.blockIndex, port1.portIndex, index, i, "data");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+            div.appendChild(port);
+        }
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicExportNum; i++) {
+            let port = document.createElement("div");
+            port.style.right = "4px";
+            port.style.top = i * 50 + 25 + 17.5 + "px";
+            port.classList.add("logicport");
+            port.classList.add("logicportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "logicExport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "logicImport") {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "logic")) {
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.addLogicConnection(index, i, port1.blockIndex, port1.portIndex);
+                        renderLink(index, i, port1.blockIndex, port1.portIndex, "logic");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+            div.appendChild(port);
+        }
+        for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataExportNum; i++) {
+            let port = document.createElement("div");
+            port.style.right = "4px";
+            port.style.top = (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicExportNum + i) * 50 + 25 + 17.5 + "px";
+            port.classList.add("dataport");
+            port.classList.add("dataportHover");
+            port.onclick = () => {
+                if (port1.type == "none") {
+                    port1 = {
+                        type: "dataExport",
+                        blockIndex: index,
+                        portIndex: i
+                    }
+                } else if (port1.type == "dataImport") {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.isConnectionAvailable(index, port1.blockIndex, port1.portIndex, i, "data")) {
+                        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.addDataConnection(index, i, port1.blockIndex, port1.portIndex);
+                        renderLink(index, i, port1.blockIndex, port1.portIndex, "data");
+                    }
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                } else {
+                    port1 = {
+                        type: "none",
+                        blockIndex: -1,
+                        portIndex: -1
+                    }
+                }
+            }
+            div.appendChild(port);
+        }
+        let divblock = document.createElement("div");
+        divblock.classList.add("blockdiv");
+        switch (block.blockMould.type) {
+            case "input":
+                let input = document.createElement("input");
+                input.className = "blockInput";
+                input.classList.add("inputBorder");
+                divblock.appendChild(input);
+                break;
+            case "assign":
+                let assign = document.createElement("input");
+                assign.className = "blockAssign";
+                assign.classList.add("inputBorder");
+                divblock.appendChild(assign);
+                break;
+            case "output":
+                if (block.blockMould.nameID == "output") {
+                    let output = document.createElement("p");
+                    output.className = "blockp";
+                    output.id = "out" + index;
+                    divblock.appendChild(output);
+                    break;
+                } else if (block.blockMould.nameID == "Loutput") {
+                    let output = document.createElement("p");
+                    output.className = "blocklp";
+                    output.id = "out" + index;
+                    divblock.appendChild(output);
+                    break;
+                }
+            default:
+                let p = document.createElement("p");
+                p.className = "blockp";
+                p.setAttribute("name", block.blockMould.nameID);
+                p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+                divblock.appendChild(p);
+                break;
+        }
+        div.appendChild(divblock);
+        if ((block.blockMould.type == "input" || block.blockMould.type == "assign") && index in inputBuffer[currentCodeGraph])
+            div.lastChild.firstChild.value = inputBuffer[currentCodeGraph][index];
+        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
+        div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
+        div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
+        div.style.left = block.x * 50 + 25 + "px";
+        div.style.top = block.y * 50 + 25 + "px";
+        return div;
     }
-    div.appendChild(divblock);
-    div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
-    div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
-    div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
-    div.style.left = block.x * 50 + 25 + "px";
-    div.style.top = block.y * 50 + 25 + "px";
-    return div;
 }
 
 function clearRender() {
@@ -522,21 +891,41 @@ function initCode() {
     changeCodeGraph(0);
 }
 
-function renderMainFlow() {
-    for (let i in CodeManager.instance.graph.blocks) {
-        let numI = parseInt(i);
-        let block = CodeManager.instance.graph.blocks[i];
-        blockArea.appendChild(renderBlock(numI));
-        for (let j = 0; j < block.logicExports.length; j++) {
-            for (let k = 0; k < block.logicExports[j].length; k++) {
-                let nxtIndex = block.logicExports[j][k];
-                renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(numI), "logic");
+function renderCodeGraph() {
+    if (currentCodeGraph == 0) {
+        for (let i in CodeManager.instance.graph.blocks) {
+            let numI = parseInt(i);
+            let block = CodeManager.instance.graph.blocks[i];
+            blockArea.appendChild(renderBlock(numI));
+            for (let j = 0; j < block.logicExports.length; j++) {
+                for (let k = 0; k < block.logicExports[j].length; k++) {
+                    let nxtIndex = block.logicExports[j][k];
+                    renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchLogicImport(numI), "logic");
+                }
+            }
+            for (let j = 0; j < block.dataExports.length; j++) {
+                for (let k = 0; k < block.dataExports[j].length; k++) {
+                    let nxtIndex = block.dataExports[j][k];
+                    renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(numI), "data");
+                }
             }
         }
-        for (let j = 0; j < block.dataExports.length; j++) {
-            for (let k = 0; k < block.dataExports[j].length; k++) {
-                let nxtIndex = block.dataExports[j][k];
-                renderLink(numI, j, nxtIndex, CodeManager.instance.graph.blocks[nxtIndex].searchDataImport(numI), "data");
+    } else {
+        for (let i in thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks) {
+            let numI = parseInt(i);
+            let block = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[i];
+            blockArea.appendChild(renderBlock(numI));
+            for (let j = 0; j < block.logicExports.length; j++) {
+                for (let k = 0; k < block.logicExports[j].length; k++) {
+                    let nxtIndex = block.logicExports[j][k];
+                    renderLink(numI, j, nxtIndex, thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[nxtIndex].searchLogicImport(numI), "logic");
+                }
+            }
+            for (let j = 0; j < block.dataExports.length; j++) {
+                for (let k = 0; k < block.dataExports[j].length; k++) {
+                    let nxtIndex = block.dataExports[j][k];
+                    renderLink(numI, j, nxtIndex, thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[nxtIndex].searchDataImport(numI), "data");
+                }
             }
         }
     }
@@ -680,7 +1069,9 @@ window.openFileClicked = () => {
 
             obj2graph(res);
 
-            renderMainFlow();
+            changeCodeGraph(0);
+
+            renderCodeGraph();
 
             for (let i in CodeManager.instance.graph.blocks) {
                 let numI = parseInt(i);
@@ -765,7 +1156,7 @@ window.dragAreaDragDetected = (event) => {
         }
         shadowActivated = true;
     }
-    let calC = { x: -1, y: -1 }
+    let calC = { x: -1, y: -1 };
     if (dragType == "mould")
         calC = CodeManager.instance.calCoor(
             px2grid(event.offsetX) - Math.round(chosedBlockMould.size.width / 2) - 1,
@@ -1039,6 +1430,7 @@ window.addMould = () => {
     }
     div.appendChild(p);
     BLibMouldsContainer.appendChild(div);
+    inputBuffer[thisMouldNum] = {};
     thisLibrary.addNewMould(thisMouldNum);
     thisLibrary.BlockMoulds[thisMouldNum].codeManager = new CodeManager();
     mouldNum += 1;
