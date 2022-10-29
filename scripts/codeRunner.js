@@ -148,6 +148,7 @@ function forwardGraph(q, variableTables = []) {
 self.onmessage = (e) => {
     blocks = JSON.parse(e.data).blocks;
     inputs = JSON.parse(e.data).inputs;
+    BLibrary = JSON.parse(e.data).BLibrary;
 
     let q = [];
 
@@ -158,6 +159,10 @@ self.onmessage = (e) => {
         constIndegree[i] = 0;
         for (let j = 0; j < blocks[i].logicImports.length; j++)
             constIndegree[i] += blocks[i].logicImports[j].length;
+    }
+
+    for (let i in BLibrary.moulds) {
+        BLibrary.moulds[i].forward = eval(BLibrary.moulds[i].forward);
     }
 
     let calIndegree = {...constIndegree };

@@ -121,6 +121,7 @@ function changeCodeGraph(index) {
         playgroundContainer.classList.add("playgroundContainerMould");
         mouldInfoContainer.classList.remove("notDisplay");
         mouldInfoContainer.classList.add("display");
+        console.log(thisLibrary.BlockMoulds[currentCodeGraph]);
         mouldName.value = thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage];
         mouldColor.value = thisLibrary.color;
         if (thisLibrary.BlockMoulds[currentCodeGraph].type == "userDefData") {
@@ -1536,95 +1537,105 @@ window.addMould = () => {
 }
 
 window.rtButtonClicked = (event) => {
-    function codeEncoder() {
-        let blocks = {},
-            inputs = {};
-        for (let i in CodeManager.instance.graph.blocks) {
-            blocks[i] = {};
-            blocks[i].index = CodeManager.instance.graph.blocks[i].index;
-            blocks[i].generalType = CodeManager.instance.graph.blocks[i].blockMould.generalType;
-            blocks[i].type = CodeManager.instance.graph.blocks[i].blockMould.type;
-            blocks[i].logicImports = CodeManager.instance.graph.blocks[i].logicImports;
-            blocks[i].logicExports = CodeManager.instance.graph.blocks[i].logicExports;
-            blocks[i].dataImports = CodeManager.instance.graph.blocks[i].dataImports;
-            blocks[i].dataExports = CodeManager.instance.graph.blocks[i].dataExports;
-            blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
-            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
-                let block = document.getElementById("b" + i);
-                inputs[i] = [block.lastChild.firstChild.value];
+    if (currentCodeGraph == 0) {
+        function codeEncoder() {
+            let blocks = {},
+                inputs = {},
+                Blibrary = { nameID: thisLibrary.nameID, moulds: {} };
+            for (let i in CodeManager.instance.graph.blocks) {
+                blocks[i] = {};
+                blocks[i].index = CodeManager.instance.graph.blocks[i].index;
+                blocks[i].generalType = CodeManager.instance.graph.blocks[i].blockMould.generalType;
+                blocks[i].type = CodeManager.instance.graph.blocks[i].blockMould.type;
+                blocks[i].logicImports = CodeManager.instance.graph.blocks[i].logicImports;
+                blocks[i].logicExports = CodeManager.instance.graph.blocks[i].logicExports;
+                blocks[i].dataImports = CodeManager.instance.graph.blocks[i].dataImports;
+                blocks[i].dataExports = CodeManager.instance.graph.blocks[i].dataExports;
+                blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
+                if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                    let block = document.getElementById("b" + i);
+                    inputs[i] = [block.lastChild.firstChild.value];
+                }
+                if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
+                    document.getElementById("out" + i).innerText = "";
             }
-            if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
-                document.getElementById("out" + i).innerText = "";
+            for (let i in thisLibrary.moulds) {
+                Blibrary.moulds[i] = {};
+                Blibrary.moulds[i].nameID = thisLibrary.BlockMoulds[i].nameID;
+                Blibrary.moulds[i].generalType = thisLibrary.BlockMoulds[i].generalType;
+                Blibrary.moulds[i].type = thisLibrary.BlockMoulds[i].type;
+                Blibrary.moulds[i].forward = thisLibrary.BlockMoulds[i].forward.toString();
+            }
+            return { blocks: blocks, inputs: inputs, Blibrary: Blibrary };
         }
-        return { blocks: blocks, inputs: inputs };
-    }
 
-    function runCodeInit() {
-        console.log("start");
-        pstatus.innerText = LanguageManager.getPhrase("l_i_s_busy");
-        infoContainer.style.backgroundColor = "var(--busyColor)";
-        img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
-        isCodeRunning = true;
-        lockArea.classList.add("display");
-        lockArea.classList.remove("notDisplay");
-        for (let i in CodeManager.instance.graph.blocks) {
-            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
-                let block = document.getElementById("b" + i);
-                block.lastChild.firstChild.classList.remove("inputBorder");
-                block.lastChild.firstChild.classList.add("inputTransBorder");
+        function runCodeInit() {
+            console.log("start");
+            pstatus.innerText = LanguageManager.getPhrase("l_i_s_busy");
+            infoContainer.style.backgroundColor = "var(--busyColor)";
+            img_runButton.setAttribute("src", "./res/svg/feather_error/square.svg");
+            isCodeRunning = true;
+            lockArea.classList.add("display");
+            lockArea.classList.remove("notDisplay");
+            for (let i in CodeManager.instance.graph.blocks) {
+                if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                    let block = document.getElementById("b" + i);
+                    block.lastChild.firstChild.classList.remove("inputBorder");
+                    block.lastChild.firstChild.classList.add("inputTransBorder");
+                }
+            }
+            worker = new Worker("./scripts/codeRunner.js", { type: 'module' });
+            worker.postMessage(JSON.stringify(codeEncoder()));
+            worker.onmessage = (e) => {
+                switch (e.data.type) {
+                    case "signal":
+                        switch (e.data.data) {
+                            case "End":
+                                pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+                                infoContainer.style.backgroundColor = "var(--thirdColor)";
+                                runCodeEnd();
+                                break;
+                            case "Error":
+                                pstatus.innerText = LanguageManager.getPhrase("l_i_s_errorat") + e.data.index;
+                                infoContainer.style.backgroundColor = "var(--errorColor)";
+                                runCodeEnd(false);
+                                break;
+                        }
+                        break;
+                    case "output":
+                        console.log(e.data.data.context);
+                        document.getElementById("out" + e.data.data.index).innerText = e.data.data.context;
+                        break;
+                }
             }
         }
-        worker = new Worker("./scripts/codeRunner.js", { type: 'module' });
-        worker.postMessage(JSON.stringify(codeEncoder()));
-        worker.onmessage = (e) => {
-            switch (e.data.type) {
-                case "signal":
-                    switch (e.data.data) {
-                        case "End":
-                            pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
-                            infoContainer.style.backgroundColor = "var(--thirdColor)";
-                            runCodeEnd();
-                            break;
-                        case "Error":
-                            pstatus.innerText = LanguageManager.getPhrase("l_i_s_errorat") + e.data.index;
-                            infoContainer.style.backgroundColor = "var(--errorColor)";
-                            runCodeEnd(false);
-                            break;
-                    }
-                    break;
-                case "output":
-                    console.log(e.data.data.context);
-                    document.getElementById("out" + e.data.data.index).innerText = e.data.data.context;
-                    break;
-            }
-        }
-    }
 
-    function runCodeEnd(isNormal = true) {
-        console.log("end");
-        worker.terminate();
-        worker = undefined;
-        if (isNormal) {
-            pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
-            infoContainer.style.backgroundColor = "var(--thirdColor)";
-        }
-        img_runButton.setAttribute("src", "./res/svg/feather_cyan/play.svg");
-        lockArea.classList.remove("display");
-        lockArea.classList.add("notDisplay");
-        for (let i in CodeManager.instance.graph.blocks) {
-            if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
-                let block = document.getElementById("b" + i);
-                block.lastChild.firstChild.classList.add("inputBorder");
-                block.lastChild.firstChild.classList.remove("inputTransBorder");
+        function runCodeEnd(isNormal = true) {
+            console.log("end");
+            worker.terminate();
+            worker = undefined;
+            if (isNormal) {
+                pstatus.innerText = LanguageManager.getPhrase("l_i_s_normal");
+                infoContainer.style.backgroundColor = "var(--thirdColor)";
             }
+            img_runButton.setAttribute("src", "./res/svg/feather_cyan/play.svg");
+            lockArea.classList.remove("display");
+            lockArea.classList.add("notDisplay");
+            for (let i in CodeManager.instance.graph.blocks) {
+                if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
+                    let block = document.getElementById("b" + i);
+                    block.lastChild.firstChild.classList.add("inputBorder");
+                    block.lastChild.firstChild.classList.remove("inputTransBorder");
+                }
+            }
+            isCodeRunning = false;
         }
-        isCodeRunning = false;
-    }
 
-    if (isCodeRunning == false)
-        runCodeInit();
-    else
-        runCodeEnd();
+        if (isCodeRunning == false)
+            runCodeInit();
+        else
+            runCodeEnd();
+    }
 }
 
 window.onresize = () => {
