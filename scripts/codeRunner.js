@@ -165,9 +165,78 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
     }
 }
 
-function forwardFunction(mouldName, variableTables = []) {
+function forwardFunction(mouldInfo, variableTables = []) {
     let thisVariableTables = [...variableTables, new VariableTable()];
-    forwardGraph(q, blocks, thisVariableTables, indegree);
+    let graph = Blibrary[mouldInfo.lib].moulds[mouldInfo.nameID];
+    let q = [];
+    let constFuncIndegree = {};
+    let regionTable = {},
+        region2Table = {};
+    let regionTree = {};
+    blocks = graph.blocks;
+
+    for (let i in blocks) {
+        if (blocks[i].generalType == "data")
+            continue;
+        constFuncIndegree[i] = 0;
+        for (let j = 0; j < blocks[i].logicImports.length; j++)
+            constFuncIndegree[i] += blocks[i].logicImports[j].length;
+    }
+
+    let calIndegree = {...constFuncIndegree };
+
+    constFuncRegionCnt[-1] = 0;
+
+    for (let i in blocks) {
+        if (constFuncIndegree[i] == 0) {
+            q.push(i);
+            regionTable[i] = -1;
+            constFuncRegionCnt[-1]++;
+        }
+    }
+
+    while (q.length > 0) {
+        let currentIndex = q.shift();
+        for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+            for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                calIndegree[blocks[currentIndex].logicExports[i][j]] -= 1;
+
+                if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0) {
+                    q.push(blocks[currentIndex].logicExports[i][j]);
+
+                    if (blocks[currentIndex].type == "switch" && i != 2) {
+                        regionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "_" + i;
+                        if (!(currentIndex in region2Table))
+                            region2Table[currentIndex] = [];
+                        region2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(regionTable[currentIndex] in regionTree))
+                            regionTree[regionTable[currentIndex]] = [];
+                        regionTree[regionTable[currentIndex]].push(currentIndex + "_" + i);
+                    } else if (blocks[currentIndex].type == "loop" && i != 1) {
+                        regionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "";
+                        if (!(currentIndex in region2Table))
+                            region2Table[currentIndex] = [];
+                        region2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(regionTable[currentIndex] in regionTree))
+                            regionTree[regionTable[currentIndex]] = [];
+                        regionTree[regionTable[currentIndex]].push(currentIndex + "");
+                    } else
+                        regionTable[blocks[currentIndex].logicExports[i][j]] = regionTable[currentIndex];
+
+                    if (regionTable[blocks[currentIndex].logicExports[i][j]] in constFuncRegionCnt)
+                        constFuncRegionCnt[regionTable[blocks[currentIndex].logicExports[i][j]]]++;
+                    else
+                        constFuncRegionCnt[regionTable[blocks[currentIndex].logicExports[i][j]]] = 1;
+                }
+            }
+        }
+    }
+
+    for (let i in blocks)
+        if (constFuncIndegree[i] == 0)
+            q.push(i);
+
+    forwardGraph(q, graph.blocks, thisVariableTables, constFuncIndegree);
 }
 
 self.onmessage = (e) => {
@@ -187,9 +256,12 @@ self.onmessage = (e) => {
             constIndegree[i] += blocks[i].logicImports[j].length;
     }
 
-    for (let i in Blibrary.moulds) {
-        Blibrary.moulds[i].forward = eval(Blibrary.moulds[i].forward);
-    }
+    for (let k in Blibrary)
+        for (let i in Blibrary[k].moulds)
+            for (let j in Blibrary[k].moulds[i].blocks)
+                Blibrary[k].moulds[i].blocks[j].forward = eval(Blibrary[k].moulds[i].blocks[j].forward);
+
+    console.log(Blibrary);
 
     let calIndegree = {...constIndegree };
 
@@ -244,7 +316,7 @@ self.onmessage = (e) => {
         if (constIndegree[i] == 0)
             q.push(i);
 
-    forwardGraph(q, blocks, [new VariableTable()], indegree);
+    forwardGraph(q, blocks, [new VariableTable()], constIndegree);
 
     postMessage({ type: "signal", data: "End" });
     close();

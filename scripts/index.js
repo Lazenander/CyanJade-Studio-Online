@@ -20,6 +20,7 @@ const playgroundContainer = document.getElementById("playgroundContainer");
 const canvasArea = document.getElementById("canvasArea");
 const blockArea = document.getElementById("blockArea");
 const shadowBlock = document.getElementById("shadowBlock");
+const runButtonDiv = document.getElementById("runButtonDiv");
 const img_runButton = document.getElementById("img_runButton");
 const pstatus = document.getElementById("pstatus");
 const pblocks = document.getElementById("pblocks");
@@ -103,6 +104,10 @@ function changeCodeGraph(index) {
         playgroundContainer.classList.add("playgroundContainerMainFlow");
         mouldInfoContainer.classList.remove("display");
         mouldInfoContainer.classList.add("notDisplay");
+        runButtonDiv.classList.remove("notDisplay");
+        runButtonDiv.classList.add("display");
+        img_runButton.classList.remove("notDisplay");
+        img_runButton.classList.add("display");
         inputBuffer[currentCodeGraph] = {};
         for (let i in thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks) {
             let block = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[i];
@@ -123,6 +128,10 @@ function changeCodeGraph(index) {
         playgroundContainer.classList.add("playgroundContainerMould");
         mouldInfoContainer.classList.remove("notDisplay");
         mouldInfoContainer.classList.add("display");
+        runButtonDiv.classList.remove("display");
+        runButtonDiv.classList.add("notDisplay");
+        img_runButton.classList.remove("display");
+        img_runButton.classList.add("notDisplay");
         console.log(thisLibrary.BlockMoulds[currentCodeGraph]);
         mouldName.value = thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage];
         mouldColor.value = thisLibrary.color;
@@ -1558,7 +1567,8 @@ window.rtButtonClicked = (event) => {
         function codeEncoder() {
             let blocks = {},
                 inputs = {},
-                Blibrary = { nameID: thisLibrary.nameID, moulds: {} };
+                Blibrary = {};
+            Blibrary[thisLibrary.nameID] = { nameID: thisLibrary.nameID, moulds: {} };
             for (let i in CodeManager.instance.graph.blocks) {
                 blocks[i] = {};
                 blocks[i].index = CodeManager.instance.graph.blocks[i].index;
@@ -1576,13 +1586,30 @@ window.rtButtonClicked = (event) => {
                 if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
                     document.getElementById("out" + i).innerText = "";
             }
-            for (let i in thisLibrary.moulds) {
-                Blibrary.moulds[i] = {};
-                Blibrary.moulds[i].nameID = thisLibrary.BlockMoulds[i].nameID;
-                Blibrary.moulds[i].generalType = thisLibrary.BlockMoulds[i].generalType;
-                Blibrary.moulds[i].type = thisLibrary.BlockMoulds[i].type;
-                Blibrary.moulds[i].forward = thisLibrary.BlockMoulds[i].forward.toString();
+            for (let i in thisLibrary.BlockMoulds) {
+                Blibrary[thisLibrary.nameID].moulds[i] = {};
+                Blibrary[thisLibrary.nameID].moulds[i].nameID = thisLibrary.BlockMoulds[i].nameID;
+                Blibrary[thisLibrary.nameID].moulds[i].generalType = thisLibrary.BlockMoulds[i].generalType;
+                Blibrary[thisLibrary.nameID].moulds[i].type = thisLibrary.BlockMoulds[i].type;
+                Blibrary[thisLibrary.nameID].moulds[i].lib = thisLibrary.BlockMoulds[i].lib;
+                Blibrary[thisLibrary.nameID].moulds[i].blocks = {};
+                Blibrary[thisLibrary.nameID].moulds[i].inputs = {};
+                for (let j in thisLibrary.BlockMoulds[i].codeManager.graph.blocks) {
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j] = {};
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].index = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].index;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].generalType = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.generalType;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].type = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].logicImports = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].logicImports;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].logicExports = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].logicExports;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].dataImports = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].dataImports;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].dataExports = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].dataExports;
+                    Blibrary[thisLibrary.nameID].moulds[i].blocks[j].forward = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.forward.toString();
+                    if (thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "assign" || thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "input")
+                        Blibrary[thisLibrary.nameID].moulds[i].inputs[j] = inputBuffer[i][j];
+                }
             }
+            console.log(thisLibrary);
+            console.log(Blibrary);
             return { blocks: blocks, inputs: inputs, Blibrary: Blibrary };
         }
 
