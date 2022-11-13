@@ -36,6 +36,8 @@ const mouldWidth = document.getElementById("mouldWidth");
 const mouldInputs = document.getElementById("mouldInputs");
 const mouldOutputs = document.getElementById("mouldOutputs");
 const mouldOutputPort = document.getElementById("mouldOutputPort");
+const mouldInfoSelectorOutputText = document.getElementById("mouldInfoSelectorOutputText");
+const mouldInfoSelectorOutputInput = document.getElementById("mouldInfoSelectorOutputInput");
 
 let activated = "disabled";
 let blockLibDisplay = "disabled";
@@ -129,11 +131,19 @@ function changeCodeGraph(index) {
             mouldTypeLogic.classList.add("notDisplay");
             mouldTypeData.classList.remove("notDisplay");
             mouldTypeData.classList.add("display");
+            mouldInfoSelectorOutputText.classList.remove("notDisplay");
+            mouldInfoSelectorOutputText.classList.add("display");
+            mouldInfoSelectorOutputInput.classList.remove("notDisplay");
+            mouldInfoSelectorOutputInput.classList.add("display");
         } else {
             mouldTypeData.classList.remove("display");
             mouldTypeData.classList.add("notDisplay");
             mouldTypeLogic.classList.remove("notDisplay");
             mouldTypeLogic.classList.add("display");
+            mouldInfoSelectorOutputText.classList.remove("display");
+            mouldInfoSelectorOutputText.classList.add("notDisplay");
+            mouldInfoSelectorOutputInput.classList.remove("display");
+            mouldInfoSelectorOutputInput.classList.add("notDisplay");
         }
         mouldWidth.value = thisLibrary.BlockMoulds[currentCodeGraph].size.width;
         mouldHeight.value = thisLibrary.BlockMoulds[currentCodeGraph].size.height;
@@ -152,7 +162,6 @@ function changeCodeGraph(index) {
         }
         pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
         mouldOutputs.value = outputStr;
-        mouldOutputPort.value = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputPort;
     }
     clearRender();
     renderCodeGraph();
@@ -968,12 +977,20 @@ window.changeMouldType = () => {
         mouldTypeData.classList.add("notDisplay");
         mouldTypeLogic.classList.remove("notDisplay");
         mouldTypeLogic.classList.add("display");
+        mouldInfoSelectorOutputText.classList.remove("display");
+        mouldInfoSelectorOutputText.classList.add("notDisplay");
+        mouldInfoSelectorOutputInput.classList.remove("display");
+        mouldInfoSelectorOutputInput.classList.add("notDisplay");
     } else {
         thisLibrary.BlockMoulds[currentCodeGraph].type = "userDefData";
         mouldTypeLogic.classList.remove("display");
         mouldTypeLogic.classList.add("notDisplay");
         mouldTypeData.classList.remove("notDisplay");
         mouldTypeData.classList.add("display");
+        mouldInfoSelectorOutputText.classList.remove("notDisplay");
+        mouldInfoSelectorOutputText.classList.add("display");
+        mouldInfoSelectorOutputInput.classList.remove("notDisplay");
+        mouldInfoSelectorOutputInput.classList.add("display");
     }
 }
 
