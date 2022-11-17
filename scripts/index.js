@@ -1454,6 +1454,7 @@ window.rtButtonClicked = (event) => {
                 inputs = {},
                 Blibrary = {};
             Blibrary[thisLibrary.nameID] = { nameID: thisLibrary.nameID, moulds: {} };
+            inputs[0] = {};
             for (let i in CodeManager.instance.graph.blocks) {
                 blocks[i] = {};
                 blocks[i].index = CodeManager.instance.graph.blocks[i].index;
@@ -1468,11 +1469,12 @@ window.rtButtonClicked = (event) => {
                 blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
                 if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
                     let block = document.getElementById("b" + i);
-                    inputs[i] = [block.lastChild.firstChild.value];
+                    inputs[0][i] = [block.lastChild.firstChild.value];
                 }
                 if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
                     document.getElementById("out" + i).innerText = "";
             }
+            inputs[thisLibrary.nameID] = {};
             for (let i in thisLibrary.BlockMoulds) {
                 Blibrary[thisLibrary.nameID].moulds[i] = {};
                 Blibrary[thisLibrary.nameID].moulds[i].nameID = thisLibrary.BlockMoulds[i].nameID;
@@ -1483,7 +1485,7 @@ window.rtButtonClicked = (event) => {
                 Blibrary[thisLibrary.nameID].moulds[i].inputVariableNames = thisLibrary.BlockMoulds[i].codeManager.inputVariableNames;
                 Blibrary[thisLibrary.nameID].moulds[i].outputVariableNames = thisLibrary.BlockMoulds[i].codeManager.outputVariableNames;
                 Blibrary[thisLibrary.nameID].moulds[i].blocks = {};
-                Blibrary[thisLibrary.nameID].moulds[i].inputs = {};
+                inputs[thisLibrary.nameID][i] = {};
                 for (let j in thisLibrary.BlockMoulds[i].codeManager.graph.blocks) {
                     Blibrary[thisLibrary.nameID].moulds[i].blocks[j] = {};
                     Blibrary[thisLibrary.nameID].moulds[i].blocks[j].index = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].index;
@@ -1497,7 +1499,7 @@ window.rtButtonClicked = (event) => {
                     Blibrary[thisLibrary.nameID].moulds[i].blocks[j].dataExports = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].dataExports;
                     Blibrary[thisLibrary.nameID].moulds[i].blocks[j].forward = thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.forward.toString();
                     if (thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "assign" || thisLibrary.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "input")
-                        Blibrary[thisLibrary.nameID].moulds[i].inputs[j] = inputBuffer[i][j];
+                        inputs[thisLibrary.nameID][i][j] = inputBuffer[i][j];
                 }
             }
             console.log(thisLibrary);

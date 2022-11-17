@@ -7,9 +7,9 @@ let regionTable = {},
     region2Table = {};
 let regionTree = {};
 
-let blocks, inputs, Blibrary;
+let blocks, globalInputs, Blibrary;
 
-function calculateDataBlock(index, blocks, variableTables = []) {
+function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
     let innerDataStream = [];
     let inputDataStream = [];
     console.log(blocks);
@@ -23,28 +23,28 @@ function calculateDataBlock(index, blocks, variableTables = []) {
                 inputDataStream.push(new DataStream());
                 continue;
             }
-            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables).dataOutput[0]);
+            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
         }
     }
     let res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     return res;
 }
 
-function forwardSwitch(index, blocks, variableTables = [], indegree = constIndegree) {
+function forwardSwitch(index, blocks, variableTables = [], indegree = constIndegree, inputs = {}) {
     let inputDataStream = [];
     for (let i = 0; i < blocks[index].dataImports.length; i++) {
         if (blocks[index].dataImports[i] == -1) {
             inputDataStream.push(new DataStream());
             continue;
         }
-        inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables).dataOutput[0]);
+        inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
     }
     let thisVariableTables = [...variableTables, new VariableTable()];
     let res = blocks[index].forward([], inputDataStream, thisVariableTables);
-    forwardGraph([...blocks[index].logicExports[res.logicport]], blocks, thisVariableTables, indegree);
+    forwardGraph([...blocks[index].logicExports[res.logicport]], blocks, thisVariableTables, indegree, inputs);
 }
 
-function forwardLoop(index, blocks, variableTables = [], indegree = constIndegree) {
+function forwardLoop(index, blocks, variableTables = [], indegree = constIndegree, inputs = {}) {
     let inputDataStream = [];
     while (1) {
         inputDataStream = [];
@@ -53,17 +53,17 @@ function forwardLoop(index, blocks, variableTables = [], indegree = constIndegre
                 inputDataStream.push(new DataStream());
                 continue;
             }
-            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables).dataOutput[0]);
+            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
         }
         let thisVariableTables = [...variableTables, new VariableTable()];
         let res = blocks[index].forward([], inputDataStream, thisVariableTables);
         if (res.logicport == blocks[index].logicExports.length - 1)
             break;
-        forwardGraph([...blocks[index].logicExports[res.logicport]], blocks, thisVariableTables, indegree);
+        forwardGraph([...blocks[index].logicExports[res.logicport]], blocks, thisVariableTables, indegree, inputs);
     }
 }
 
-function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) {
+function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree, inputs = {}) {
     let calIndegree = {...indegree };
 
     console.log(q);
@@ -83,12 +83,12 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
                             inputDataStream.push(new DataStream());
                             continue;
                         }
-                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables).dataOutput[0].readData(variableTables));
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables, inputs).dataOutput[0].readData(variableTables));
                     }
                     postMessage({ type: "output", data: { index: currentIndex, context: inputDataStream[0].toString() } });
                     break;
                 case "switch":
-                    forwardSwitch(currentIndex, blocks, variableTables, indegree);
+                    forwardSwitch(currentIndex, blocks, variableTables, indegree, inputs);
                     for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
                         calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
                         if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
@@ -96,7 +96,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
                     }
                     break;
                 case "loop":
-                    forwardLoop(currentIndex, blocks, variableTables, indegree);
+                    forwardLoop(currentIndex, blocks, variableTables, indegree, inputs);
                     for (let i = 0; i < blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1].length; i++) {
                         calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]]--;
                         if (calIndegree[blocks[currentIndex].logicExports[blocks[currentIndex].logicExports.length - 1][i]] == 0)
@@ -112,7 +112,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
                             inputDataStream.push(new DataStream());
                             continue;
                         }
-                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables).dataOutput[0]);
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
                     }
                     blocks[currentIndex].forward(innerDataStream, inputDataStream, variableTables);
                     for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
@@ -130,7 +130,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
                             inputDataStream.push(new DataStream());
                             continue;
                         }
-                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables).dataOutput[0]);
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
                     }
                     forwardFunction(Blibrary[blocks[currentIndex].lib].moulds[blocks[currentIndex].nameID], inputDataStream, variableTables);
                     for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
@@ -147,7 +147,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
                             inputDataStream.push(new DataStream());
                             continue;
                         }
-                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables).dataOutput[0]);
+                        inputDataStream.push(calculateDataBlock(blocks[currentIndex].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
                     }
                     blocks[currentIndex].forward([], inputDataStream, variableTables);
                     for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
@@ -168,7 +168,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree) 
     }
 }
 
-function forwardFunction(mouldInfo, inputDataStream, variableTables = []) {
+function forwardFunction(mouldInfo, inputDataStream, variableTables = [], inputs = {}) {
     let innerVariableTable = new VariableTable();
     let graph = Blibrary[mouldInfo.lib].moulds[mouldInfo.nameID];
     for (let i in mouldInfo.inputVariableNames)
@@ -244,14 +244,15 @@ function forwardFunction(mouldInfo, inputDataStream, variableTables = []) {
         if (constFuncIndegree[i] == 0)
             q.push(i);
 
-    forwardGraph(q, graph.blocks, thisVariableTables, constFuncIndegree);
+    forwardGraph(q, graph.blocks, thisVariableTables, constFuncIndegree, globalInputs[mouldInfo.lib][mouldInfo.nameID]);
 }
 
 self.onmessage = (e) => {
     blocks = JSON.parse(e.data).blocks;
-    inputs = JSON.parse(e.data).inputs;
+    globalInputs = JSON.parse(e.data).inputs;
     Blibrary = JSON.parse(e.data).Blibrary;
     console.log(blocks[0])
+    console.log(globalInputs);
 
     let q = [];
 
@@ -326,7 +327,7 @@ self.onmessage = (e) => {
 
     console.log(q);
 
-    forwardGraph(q, blocks, [new VariableTable()], constIndegree);
+    forwardGraph(q, blocks, [new VariableTable()], constIndegree, globalInputs[0]);
 
     postMessage({ type: "signal", data: "End" });
     close();
