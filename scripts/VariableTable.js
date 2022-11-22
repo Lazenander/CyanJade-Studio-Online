@@ -11,7 +11,7 @@ export default class VariableTable {
 
     assignVariable(variable, data) {
         if (variable.type != "variable") {
-            ErrorManager.error(1, variable.data);
+            ErrorManager.error(1, { name: variable.data });
             return;
         }
         console.log("Assign var " + variable + ": " + data);
@@ -27,7 +27,7 @@ export default class VariableTable {
                 currentData = currentData.data[variable.data.address[i]];
             currentData.data[variable.data.address[variable.data.address.length - 1]] = data.readData([this]);
         } else
-            ErrorManager.error(2, variable.data);
+            ErrorManager.error(2, { name: variable.data });
         return;
     }
 
@@ -48,7 +48,7 @@ export default class VariableTable {
                         currentData = currentData.data[this.readVariable(variable.data.address[i])];
                         break;
                     default:
-                        ErrorManager.error(3, variable.data);
+                        ErrorManager.error(3, { name: variable.data });
                         return;
                 }
             }
@@ -60,7 +60,7 @@ export default class VariableTable {
 
     existVariable(variable) {
         if (variable.type != "variable" && variable.type != "variableArrayElement") {
-            ErrorManager.error(4, variable.data);
+            ErrorManager.error(4, { name: variable.data });
             return;
         }
         if (variable.type == "variable")

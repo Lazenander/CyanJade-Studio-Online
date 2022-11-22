@@ -169,18 +169,22 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree, 
 }
 
 function forwardFunction(mouldInfo, inputDataStream, variableTables = [], inputs = {}) {
+    console.log(2);
     let innerVariableTable = new VariableTable();
     let graph = Blibrary[mouldInfo.lib].moulds[mouldInfo.nameID];
+    console.log(mouldInfo.inputVariableNames, inputDataStream);
     for (let i in mouldInfo.inputVariableNames)
         innerVariableTable.assignVariable(mouldInfo.inputVariableNames[i], inputDataStream[i]);
     let thisVariableTables = [...variableTables, innerVariableTable];
     console.log(innerVariableTable);
+    console.log(thisVariableTables[0]._storage);
+    console.log(thisVariableTables);
     let q = [];
     let constFuncIndegree = {};
     let constFuncRegionCnt = {};
-    let regionTable = {},
-        region2Table = {};
-    let regionTree = {};
+    let funcRegionTable = {},
+        funcRegion2Table = {};
+    let funcRegionTree = {};
     blocks = graph.blocks;
 
     for (let i in blocks) {
@@ -191,14 +195,14 @@ function forwardFunction(mouldInfo, inputDataStream, variableTables = [], inputs
             constFuncIndegree[i] += blocks[i].logicImports[j].length;
     }
 
-    let calIndegree = {...constFuncIndegree };
+    let calFuncIndegree = {...constFuncIndegree };
 
     constFuncRegionCnt[-1] = 0;
 
     for (let i in blocks) {
         if (constFuncIndegree[i] == 0) {
             q.push(i);
-            regionTable[i] = -1;
+            funcRegionTable[i] = -1;
             constFuncRegionCnt[-1]++;
         }
     }
@@ -207,34 +211,34 @@ function forwardFunction(mouldInfo, inputDataStream, variableTables = [], inputs
         let currentIndex = q.shift();
         for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
             for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
-                calIndegree[blocks[currentIndex].logicExports[i][j]] -= 1;
+                calFuncIndegree[blocks[currentIndex].logicExports[i][j]] -= 1;
 
-                if (calIndegree[blocks[currentIndex].logicExports[i][j]] == 0) {
+                if (calFuncIndegree[blocks[currentIndex].logicExports[i][j]] == 0) {
                     q.push(blocks[currentIndex].logicExports[i][j]);
 
                     if (blocks[currentIndex].type == "switch" && i != 2) {
-                        regionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "_" + i;
-                        if (!(currentIndex in region2Table))
-                            region2Table[currentIndex] = [];
-                        region2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
-                        if (!(regionTable[currentIndex] in regionTree))
-                            regionTree[regionTable[currentIndex]] = [];
-                        regionTree[regionTable[currentIndex]].push(currentIndex + "_" + i);
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "_" + i;
+                        if (!(currentIndex in funcRegion2Table))
+                            funcRegion2Table[currentIndex] = [];
+                        funcRegion2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(funcRegionTable[currentIndex] in funcRegionTree))
+                            funcRegionTree[funcRegionTable[currentIndex]] = [];
+                        funcRegionTree[funcRegionTable[currentIndex]].push(currentIndex + "_" + i);
                     } else if (blocks[currentIndex].type == "loop" && i != 1) {
-                        regionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "";
-                        if (!(currentIndex in region2Table))
-                            region2Table[currentIndex] = [];
-                        region2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
-                        if (!(regionTable[currentIndex] in regionTree))
-                            regionTree[regionTable[currentIndex]] = [];
-                        regionTree[regionTable[currentIndex]].push(currentIndex + "");
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "";
+                        if (!(currentIndex in funcRegion2Table))
+                            funcRegion2Table[currentIndex] = [];
+                        funcRegion2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(funcRegionTable[currentIndex] in funcRegionTree))
+                            funcRegionTree[funcRegionTable[currentIndex]] = [];
+                        funcRegionTree[funcRegionTable[currentIndex]].push(currentIndex + "");
                     } else
-                        regionTable[blocks[currentIndex].logicExports[i][j]] = regionTable[currentIndex];
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = funcRegionTable[currentIndex];
 
-                    if (regionTable[blocks[currentIndex].logicExports[i][j]] in constFuncRegionCnt)
-                        constFuncRegionCnt[regionTable[blocks[currentIndex].logicExports[i][j]]]++;
+                    if (funcRegionTable[blocks[currentIndex].logicExports[i][j]] in constFuncRegionCnt)
+                        constFuncRegionCnt[funcRegionTable[blocks[currentIndex].logicExports[i][j]]]++;
                     else
-                        constFuncRegionCnt[regionTable[blocks[currentIndex].logicExports[i][j]]] = 1;
+                        constFuncRegionCnt[funcRegionTable[blocks[currentIndex].logicExports[i][j]]] = 1;
                 }
             }
         }
