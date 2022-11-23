@@ -141,6 +141,7 @@ window.onMouldOutputsChange = () => {
     let outputStrs = mouldOutputs.value.split(",");
     for (let i = 0; i < outputStrs.length; i++)
         outputStrs[i] = outputStrs[i].replace(" ", "");
+    console.log(outputStrs);
     thisLibrary.BlockMoulds[currentCodeGraph].codeManager.outputVariableNames = outputStrs;
     thisLibrary.BlockMoulds[currentCodeGraph].dataExportNum = 1;
     thisLibrary.BlockMoulds[currentCodeGraph].size.height = Math.max(parseInt(mouldHeight.value),
@@ -1469,7 +1470,7 @@ window.rtButtonClicked = (event) => {
                 blocks[i].forward = CodeManager.instance.graph.blocks[i].blockMould.forward.toString();
                 if (CodeManager.instance.graph.blocks[i].blockMould.type == "assign" || CodeManager.instance.graph.blocks[i].blockMould.type == "input") {
                     let block = document.getElementById("b" + i);
-                    inputs[0][i] = [block.lastChild.firstChild.value];
+                    inputs[0][i] = block.lastChild.firstChild.value;
                 }
                 if (CodeManager.instance.graph.blocks[i].blockMould.type == "output")
                     document.getElementById("out" + i).innerText = "";
@@ -1485,6 +1486,7 @@ window.rtButtonClicked = (event) => {
                 Blibrary[thisLibrary.nameID].moulds[i].inputVariableNames = thisLibrary.BlockMoulds[i].codeManager.inputVariableNames;
                 Blibrary[thisLibrary.nameID].moulds[i].outputVariableNames = thisLibrary.BlockMoulds[i].codeManager.outputVariableNames;
                 Blibrary[thisLibrary.nameID].moulds[i].blocks = {};
+                console.log(Blibrary[thisLibrary.nameID].moulds[i].outputVariableNames);
                 inputs[thisLibrary.nameID][i] = {};
                 for (let j in thisLibrary.BlockMoulds[i].codeManager.graph.blocks) {
                     Blibrary[thisLibrary.nameID].moulds[i].blocks[j] = {};

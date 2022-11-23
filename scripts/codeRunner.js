@@ -9,14 +9,117 @@ let regionTree = {};
 
 let blocks, globalInputs, Blibrary;
 
+function calculateDataFunction(mouldInfo, inputDataStream, inputs = {}) {
+    console.log(2);
+    let innerVariableTable = new VariableTable();
+    let graph = Blibrary[mouldInfo.lib].moulds[mouldInfo.nameID];
+    console.log(mouldInfo.inputVariableNames, inputDataStream);
+    for (let i in mouldInfo.inputVariableNames)
+        innerVariableTable.assignVariable(new DataStream("variable", mouldInfo.inputVariableNames[i]), inputDataStream[i]);
+    let thisVariableTables = [innerVariableTable];
+    console.log(innerVariableTable);
+    console.log(thisVariableTables[0]._storage);
+    console.log(thisVariableTables);
+    let q = [];
+    let constFuncIndegree = {};
+    let constFuncRegionCnt = {};
+    let funcRegionTable = {},
+        funcRegion2Table = {};
+    let funcRegionTree = {};
+    blocks = graph.blocks;
+
+    for (let i in blocks) {
+        if (blocks[i].generalType == "data")
+            continue;
+        constFuncIndegree[i] = 0;
+        for (let j = 0; j < blocks[i].logicImports.length; j++)
+            constFuncIndegree[i] += blocks[i].logicImports[j].length;
+    }
+
+    let calFuncIndegree = {...constFuncIndegree };
+
+    constFuncRegionCnt[-1] = 0;
+
+    for (let i in blocks) {
+        if (constFuncIndegree[i] == 0) {
+            q.push(i);
+            funcRegionTable[i] = -1;
+            constFuncRegionCnt[-1]++;
+        }
+    }
+
+    while (q.length > 0) {
+        let currentIndex = q.shift();
+        for (let i = 0; i < blocks[currentIndex].logicExports.length; i++) {
+            for (let j = 0; j < blocks[currentIndex].logicExports[i].length; j++) {
+                calFuncIndegree[blocks[currentIndex].logicExports[i][j]] -= 1;
+
+                if (calFuncIndegree[blocks[currentIndex].logicExports[i][j]] == 0) {
+                    q.push(blocks[currentIndex].logicExports[i][j]);
+
+                    if (blocks[currentIndex].type == "switch" && i != 2) {
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "_" + i;
+                        if (!(currentIndex in funcRegion2Table))
+                            funcRegion2Table[currentIndex] = [];
+                        funcRegion2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(funcRegionTable[currentIndex] in funcRegionTree))
+                            funcRegionTree[funcRegionTable[currentIndex]] = [];
+                        funcRegionTree[funcRegionTable[currentIndex]].push(currentIndex + "_" + i);
+                    } else if (blocks[currentIndex].type == "loop" && i != 1) {
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = currentIndex + "";
+                        if (!(currentIndex in funcRegion2Table))
+                            funcRegion2Table[currentIndex] = [];
+                        funcRegion2Table[currentIndex].push(blocks[currentIndex].logicExports[i][j]);
+                        if (!(funcRegionTable[currentIndex] in funcRegionTree))
+                            funcRegionTree[funcRegionTable[currentIndex]] = [];
+                        funcRegionTree[funcRegionTable[currentIndex]].push(currentIndex + "");
+                    } else
+                        funcRegionTable[blocks[currentIndex].logicExports[i][j]] = funcRegionTable[currentIndex];
+
+                    if (funcRegionTable[blocks[currentIndex].logicExports[i][j]] in constFuncRegionCnt)
+                        constFuncRegionCnt[funcRegionTable[blocks[currentIndex].logicExports[i][j]]]++;
+                    else
+                        constFuncRegionCnt[funcRegionTable[blocks[currentIndex].logicExports[i][j]]] = 1;
+                }
+            }
+        }
+    }
+
+    for (let i in blocks)
+        if (constFuncIndegree[i] == 0)
+            q.push(i);
+
+    forwardGraph(q, graph.blocks, thisVariableTables, constFuncIndegree, globalInputs[mouldInfo.lib][mouldInfo.nameID]);
+
+    let outputDataStream = [];
+    console.log(mouldInfo.outputVariableNames);
+    for (let i in mouldInfo.outputVariableNames)
+        outputDataStream.push(innerVariableTable.readVariable(new DataStream("variable", mouldInfo.outputVariableNames[i])));
+
+    console.log(outputDataStream[0]);
+
+    return { logicport: -1, dataOutput: outputDataStream };
+}
+
 function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
     let innerDataStream = [];
     let inputDataStream = [];
+    let res = null;
     console.log(blocks);
     if (blocks[index].type == "input") {
         let ds = new DataStream();
-        ds.read(inputs[index][0]);
+        ds.read(inputs[index]);
         innerDataStream.push(ds);
+        res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
+    } else if (blocks[index].type == "userDefData") {
+        for (let i = 0; i < blocks[index].dataImports.length; i++) {
+            if (blocks[index].dataImports[i] == -1) {
+                inputDataStream.push(new DataStream());
+                continue;
+            }
+            inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
+        }
+        res = calculateDataFunction(Blibrary[blocks[index].lib].moulds[blocks[index].nameID], inputDataStream, inputs);
     } else {
         for (let i = 0; i < blocks[index].dataImports.length; i++) {
             if (blocks[index].dataImports[i] == -1) {
@@ -25,8 +128,8 @@ function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
             }
             inputDataStream.push(calculateDataBlock(blocks[index].dataImports[i], blocks, variableTables, inputs).dataOutput[0]);
         }
+        res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     }
-    let res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     return res;
 }
 
@@ -105,7 +208,7 @@ function forwardGraph(q, blocks, variableTables = [], indegree = constIndegree, 
                     break;
                 case "assign":
                     let ds = new DataStream();
-                    ds.read(inputs[currentIndex][0]);
+                    ds.read(inputs[currentIndex]);
                     innerDataStream.push(ds);
                     for (let i = 0; i < blocks[currentIndex].dataImports.length; i++) {
                         if (blocks[currentIndex].dataImports[i] == -1) {
