@@ -174,7 +174,7 @@ function forwardFunction(mouldInfo, inputDataStream, variableTables = [], inputs
     let graph = Blibrary[mouldInfo.lib].moulds[mouldInfo.nameID];
     console.log(mouldInfo.inputVariableNames, inputDataStream);
     for (let i in mouldInfo.inputVariableNames)
-        innerVariableTable.assignVariable(mouldInfo.inputVariableNames[i], inputDataStream[i]);
+        innerVariableTable.assignVariable(new DataStream("variable", mouldInfo.inputVariableNames[i]), inputDataStream[i]);
     let thisVariableTables = [...variableTables, innerVariableTable];
     console.log(innerVariableTable);
     console.log(thisVariableTables[0]._storage);
