@@ -19,6 +19,9 @@ export default class Block {
     }
 
     searchLogicImport(index) {
+        for (let i = 0; i < this.blockMould.logicImportNum; i++)
+            if (this.logicImports[i].indexOf(index) != -1)
+                return i;
         index = parseInt(index);
         for (let i = 0; i < this.blockMould.logicImportNum; i++)
             if (this.logicImports[i].indexOf(index) != -1)
@@ -27,6 +30,9 @@ export default class Block {
     }
 
     searchLogicExport(index) {
+        for (let i = 0; i < this.blockMould.logicExportNum; i++)
+            if (this.logicExports[i].indexOf(index) != -1)
+                return i;
         index = parseInt(index);
         for (let i = 0; i < this.blockMould.logicExportNum; i++)
             if (this.logicExports[i].indexOf(index) != -1)
@@ -35,6 +41,9 @@ export default class Block {
     }
 
     searchDataImport(index) {
+        for (let i = 0; i < this.blockMould.dataImportNum; i++)
+            if (this.dataImports[i] == index)
+                return i;
         index = parseInt(index);
         for (let i = 0; i < this.blockMould.dataImportNum; i++)
             if (this.dataImports[i] == index)
@@ -43,6 +52,9 @@ export default class Block {
     }
 
     searchDataExport(index) {
+        for (let i = 0; i < this.blockMould.dataExportNum; i++)
+            if (this.dataExports[i].indexOf(index) != -1)
+                return i;
         index = parseInt(index);
         for (let i = 0; i < this.blockMould.dataExportNum; i++)
             if (this.dataExports[i].indexOf(index) != -1)

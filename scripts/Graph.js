@@ -14,10 +14,16 @@ export default class Graph {
         let newBlock = new Block(newIndex, x, y, blockMould);
         this.blocks[newIndex] = newBlock;
         this.size++;
+        console.log(this.blocks);
         return newIndex;
     }
 
     delBlock(index) {
+        index = parseInt(index);
+        console.log(this.blocks[index].logicImports);
+        console.log(this.blocks[index].logicExports);
+        console.log(this.blocks[index].dataImports);
+        console.log(this.blocks[index].dataExports);
         for (let i = 0; i < this.blocks[index].blockMould.logicImportNum; i++)
             for (let j = 0; j < this.blocks[index].logicImports[i].length; j++)
                 this.delLogicConnection(this.blocks[index].logicImports[i][j],
@@ -40,37 +46,47 @@ export default class Graph {
         delete this.blocks[index];
         this.emptyIndex.push(index);
         this.size--;
+        console.log(this.blocks);
         return;
     }
 
     addLogicConnection(index1, port1, index2, port2) {
+        console.log(index1, port1, index2, port2);
         this.blocks[index1].logicExports[port1].push(index2);
         this.blocks[index2].logicImports[port2].push(index1);
+        console.log(this.blocks);
         console.log(`Add Logic Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 
     addDataConnection(index1, port1, index2, port2) {
+        console.log(index1, port1, index2, port2);
         this.blocks[index1].dataExports[port1].push(index2);
         this.blocks[index2].dataImports[port2] = index1;
+        console.log(this.blocks);
         console.log(`Add Data Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 
     delLogicConnection(index1, port1, index2, port2) {
+        console.log(index1, port1, index2, port2);
         let delIndex1 = this.blocks[index1].logicExports[port1].indexOf(index2);
         let delIndex2 = this.blocks[index2].logicImports[port2].indexOf(index1);
         if (delIndex1 == -1 || delIndex2 == -1)
             return;
         this.blocks[index1].logicExports[port1].splice(delIndex1, 1);
         this.blocks[index2].logicImports[port2].splice(delIndex2, 1);
+        console.log(this.blocks);
         console.log(`Delete Logic Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 
     delDataConnection(index1, port1, index2, port2) {
+        console.log(index1, port1, index2, port2);
         let delIndex1 = this.blocks[index1].dataExports[port1].indexOf(index2);
+        console.log(this.blocks[index1].dataExports);
         if (delIndex1 == -1 || this.blocks[index2].dataImports[port2] != index1)
             return;
         this.blocks[index1].dataExports[port1].splice(delIndex1, 1);
         this.blocks[index2].dataImports[port2] = -1;
+        console.log(this.blocks);
         console.log(`Delete Data Connection ${index1}, ${index2}, at port ${port1}, ${port2}`);
     }
 

@@ -63,6 +63,112 @@ let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese
 let currentCodeGraph = 0;
 let inputBuffer = { 0: {} };
 
+function delBlockMouldBlocks(nameID) {
+    if (currentCodeGraph == 0) {
+        for (let index in CodeManager.instance.graph.blocks)
+            if (CodeManager.instance.graph.blocks[index].blockMould.nameID == nameID) {
+                let tmpblock = document.getElementById("b" + index);
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicImports[i].length; j++) {
+                        let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                            "_" + index + "_" + i + "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                            "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataImportNum; i++) {
+                    if (CodeManager.instance.graph.blocks[index].dataImports[i] == -1)
+                        continue;
+                    let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                        "_" + index + "_" + i + "_" + "data");
+                    blockArea.removeChild(link);
+                }
+                for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
+                    for (let j = 0; j < CodeManager.instance.graph.blocks[index].dataExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                            "_" + "data");
+                        blockArea.removeChild(link);
+                    }
+                }
+                blockArea.removeChild(tmpblock);
+                CodeManager.instance.delBlock(index);
+                pblocks.innerText = CodeManager.instance.graph.size;
+            }
+        for (let j in thisLibrary.BlockMoulds) {
+            for (let index in thisLibrary.BlockMoulds[j].codeManager.graph.blocks)
+                if (thisLibrary.BlockMoulds[j].codeManager.graph.blocks[index].blockMould.nameID == nameID)
+                    thisLibrary.BlockMoulds[j].codeManager.delBlock(index);
+        }
+    } else {
+        for (let index in CodeManager.instance.graph.blocks)
+            if (CodeManager.instance.graph.blocks[index].blockMould.nameID == nameID) {
+                console.log(index, nameID);
+                CodeManager.instance.delBlock(index);
+            }
+        for (let j in thisLibrary.BlockMoulds) {
+            if (j == currentCodeGraph)
+                continue;
+            for (let index in thisLibrary.BlockMoulds[j].codeManager.graph.blocks)
+                if (thisLibrary.BlockMoulds[j].codeManager.graph.blocks[index].blockMould.nameID == nameID)
+                    thisLibrary.BlockMoulds[j].codeManager.delBlock(index);
+        }
+        for (let index in thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks)
+            if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.nameID == nameID) {
+                let tmpblock = document.getElementById("b" + index);
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicImportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i].length; j++) {
+                        let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                            "_" + index + "_" + i + "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.logicExportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                            "_" + "logic");
+                        blockArea.removeChild(link);
+                    }
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataImportNum; i++) {
+                    if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i] == -1)
+                        continue;
+                    let link = document.getElementById("l" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i] +
+                        "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                        "_" + index + "_" + i + "_" + "data");
+                    blockArea.removeChild(link);
+                }
+                for (let i = 0; i < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.dataExportNum; i++) {
+                    for (let j = 0; j < thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i].length; j++) {
+                        let link = document.getElementById("l" + index + "_" + i +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i][j] +
+                            "_" + thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                            "_" + "data");
+                        blockArea.removeChild(link);
+                    }
+                }
+                blockArea.removeChild(tmpblock);
+                thisLibrary.BlockMoulds[currentCodeGraph].codeManager.delBlock(index);
+                pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
+            }
+
+    }
+}
+
 window.onMouldNameChange = () => {
     thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage] = mouldName.value;
     document.getElementById("userdefmould_" + currentCodeGraph).innerText = mouldName.value;
@@ -73,11 +179,13 @@ window.onMouldColorChange = () => {
 }
 
 window.onMouldWidthChange = () => {
+    delBlockMouldBlocks(currentCodeGraph);
     thisLibrary.BlockMoulds[currentCodeGraph].size.width = Math.max(parseInt(mouldWidth.value), 1);
     mouldWidth.value = thisLibrary.BlockMoulds[currentCodeGraph].size.width;
 }
 
 window.onMouldHeightChange = () => {
+    delBlockMouldBlocks(currentCodeGraph);
     thisLibrary.BlockMoulds[currentCodeGraph].size.height = Math.max(parseInt(mouldHeight.value),
         thisLibrary.BlockMoulds[currentCodeGraph].logicImportNum + thisLibrary.BlockMoulds[currentCodeGraph].dataImportNum,
         thisLibrary.BlockMoulds[currentCodeGraph].logicExportNum + thisLibrary.BlockMoulds[currentCodeGraph].dataExportNum);
@@ -85,6 +193,7 @@ window.onMouldHeightChange = () => {
 }
 
 window.changeMouldType = () => {
+    delBlockMouldBlocks(currentCodeGraph);
     if (currentCodeGraph == 0)
         return;
     if (thisLibrary.BlockMoulds[currentCodeGraph].type == "userDefData") {
@@ -125,6 +234,17 @@ window.changeMouldType = () => {
 }
 
 window.onMouldInputsChange = () => {
+    delBlockMouldBlocks(currentCodeGraph);
+    if (mouldInputs.value == "") {
+        thisLibrary.BlockMoulds[currentCodeGraph].codeManager.inputVariableNames = [];
+        thisLibrary.BlockMoulds[currentCodeGraph].dataImportNum = 0;
+        thisLibrary.BlockMoulds[currentCodeGraph].size.height = Math.max(parseInt(mouldHeight.value),
+            thisLibrary.BlockMoulds[currentCodeGraph].logicImportNum + thisLibrary.BlockMoulds[currentCodeGraph].dataImportNum,
+            thisLibrary.BlockMoulds[currentCodeGraph].logicExportNum + thisLibrary.BlockMoulds[currentCodeGraph].dataExportNum);
+        mouldHeight.value = thisLibrary.BlockMoulds[currentCodeGraph].size.height;
+        console.log(inputStrs);
+        return;
+    }
     let inputStrs = mouldInputs.value.split(",");
     for (let i = 0; i < inputStrs.length; i++)
         inputStrs[i] = inputStrs[i].replace(" ", "");
@@ -138,6 +258,7 @@ window.onMouldInputsChange = () => {
 }
 
 window.onMouldOutputsChange = () => {
+    delBlockMouldBlocks(currentCodeGraph);
     let outputStrs = mouldOutputs.value.split(",");
     for (let i = 0; i < outputStrs.length; i++)
         outputStrs[i] = outputStrs[i].replace(" ", "");
@@ -456,12 +577,19 @@ function renderBlock(index) {
                         let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
                             "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
                             "_" + index + "_" + i + "_" + "logic");
+                        console.log("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicImports[i][j]].searchLogicExport(index) +
+                            "_" + index + "_" + i + "_" + "logic");
                         blockArea.removeChild(link);
                     }
                 }
                 for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicExportNum; i++) {
                     for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicExports[i].length; j++) {
                         let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
+                            "_" + "logic");
+                        console.log("l" + index + "_" + i +
                             "_" + CodeManager.instance.graph.blocks[index].logicExports[i][j] +
                             "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].logicExports[i][j]].searchLogicImport(index) +
                             "_" + "logic");
@@ -474,11 +602,18 @@ function renderBlock(index) {
                     let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
                         "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
                         "_" + index + "_" + i + "_" + "data");
+                    console.log("l" + CodeManager.instance.graph.blocks[index].dataImports[i] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataImports[i]].searchDataExport(index) +
+                        "_" + index + "_" + i + "_" + "data");
                     blockArea.removeChild(link);
                 }
                 for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.dataExportNum; i++) {
                     for (let j = 0; j < CodeManager.instance.graph.blocks[index].dataExports[i].length; j++) {
                         let link = document.getElementById("l" + index + "_" + i +
+                            "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
+                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
+                            "_" + "data");
+                        console.log("l" + index + "_" + i +
                             "_" + CodeManager.instance.graph.blocks[index].dataExports[i][j] +
                             "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[index].dataExports[i][j]].searchDataImport(index) +
                             "_" + "data");
@@ -1283,6 +1418,9 @@ window.dragAreaDropDetected = (event) => {
                     let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
                         "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
                         "_" + chosedBlockIndex + "_" + i + "_" + "logic");
+                    console.log("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
+                        "_" + chosedBlockIndex + "_" + i + "_" + "logic");
                     blockArea.removeChild(link);
                     renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
                         CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
@@ -1292,6 +1430,10 @@ window.dragAreaDropDetected = (event) => {
             for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
                 for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
                     let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
+                        "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
+                        "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
+                        "_" + "logic");
+                    console.log("l" + chosedBlockIndex + "_" + i +
                         "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
                         "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
                         "_" + "logic");
@@ -1415,6 +1557,7 @@ window.addMould = () => {
         if (event.button == 2) {
             console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
+            delBlockMouldBlocks(thisMouldNum);
             delete thisLibrary[thisMouldNum];
         } else {
             changeCodeGraph(thisMouldNum);
