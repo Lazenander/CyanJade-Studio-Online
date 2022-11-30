@@ -60,6 +60,8 @@ let navigatorType = 0;
 let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
+let loadedLibraries = [];
+let newLibMem = {};
 let currentCodeGraph = 0;
 let inputBuffer = { 0: {} };
 
@@ -1220,6 +1222,151 @@ window.newFileClicked = () => {
     initCode();
 }
 
+window.loadLibrary = () => {
+    let input = FileOperator.openFile();
+    let reader = new FileReader();
+    initCode();
+    input.onchange = () => {
+        reader.readAsText(input.files[0]);
+        reader.onload = () => {
+            let res = JSON.parse(reader.result);
+            let newLib = new BlockLibrary(res.fileName, { English: res.fileName, Chinese: res.fileName }, res.Blib.color);
+
+            function obj2Blib(obj) {
+                newLib.nameID = obj.Blib.nameID;
+                newLib.color = obj.Blib.color;
+                for (let i in obj.Blib.moulds) {
+                    let index = parseInt(i);
+                    newLib.addNewMould(index);
+                    newLib.BlockMoulds[index].codeManager = new CodeManager();
+                    console.log(obj.Blib.moulds[i]);
+                    console.log(newLib.BlockMoulds[index]);
+                    newLib.BlockMoulds[index].nameID = obj.Blib.moulds[i].nameID;
+                    newLib.BlockMoulds[index].Tnames = obj.Blib.moulds[i].Tnames;
+                    newLib.BlockMoulds[index].generalType = obj.Blib.moulds[i].generalType;
+                    newLib.BlockMoulds[index].type = obj.Blib.moulds[i].type;
+                    newLib.BlockMoulds[index].lib = obj.Blib.moulds[i].lib;
+                    newLib.BlockMoulds[index].size = obj.Blib.moulds[i].size;
+                    newLib.BlockMoulds[index].logicImportNum = obj.Blib.moulds[i].logicImportNum;
+                    newLib.BlockMoulds[index].logicExportNum = obj.Blib.moulds[i].logicExportNum;
+                    newLib.BlockMoulds[index].dataImportNum = obj.Blib.moulds[i].dataImportNum;
+                    newLib.BlockMoulds[index].dataExportNum = obj.Blib.moulds[i].dataExportNum;
+                    newLib.BlockMoulds[index].codeManager.type = obj.Blib.moulds[i].codeManager.type;
+                    newLib.BlockMoulds[index].codeManager.inputVariableNames = obj.Blib.moulds[i].codeManager.inputVariableNames;
+                    newLib.BlockMoulds[index].codeManager.outputVariableNames = obj.Blib.moulds[i].codeManager.outputVariableNames;
+                    newLib.BlockMoulds[index].codeManager.outputPort = obj.Blib.moulds[i].codeManager.outputPort;
+                    newLib.BlockMoulds[index].codeManager.graph.emptyIndex = obj.Blib.moulds[i].codeManager.graph.emptyIndex;
+                    newLib.BlockMoulds[index].codeManager.graph.size = obj.Blib.moulds[i].codeManager.graph.size;
+                    newLibMem[index] = {};
+                }
+                for (let i in obj.Blib.moulds) {
+                    let index = parseInt(i);
+                    for (let j in obj.Blib.moulds[i].codeManager.graph.blocks) {
+                        let numI = parseInt(j);
+                        let block = obj.Blib.moulds[i].codeManager.graph.blocks[numI];
+                        if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
+                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
+                                x1: block.x,
+                                x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
+                                y1: block.y,
+                                y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
+                            });
+                        } else if (block.library == newLib.nameID && block.nameID in newLib.BlockMoulds) {
+                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, newLib.BlockMoulds[block.nameID]);
+                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
+                                x1: block.x,
+                                x2: block.x + newLib.BlockMoulds[block.nameID].size.width + 1,
+                                y1: block.y,
+                                y2: block.y + newLib.BlockMoulds[block.nameID].size.height + 1
+                            });
+                        } else if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
+                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
+                                x1: block.x,
+                                x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
+                                y1: block.y,
+                                y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
+                            });
+                        }
+                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicImports = block.logicImports;
+                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicExports = block.logicExports;
+                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataImports = block.dataImports;
+                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataExports = block.dataExports;
+                        inputBuffer[index][numI] = block.input;
+                    }
+                }
+
+            }
+
+            fileName = res.fileName;
+            mouldNum = res.mouldNum;
+            console.log("Open file: ", fileName);
+            fileNameInput.setAttribute("value", fileName);
+
+            obj2Blib(res);
+
+            changeCodeGraph(0);
+
+            renderCodeGraph();
+
+            for (let i in CodeManager.instance.graph.blocks) {
+                let numI = parseInt(i);
+                if (CodeManager.instance.graph.blocks[numI].blockMould.type == "input" || CodeManager.instance.graph.blocks[numI].blockMould.type == "assign")
+                    document.getElementById("b" + numI).lastChild.firstChild.value = res.graph.blocks[numI].input;
+            }
+
+            loadedLibraries[res.nameID] = (newLib);
+
+            console.log(thisLibrary.BlockMoulds);
+
+            for (let i in thisLibrary.BlockMoulds) {
+                let div = document.createElement("div");
+                div.classList.add("BLibMouldsContent");
+                div.classList.add("contentHover");
+                let p = document.createElement("p");
+                p.id = "userdefmould_" + thisLibrary.BlockMoulds[i].nameID;
+                p.innerText = thisLibrary.BlockMoulds[i].Tnames[LanguageManager.currentLanguage];
+
+                let thisMouldNum = thisLibrary.BlockMoulds[i].nameID;
+                div.onmouseup = (event) => {
+                    if (event.button == 2) {
+                        console.log("delete mould " + thisMouldNum);
+                        BLibMouldsContainer.removeChild(div);
+                        delBlockMouldBlocks(thisMouldNum);
+                        delete thisLibrary[thisMouldNum];
+                    } else {
+                        changeCodeGraph(thisMouldNum);
+                        console.log(thisMouldNum, event.button);
+                    }
+                }
+
+                div.draggable = true;
+
+                div.ondragstart = () => {
+                    console.log("2");
+                    dragType = "mould";
+                    dragDivArea.classList.remove("notDisplay");
+                    dragDivArea.classList.add("display");
+                    chosedBlockMould = thisLibrary.BlockMoulds[thisMouldNum];
+                };
+                div.ondragend = () => {
+                    console.log("2");
+                    dragDivArea.classList.remove("display");
+                    dragDivArea.classList.add("notDisplay");
+                    shadowBlock.classList.remove("display");
+                    shadowBlock.classList.add("notDisplay");
+                    shadowActivated = false;
+                }
+                div.appendChild(p);
+
+                BLibMouldsContainer.appendChild(div);
+            }
+        }
+    };
+    input.click();
+}
+
 window.openFileClicked = () => {
     let input = FileOperator.openFile();
     let reader = new FileReader();
@@ -1485,7 +1632,7 @@ window.saveFileClicked = () => {
     strJson["mouldNum"] = mouldNum;
     strJson["graph"] = graph2obj();
     strJson["Blib"] = Blib2obj();
-    FileOperator.saveFile(fileName + "-" + datestr + ".cjade", JSON.stringify(strJson));
+    FileOperator.saveFile(fileName + ".cjade", JSON.stringify(strJson));
 }
 
 window.changeTheme = () => {

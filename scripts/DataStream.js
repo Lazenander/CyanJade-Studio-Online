@@ -76,22 +76,24 @@ export default class DataStream {
             this.data = [];
             let tmpstr = "";
             let br = 0;
-            for (let i = 1; i < str.length - 1; i++) {
-                if (str[i] == "[")
-                    br++;
-                if (str[i] == "]")
-                    br--;
-                if (str[i] == "," && br == 0) {
-                    let tmpDS = new DataStream();
-                    tmpDS.read(tmpstr)
-                    this.data.push(tmpDS);
-                    tmpstr = "";
-                } else if (str[i])
-                    tmpstr += str[i];
+            if (str.length != 2) {
+                for (let i = 1; i < str.length - 1; i++) {
+                    if (str[i] == "[")
+                        br++;
+                    if (str[i] == "]")
+                        br--;
+                    if (str[i] == "," && br == 0) {
+                        let tmpDS = new DataStream();
+                        tmpDS.read(tmpstr);
+                        this.data.push(tmpDS);
+                        tmpstr = "";
+                    } else if (str[i])
+                        tmpstr += str[i];
+                }
+                let tmpDS = new DataStream();
+                tmpDS.read(tmpstr)
+                this.data.push(tmpDS);
             }
-            let tmpDS = new DataStream();
-            tmpDS.read(tmpstr)
-            this.data.push(tmpDS);
             return;
         } else if (this.isVariable(str.split('[')[0])) {
             this.type = "variableArrayElement";
