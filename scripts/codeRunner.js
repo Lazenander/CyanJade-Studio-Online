@@ -130,6 +130,7 @@ function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
         }
         res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     }
+    console.log(res);
     return res;
 }
 

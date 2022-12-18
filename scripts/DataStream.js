@@ -152,6 +152,7 @@ export default class DataStream {
                 return "" + this.data;
             case "array":
                 let str = "[";
+                console.log(this.data);
                 for (let i = 0; i < this.data.length; i++) {
                     str += this.data[i].toString();
                     if (i != this.data.length - 1)

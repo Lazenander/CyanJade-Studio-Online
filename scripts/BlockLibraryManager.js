@@ -830,7 +830,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (!ds1.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["equal"] = new BlockMould("equal", { "English": "equal", "Chinese": "等于" }, "data", "equal", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["equal"] = new BlockMould("equal", { "English": "=", "Chinese": "=" }, "data", "equal", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -863,7 +863,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data == ds2.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["unequal"] = new BlockMould("unequal", { "English": "unequal", "Chinese": "不等于" }, "data", "unequal", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["unequal"] = new BlockMould("unequal", { "English": "≠", "Chinese": "≠" }, "data", "unequal", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -896,7 +896,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data != ds2.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["greater"] = new BlockMould("greater", { "English": "greater", "Chinese": "大于" }, "data", "greater", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["greater"] = new BlockMould("greater", { "English": ">", "Chinese": ">" }, "data", "greater", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -929,7 +929,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data > ds2.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["egreater"] = new BlockMould("egreater", { "English": "eq-greater", "Chinese": "大于等于" }, "data", "egreater", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["egreater"] = new BlockMould("egreater", { "English": "≥", "Chinese": "≥" }, "data", "egreater", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -962,7 +962,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data >= ds2.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["less"] = new BlockMould("less", { "English": "less", "Chinese": "小于" }, "data", "less", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["less"] = new BlockMould("less", { "English": "<", "Chinese": "<" }, "data", "less", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -995,7 +995,7 @@ function formLogic() {
         return { logicport: -1, dataOutput: [new DataStream("boolean", (ds1.data < ds2.data) ? true : false)] };
     });
 
-    logic.BlockMoulds["eless"] = new BlockMould("eless", { "English": "eq-less", "Chinese": "小于等于" }, "data", "eless", "sys_lib_logic", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+    logic.BlockMoulds["eless"] = new BlockMould("eless", { "English": "≤", "Chinese": "≤" }, "data", "eless", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
         if (ds1.type == "array") {
@@ -1088,6 +1088,140 @@ function formArray() {
     return array;
 }
 
+function formMatrix() {
+    let matrix = new BlockLibrary("sys_lib_matrix", { "English": "Matrix", "Chinese": "矩阵指令" }, "#2c9678");
+
+    matrix.BlockMoulds["isMatrix"] = new BlockMould("isMatrix", { "English": "isMatrix?", "Chinese": "是否为矩阵?" }, "data", "isMatrix", "sys_lib_matrix", { width: 3, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        if (ds1.type == "array") {
+            let test = ds1.data[0].data.length;
+            let output = test ? true : false;
+            for (let i = 1; i < ds1.data.length; i++) {
+                if (test != ds1.data[i].data.length) {
+                    output = false;
+                    break;
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream("bool", output)] };
+        }
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["transpose"] = new BlockMould("transpose", { "English": "transpose", "Chinese": "矩阵转置" }, "data", "transpose", "sys_lib_matrix", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        if (ds1.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data[0].data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds1.data.length; j++) {
+                    output[i].data.push(ds1.data[j].data[i]);
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["cmultiplication"] = new BlockMould("cmultiplication", { "English": "matcmul", "Chinese": "矩阵叉乘" }, "data", "cmultiplication", "sys_lib_matrix", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds2.data[0].data.length; j++) {
+                    output[i].data.push(0);
+                    for (let k = 0; k < ds1.data[0].data.length; k++) {
+                        output[i].data[j] += ds1.data[i].data[k] * ds2.data[k].data[j];
+                        console.log(output);
+                    }
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["addition"] = new BlockMould("addition", { "English": "matadd", "Chinese": "矩阵加法" }, "data", "addition", "sys_lib_matrix", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds2.data[0].data.length; j++) {
+                    output[i].data.push(new DataStream("number", ds1.data[i].data[j].data + ds2.data[i].data[j].data));
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["minus"] = new BlockMould("minus", { "English": "matminus", "Chinese": "矩阵减法" }, "data", "minus", "sys_lib_matrix", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds2.data[0].data.length; j++) {
+                    output[i].data.push(new DataStream("number", ds1.data[i].data[j].data - ds2.data[i].data[j].data));
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["dmultiplication"] = new BlockMould("dmultiplication", { "English": "matdmul", "Chinese": "矩阵乘法" }, "data", "dmultiplication", "sys_lib_matrix", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds2.data[0].data.length; j++) {
+                    output[i].data.push(new DataStream("number", ds1.data[i].data[j].data * ds2.data[i].data[j].data));
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    matrix.BlockMoulds["division"] = new BlockMould("division", { "English": "matdiv", "Chinese": "矩阵除法" }, "data", "division", "sys_lib_matrix", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                output.push(new DataStream("array", []));
+                for (let j = 0; j < ds2.data[0].data.length; j++) {
+                    output[i].data.push(new DataStream("number", ds1.data[i].data[j].data / ds2.data[i].data[j].data));
+                }
+            }
+            console.log(output);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.err("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    return matrix;
+}
+
 export default class BlockLibraryManager {
     static instance = new BlockLibraryManager();
     constructor() {
@@ -1096,5 +1230,6 @@ export default class BlockLibraryManager {
         this.libraries["sys_lib_math"] = formMath();
         this.libraries["sys_lib_logic"] = formLogic();
         this.libraries["sys_lib_array"] = formArray();
+        this.libraries["sys_lib_matrix"] = formMatrix();
     }
 }
