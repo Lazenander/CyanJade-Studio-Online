@@ -1121,7 +1121,7 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -1143,7 +1143,7 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -1161,7 +1161,7 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -1179,7 +1179,7 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -1197,7 +1197,7 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
@@ -1215,11 +1215,256 @@ function formMatrix() {
             console.log(output);
             return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
         }
-        console.err("Not Matrix!");
+        console.error("Not Matrix!");
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
     return matrix;
+}
+
+function formAnalysis() {
+    let analysis = new BlockLibrary("sys_lib_analysis", { "English": "Analysis", "Chinese": "分析指令" }, "#2c9678");
+
+    analysis.BlockMoulds["mataverage"] = new BlockMould("mataverage", { "English": "matave", "Chinese": "矩阵平均值" }, "data", "mataverage", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let ave = 0;
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        ave += ds1.data[i].data[j].data;
+                return { logicport: -1, dataOutput: [new DataStream("number", ave / (ds1.data.length * ds1.data[0].data.length))] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let ave = 0;
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        ave += ds1.data[i].data[j].data;
+                    output.push(new DataStream("number", ave / ds1.data.length));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let ave = 0;
+                    for (let i = 0; i < ds1.data.length; i++)
+                        ave += ds1.data[i].data[j].data;
+                    output.push(new DataStream("number", ave / ds1.data[0].data.length));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["matsum"] = new BlockMould("matsum", { "English": "matsum", "Chinese": "矩阵总和值" }, "data", "matsum", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let summ = 0;
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        summ += ds1.data[i].data[j].data;
+                return { logicport: -1, dataOutput: [new DataStream("number", summ)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let summ = 0;
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        summ += ds1.data[i].data[j].data;
+                    output.push(new DataStream("number", summ));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let summ = 0;
+                    for (let i = 0; i < ds1.data.length; i++)
+                        summ += ds1.data[i].data[j].data;
+                    output.push(new DataStream("number", summ));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["matmin"] = new BlockMould("matmin", { "English": "matmin", "Chinese": "矩阵最小值" }, "data", "matmin", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let minn = ds1.data[0].data[0].data;
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                return { logicport: -1, dataOutput: [new DataStream("number", minn)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let minn = ds1.data[i].data[0].data;
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                    output.push(new DataStream("number", minn));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let minn = ds1.data[0].data[j].data;
+                    for (let i = 0; i < ds1.data.length; i++)
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                    output.push(new DataStream("number", minn));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["matmax"] = new BlockMould("matmax", { "English": "matmax", "Chinese": "矩阵最大值" }, "data", "matmax", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let maxn = ds1.data[0].data[0].data;
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                return { logicport: -1, dataOutput: [new DataStream("number", maxn)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let maxn = ds1.data[i].data[0].data;
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                    output.push(new DataStream("number", maxn));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let maxn = ds1.data[0].data[j].data;
+                    for (let i = 0; i < ds1.data.length; i++)
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                    output.push(new DataStream("number", maxn));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["variance"] = new BlockMould("variance", { "English": "variance", "Chinese": "方差" }, "data", "variance", "sys_lib_analysis", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        if (ds1.type == "array") {
+            let output = [];
+            let x_ave = 0;
+            for (let i = 0; i < ds1.data.length; i++)
+                x_ave += ds1.data[i].data;
+            x_ave /= ds1.data.length;
+            let a = 0;
+            for (let i = 0; i < ds1.data.length; i++)
+                a += (ds1.data[i].data - x_ave) * (ds1.data[i].data - x_ave);
+            return { logicport: -1, dataOutput: [new DataStream("number", a / ds1.data.length)] };
+        }
+        console.error("Not two vector!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["covariance"] = new BlockMould("covariance", { "English": "covariance", "Chinese": "协方差" }, "data", "covariance", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        console.log(ds1, ds2);
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            let x_ave = 0,
+                y_ave = 0,
+                xy_ave = 0;
+            for (let i = 0; i < ds1.data.length; i++) {
+                x_ave += ds1.data[i].data;
+                y_ave += ds2.data[i].data;
+                xy_ave += ds1.data[i].data * ds2.data[i].data;
+            }
+            x_ave /= ds1.data.length;
+            y_ave /= ds2.data.length;
+            xy_ave /= ds1.data.length;
+            console.log(ds2.data[0]);
+            console.log(x_ave, y_ave, xy_ave);
+            return { logicport: -1, dataOutput: [new DataStream("number", xy_ave - x_ave * y_ave)] };
+        }
+        console.error("Not two vector!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["relevance"] = new BlockMould("relevance", { "English": "relevance", "Chinese": "相关性" }, "data", "relevance", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        console.log(ds1, ds2);
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            let x_ave = 0,
+                y_ave = 0,
+                xy_ave = 0;
+            for (let i = 0; i < ds1.data.length; i++) {
+                x_ave += ds1.data[i].data;
+                y_ave += ds2.data[i].data;
+                xy_ave += ds1.data[i].data * ds2.data[i].data;
+            }
+            x_ave /= ds1.data.length;
+            y_ave /= ds2.data.length;
+            xy_ave /= ds1.data.length;
+            let a = 0,
+                b = 0;
+            for (let i = 0; i < ds1.data.length; i++) {
+                a += (ds1.data[i].data - x_ave) * (ds1.data[i].data - x_ave);
+                b += (ds2.data[i].data - y_ave) * (ds2.data[i].data - y_ave);
+            }
+            a /= ds1.data.length;
+            b /= ds2.data.length;
+            console.log(ds2.data[0]);
+            console.log(x_ave, y_ave, xy_ave);
+            output = (xy_ave - x_ave * y_ave) / Math.sqrt(a * b);
+            return { logicport: -1, dataOutput: [new DataStream("number", output ? output : 1)] };
+        }
+        console.error("Not two vector!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["bestFitLine"] = new BlockMould("bestFitLine", { "English": "best fit line", "Chinese": "直线拟合" }, "data", "bestFitLine", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            let output = [];
+            let x_ave = 0,
+                y_ave = 0;
+            for (let i = 0; i < ds1.data.length; i++) {
+                x_ave += ds1.data[i].data;
+                y_ave += ds2.data[i].data;
+            }
+            x_ave /= ds1.data.length;
+            y_ave /= ds2.data.length;
+            let a = 0,
+                b = 0;
+            for (let i = 0; i < ds1.data.length; i++) {
+                a += (ds1.data[i].data - x_ave) * (ds2.data[i].data - y_ave);
+                b += (ds1.data[i].data - x_ave) * (ds1.data[i].data - x_ave);
+            }
+            output[0] = new DataStream("number", a / b);
+            output[1] = new DataStream("number", y_ave - output[0].data * x_ave);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        console.error("Not two vector!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    return analysis;
 }
 
 export default class BlockLibraryManager {
@@ -1231,5 +1476,6 @@ export default class BlockLibraryManager {
         this.libraries["sys_lib_logic"] = formLogic();
         this.libraries["sys_lib_array"] = formArray();
         this.libraries["sys_lib_matrix"] = formMatrix();
+        this.libraries["sys_lib_analysis"] = formAnalysis();
     }
 }

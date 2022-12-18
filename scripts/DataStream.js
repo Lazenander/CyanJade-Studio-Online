@@ -24,7 +24,7 @@ export default class DataStream {
     }
 
     isNumber(str) {
-        return parseFloat(str).toString() == str;
+        return !isNaN(str);
     }
 
     isVariable(str) {
