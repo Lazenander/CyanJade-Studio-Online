@@ -636,6 +636,9 @@ body {
     line-height: 36px;
     white-space: nowrap;
     text-align: center;
+    user-select: contain;
+    -moz-user-select: contain;
+    -webkit-user-select: contain;
 }
 
 .blocklp {
@@ -650,6 +653,9 @@ body {
     word-wrap: break-word;
     line-height: 18px;
     text-align: left;
+    user-select: contain;
+    -moz-user-select: contain;
+    -webkit-user-select: contain;
 }
 
 .inputBorder {

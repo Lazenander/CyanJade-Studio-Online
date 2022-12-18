@@ -60,7 +60,7 @@ let navigatorType = 0;
 let fileName = "Untitled";
 let mouldNum = 1;
 let thisLibrary = new BlockLibrary("Untitled", { "English": "Untitled", "Chinese": "未命名" }, "#2c9678");
-let loadedLibraries = [];
+let loadedLibraries = {};
 let newLibMem = {};
 let currentCodeGraph = 0;
 let inputBuffer = { 0: {} };
@@ -172,7 +172,8 @@ function delBlockMouldBlocks(nameID) {
 }
 
 window.onMouldNameChange = () => {
-    thisLibrary.BlockMoulds[currentCodeGraph].Tnames[LanguageManager.currentLanguage] = mouldName.value;
+    for (let i in thisLibrary.BlockMoulds[currentCodeGraph].Tnames)
+        thisLibrary.BlockMoulds[currentCodeGraph].Tnames[i] = mouldName.value;
     document.getElementById("userdefmould_" + currentCodeGraph).innerText = mouldName.value;
 }
 
@@ -628,7 +629,24 @@ function renderBlock(index) {
             } else {
                 if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
                     var text = document.getElementById("out" + index).innerText;
-                    navigator.clipboard.writeText(text);
+                    if (navigator.clipboard && window.isSecureContext)
+                        navigator.clipboard.writeText(text);
+                    else {
+                        let textArea = document.createElement("textarea");
+                        textArea.value = text;
+                        textArea.style.position = "absolute";
+                        textArea.style.display = "none";
+                        textArea.style.opacity = 0;
+                        textArea.style.left = "0px";
+                        textArea.style.top = "0px";
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        return new Promise((res, rej) => {
+                            document.execCommand('copy') ? res() : rej();
+                            textArea.remove();
+                        });
+                    }
                 }
             }
         }
@@ -805,15 +823,16 @@ function renderBlock(index) {
             default:
                 let p = document.createElement("p");
                 p.className = "blockp";
-                p.setAttribute("name", block.blockMould.nameID);
-                p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+                p.setAttribute("name", block.blockMould.lib + "_" + block.blockMould.nameID);
+                console.log(block.blockMould, block.blockMould.lib + "_" + block.blockMould.nameID);
+                p.innerText = LanguageManager.phrases[block.blockMould.lib + "_" + block.blockMould.nameID][LanguageManager.currentLanguage];
                 divblock.appendChild(p);
                 break;
         }
         div.appendChild(divblock);
         if ((block.blockMould.type == "input" || block.blockMould.type == "assign") && index in inputBuffer[currentCodeGraph])
             div.lastChild.firstChild.value = inputBuffer[currentCodeGraph][index];
-        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
+        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.lib + "_" + block.blockMould.nameID]["English"] + "\"";
         div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
         div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
         div.style.left = block.x * 50 + 25 + "px";
@@ -876,7 +895,24 @@ function renderBlock(index) {
             } else {
                 if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.type == "output") {
                     var text = document.getElementById("out" + index).innerText;
-                    navigator.clipboard.writeText(text);
+                    if (navigator.clipboard && window.isSecureContext)
+                        navigator.clipboard.writeText(text);
+                    else {
+                        let textArea = document.createElement("textarea");
+                        textArea.value = text;
+                        textArea.style.position = "absolute";
+                        textArea.style.display = "none";
+                        textArea.style.opacity = 0;
+                        textArea.style.left = "0px";
+                        textArea.style.top = "0px";
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        return new Promise((res, rej) => {
+                            document.execCommand('copy') ? res() : rej();
+                            textArea.remove();
+                        });
+                    }
                 }
             }
         }
@@ -1053,15 +1089,15 @@ function renderBlock(index) {
             default:
                 let p = document.createElement("p");
                 p.className = "blockp";
-                p.setAttribute("name", block.blockMould.nameID);
-                p.innerText = LanguageManager.phrases[block.blockMould.nameID][LanguageManager.currentLanguage];
+                p.setAttribute("name", block.blockMould.lib + "_" + block.blockMould.nameID);
+                p.innerText = LanguageManager.phrases[block.blockMould.lib + "_" + block.blockMould.nameID][LanguageManager.currentLanguage];
                 divblock.appendChild(p);
                 break;
         }
         div.appendChild(divblock);
         if ((block.blockMould.type == "input" || block.blockMould.type == "assign") && index in inputBuffer[currentCodeGraph])
             div.lastChild.firstChild.value = inputBuffer[currentCodeGraph][index];
-        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.nameID]["English"] + "\"";
+        div.title = index + ": \"" + LanguageManager.phrases[block.blockMould.lib + "_" + block.blockMould.nameID]["English"] + "\"";
         div.style.width = (block.blockMould.size.width + 1) * 50 + "px";
         div.style.height = (block.blockMould.size.height + 1) * 50 + "px";
         div.style.left = block.x * 50 + 25 + "px";
@@ -1225,39 +1261,40 @@ window.newFileClicked = () => {
 window.loadLibrary = () => {
     let input = FileOperator.openFile();
     let reader = new FileReader();
-    initCode();
     input.onchange = () => {
         reader.readAsText(input.files[0]);
         reader.onload = () => {
             let res = JSON.parse(reader.result);
-            let newLib = new BlockLibrary(res.fileName, { English: res.fileName, Chinese: res.fileName }, res.Blib.color);
+            let loadedLib = new BlockLibrary(res.fileName, { "English": res.fileName, "Chinese": res.fileName }, "#2c9678");
+            let libMem = {};
 
-            function obj2Blib(obj) {
-                newLib.nameID = obj.Blib.nameID;
-                newLib.color = obj.Blib.color;
+            function obj2Llib(obj) {
+                loadedLib.nameID = obj.Blib.nameID;
+                loadedLib.color = obj.Blib.color;
                 for (let i in obj.Blib.moulds) {
                     let index = parseInt(i);
-                    newLib.addNewMould(index);
-                    newLib.BlockMoulds[index].codeManager = new CodeManager();
+                    loadedLib.addNewMould(index);
+                    loadedLib.BlockMoulds[index].codeManager = new CodeManager();
                     console.log(obj.Blib.moulds[i]);
-                    console.log(newLib.BlockMoulds[index]);
-                    newLib.BlockMoulds[index].nameID = obj.Blib.moulds[i].nameID;
-                    newLib.BlockMoulds[index].Tnames = obj.Blib.moulds[i].Tnames;
-                    newLib.BlockMoulds[index].generalType = obj.Blib.moulds[i].generalType;
-                    newLib.BlockMoulds[index].type = obj.Blib.moulds[i].type;
-                    newLib.BlockMoulds[index].lib = obj.Blib.moulds[i].lib;
-                    newLib.BlockMoulds[index].size = obj.Blib.moulds[i].size;
-                    newLib.BlockMoulds[index].logicImportNum = obj.Blib.moulds[i].logicImportNum;
-                    newLib.BlockMoulds[index].logicExportNum = obj.Blib.moulds[i].logicExportNum;
-                    newLib.BlockMoulds[index].dataImportNum = obj.Blib.moulds[i].dataImportNum;
-                    newLib.BlockMoulds[index].dataExportNum = obj.Blib.moulds[i].dataExportNum;
-                    newLib.BlockMoulds[index].codeManager.type = obj.Blib.moulds[i].codeManager.type;
-                    newLib.BlockMoulds[index].codeManager.inputVariableNames = obj.Blib.moulds[i].codeManager.inputVariableNames;
-                    newLib.BlockMoulds[index].codeManager.outputVariableNames = obj.Blib.moulds[i].codeManager.outputVariableNames;
-                    newLib.BlockMoulds[index].codeManager.outputPort = obj.Blib.moulds[i].codeManager.outputPort;
-                    newLib.BlockMoulds[index].codeManager.graph.emptyIndex = obj.Blib.moulds[i].codeManager.graph.emptyIndex;
-                    newLib.BlockMoulds[index].codeManager.graph.size = obj.Blib.moulds[i].codeManager.graph.size;
-                    newLibMem[index] = {};
+                    console.log(loadedLib.BlockMoulds[index]);
+                    loadedLib.BlockMoulds[index].nameID = obj.Blib.moulds[i].nameID;
+                    loadedLib.BlockMoulds[index].Tnames = obj.Blib.moulds[i].Tnames;
+                    loadedLib.BlockMoulds[index].generalType = obj.Blib.moulds[i].generalType;
+                    loadedLib.BlockMoulds[index].type = obj.Blib.moulds[i].type;
+                    loadedLib.BlockMoulds[index].lib = obj.Blib.moulds[i].lib;
+                    loadedLib.BlockMoulds[index].size = obj.Blib.moulds[i].size;
+                    loadedLib.BlockMoulds[index].logicImportNum = obj.Blib.moulds[i].logicImportNum;
+                    loadedLib.BlockMoulds[index].logicExportNum = obj.Blib.moulds[i].logicExportNum;
+                    loadedLib.BlockMoulds[index].dataImportNum = obj.Blib.moulds[i].dataImportNum;
+                    loadedLib.BlockMoulds[index].dataExportNum = obj.Blib.moulds[i].dataExportNum;
+                    loadedLib.BlockMoulds[index].codeManager.type = obj.Blib.moulds[i].codeManager.type;
+                    loadedLib.BlockMoulds[index].codeManager.inputVariableNames = obj.Blib.moulds[i].codeManager.inputVariableNames;
+                    loadedLib.BlockMoulds[index].codeManager.outputVariableNames = obj.Blib.moulds[i].codeManager.outputVariableNames;
+                    loadedLib.BlockMoulds[index].codeManager.outputPort = obj.Blib.moulds[i].codeManager.outputPort;
+                    loadedLib.BlockMoulds[index].codeManager.graph.emptyIndex = obj.Blib.moulds[i].codeManager.graph.emptyIndex;
+                    loadedLib.BlockMoulds[index].codeManager.graph.size = obj.Blib.moulds[i].codeManager.graph.size;
+                    LanguageManager.addPhrase(loadedLib.nameID + "_" + loadedLib.BlockMoulds[index].nameID, loadedLib.BlockMoulds[index].Tnames);
+                    libMem[index] = {};
                 }
                 for (let i in obj.Blib.moulds) {
                     let index = parseInt(i);
@@ -1265,35 +1302,27 @@ window.loadLibrary = () => {
                         let numI = parseInt(j);
                         let block = obj.Blib.moulds[i].codeManager.graph.blocks[numI];
                         if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
-                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
-                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
+                            loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
+                            loadedLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
                                 x1: block.x,
                                 x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
                                 y1: block.y,
                                 y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
                             });
-                        } else if (block.library == newLib.nameID && block.nameID in newLib.BlockMoulds) {
-                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, newLib.BlockMoulds[block.nameID]);
-                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
+                        } else if (block.library == loadedLib.nameID && block.nameID in loadedLib.BlockMoulds) {
+                            loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, loadedLib.BlockMoulds[block.nameID]);
+                            loadedLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
                                 x1: block.x,
-                                x2: block.x + newLib.BlockMoulds[block.nameID].size.width + 1,
+                                x2: block.x + loadedLib.BlockMoulds[block.nameID].size.width + 1,
                                 y1: block.y,
-                                y2: block.y + newLib.BlockMoulds[block.nameID].size.height + 1
-                            });
-                        } else if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
-                            newLib.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
-                            newLib.BlockMoulds[index].codeManager.blockCoords[numI] = ({
-                                x1: block.x,
-                                x2: block.x + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.width + 1,
-                                y1: block.y,
-                                y2: block.y + BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID].size.height + 1
+                                y2: block.y + loadedLib.BlockMoulds[block.nameID].size.height + 1
                             });
                         }
-                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicImports = block.logicImports;
-                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicExports = block.logicExports;
-                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataImports = block.dataImports;
-                        newLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataExports = block.dataExports;
-                        inputBuffer[index][numI] = block.input;
+                        loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicImports = block.logicImports;
+                        loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI].logicExports = block.logicExports;
+                        loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataImports = block.dataImports;
+                        loadedLib.BlockMoulds[index].codeManager.graph.blocks[numI].dataExports = block.dataExports;
+                        libMem[index][numI] = block.input;
                     }
                 }
 
@@ -1301,67 +1330,66 @@ window.loadLibrary = () => {
 
             fileName = res.fileName;
             mouldNum = res.mouldNum;
-            console.log("Open file: ", fileName);
+            console.log("Load Library: ", fileName);
             fileNameInput.setAttribute("value", fileName);
 
-            obj2Blib(res);
+            obj2Llib(res);
+            loadedLibraries[res.fileName] = loadedLib;
+            newLibMem[res.fileName] = libMem;
 
-            changeCodeGraph(0);
+            console.log(loadedLib);
+            console.log(newLibMem);
 
-            renderCodeGraph();
+            let blockLib = loadedLib.nameID;
+            let div = document.createElement("div");
+            div.classList.add("selectorElement");
+            div.classList.add("contentHover");
+            div.onclick = () => {
+                if (blockLibDisplay == blockLib) {
+                    eraseBlockLibDisplay();
+                    opBlockElementSelector.style.top = "-180px";
+                    blockLibDisplay = "disabled";
+                    return;
+                }
+                blockLibDisplay = blockLib;
+                eraseBlockLibDisplay();
+                for (let blockMould in loadedLib.BlockMoulds) {
+                    let div2 = document.createElement("div");
+                    div2.classList.add("selectorElement");
+                    div2.classList.add("contentHover");
+                    div2.draggable = true;
 
-            for (let i in CodeManager.instance.graph.blocks) {
-                let numI = parseInt(i);
-                if (CodeManager.instance.graph.blocks[numI].blockMould.type == "input" || CodeManager.instance.graph.blocks[numI].blockMould.type == "assign")
-                    document.getElementById("b" + numI).lastChild.firstChild.value = res.graph.blocks[numI].input;
-            }
-
-            loadedLibraries[res.nameID] = (newLib);
-
-            console.log(thisLibrary.BlockMoulds);
-
-            for (let i in thisLibrary.BlockMoulds) {
-                let div = document.createElement("div");
-                div.classList.add("BLibMouldsContent");
-                div.classList.add("contentHover");
-                let p = document.createElement("p");
-                p.id = "userdefmould_" + thisLibrary.BlockMoulds[i].nameID;
-                p.innerText = thisLibrary.BlockMoulds[i].Tnames[LanguageManager.currentLanguage];
-
-                let thisMouldNum = thisLibrary.BlockMoulds[i].nameID;
-                div.onmouseup = (event) => {
-                    if (event.button == 2) {
-                        console.log("delete mould " + thisMouldNum);
-                        BLibMouldsContainer.removeChild(div);
-                        delBlockMouldBlocks(thisMouldNum);
-                        delete thisLibrary[thisMouldNum];
-                    } else {
-                        changeCodeGraph(thisMouldNum);
-                        console.log(thisMouldNum, event.button);
+                    div2.ondragstart = () => {
+                        dragType = "mould";
+                        dragDivArea.classList.remove("notDisplay");
+                        dragDivArea.classList.add("display");
+                        chosedBlockMould = loadedLib.BlockMoulds[blockMould];
+                        console.log(chosedBlockMould);
+                    };
+                    div2.ondragend = () => {
+                        dragDivArea.classList.remove("display");
+                        dragDivArea.classList.add("notDisplay");
+                        shadowBlock.classList.remove("display");
+                        shadowBlock.classList.add("notDisplay");
+                        shadowActivated = false;
                     }
+
+                    let p2 = document.createElement("p");
+                    p2.setAttribute("name", blockLib + "_" + blockMould);
+                    p2.innerText = LanguageManager.phrases[blockLib + "_" + blockMould][LanguageManager.currentLanguage];
+                    div2.appendChild(p2);
+                    opBlockElementSelector.appendChild(div2);
                 }
-
-                div.draggable = true;
-
-                div.ondragstart = () => {
-                    console.log("2");
-                    dragType = "mould";
-                    dragDivArea.classList.remove("notDisplay");
-                    dragDivArea.classList.add("display");
-                    chosedBlockMould = thisLibrary.BlockMoulds[thisMouldNum];
-                };
-                div.ondragend = () => {
-                    console.log("2");
-                    dragDivArea.classList.remove("display");
-                    dragDivArea.classList.add("notDisplay");
-                    shadowBlock.classList.remove("display");
-                    shadowBlock.classList.add("notDisplay");
-                    shadowActivated = false;
-                }
-                div.appendChild(p);
-
-                BLibMouldsContainer.appendChild(div);
-            }
+                opBlockElementSelector.style.top = "95px";
+                opBlockElementSelector.scrollTop = 0;
+                return;
+            };
+            let p = document.createElement("p");
+            LanguageManager.addPhrase(blockLib, { "English": blockLib, "Chinese": blockLib });
+            p.setAttribute("name", blockLib);
+            p.innerText = blockLib;
+            div.appendChild(p);
+            opBlockSelector.appendChild(div);
         }
     };
     input.click();
@@ -1401,7 +1429,7 @@ window.openFileClicked = () => {
                             y2: block.y + thisLibrary.BlockMoulds[block.nameID].size.height + 1
                         });
                     }
-                    console.log(CodeManager.instance.graph.blocks, block)
+                    console.log(CodeManager.instance.graph.blocks, block);
                     CodeManager.instance.graph.blocks[numI].logicImports = block.logicImports;
                     CodeManager.instance.graph.blocks[numI].logicExports = block.logicExports;
                     CodeManager.instance.graph.blocks[numI].dataImports = block.dataImports;
@@ -1436,6 +1464,7 @@ window.openFileClicked = () => {
                     thisLibrary.BlockMoulds[index].codeManager.outputPort = obj.Blib.moulds[i].codeManager.outputPort;
                     thisLibrary.BlockMoulds[index].codeManager.graph.emptyIndex = obj.Blib.moulds[i].codeManager.graph.emptyIndex;
                     thisLibrary.BlockMoulds[index].codeManager.graph.size = obj.Blib.moulds[i].codeManager.graph.size;
+                    LanguageManager.addPhrase(thisLibrary.nameID + "_" + thisLibrary.BlockMoulds[index].nameID, thisLibrary.BlockMoulds[index].Tnames);
                     inputBuffer[index] = {};
                 }
                 for (let i in obj.Blib.moulds) {
@@ -1443,6 +1472,8 @@ window.openFileClicked = () => {
                     for (let j in obj.Blib.moulds[i].codeManager.graph.blocks) {
                         let numI = parseInt(j);
                         let block = obj.Blib.moulds[i].codeManager.graph.blocks[numI];
+                        console.log(block.library);
+                        console.log(BlockLibraryManager.instance.libraries, block.nameID);
                         if (block.library in BlockLibraryManager.instance.libraries && block.nameID in BlockLibraryManager.instance.libraries[block.library].BlockMoulds) {
                             thisLibrary.BlockMoulds[index].codeManager.graph.blocks[numI] = new Block(numI, block.x, block.y, BlockLibraryManager.instance.libraries[block.library].BlockMoulds[block.nameID]);
                             thisLibrary.BlockMoulds[index].codeManager.blockCoords[numI] = ({
@@ -1460,6 +1491,8 @@ window.openFileClicked = () => {
                                 y2: block.y + thisLibrary.BlockMoulds[block.nameID].size.height + 1
                             });
                         }
+                        console.log(block);
+                        console.log(thisLibrary.BlockMoulds[index]);
                         thisLibrary.BlockMoulds[index].codeManager.graph.blocks[numI].logicImports = block.logicImports;
                         thisLibrary.BlockMoulds[index].codeManager.graph.blocks[numI].logicExports = block.logicExports;
                         thisLibrary.BlockMoulds[index].codeManager.graph.blocks[numI].dataImports = block.dataImports;
@@ -1559,7 +1592,7 @@ window.saveFileClicked = () => {
             let block = CodeManager.instance.graph.blocks[i];
             graph.blocks[i] = {
                 nameID: block.blockMould.nameID,
-                library: block.blockMould.lib,
+                library: block.blockMould.lib == thisLibrary.nameID ? fileName : block.blockMould.lib,
                 index: block.index,
                 x: block.x,
                 y: block.y,
@@ -1577,14 +1610,14 @@ window.saveFileClicked = () => {
     }
 
     function Blib2obj() {
-        let Blib = { nameID: thisLibrary.nameID, color: thisLibrary.color, moulds: {} };
+        let Blib = { nameID: fileName, color: thisLibrary.color, moulds: {} };
         for (let i in thisLibrary.BlockMoulds) {
             Blib.moulds[i] = {
                 nameID: thisLibrary.BlockMoulds[i].nameID,
                 Tnames: thisLibrary.BlockMoulds[i].Tnames,
                 generalType: thisLibrary.BlockMoulds[i].generalType,
                 type: thisLibrary.BlockMoulds[i].type,
-                lib: thisLibrary.BlockMoulds[i].lib,
+                lib: fileName,
                 size: thisLibrary.BlockMoulds[i].size,
                 logicImportNum: thisLibrary.BlockMoulds[i].logicImportNum,
                 logicExportNum: thisLibrary.BlockMoulds[i].logicExportNum,
@@ -1976,6 +2009,39 @@ window.rtButtonClicked = (event) => {
                         inputs[thisLibrary.nameID][i][j] = inputBuffer[i][j];
                 }
             }
+            for (let currentLibName in loadedLibraries) {
+                let currentLib = loadedLibraries[currentLibName];
+                Blibrary[currentLib.nameID] = { nameID: currentLib.nameID, moulds: {} };
+                inputs[currentLib.nameID] = {};
+                for (let i in currentLib.BlockMoulds) {
+                    Blibrary[currentLib.nameID].moulds[i] = {};
+                    Blibrary[currentLib.nameID].moulds[i].nameID = currentLib.BlockMoulds[i].nameID;
+                    Blibrary[currentLib.nameID].moulds[i].generalType = currentLib.BlockMoulds[i].generalType;
+                    Blibrary[currentLib.nameID].moulds[i].type = currentLib.BlockMoulds[i].type;
+                    console.log(currentLib.BlockMoulds[i].type);
+                    Blibrary[currentLib.nameID].moulds[i].lib = currentLib.BlockMoulds[i].lib;
+                    Blibrary[currentLib.nameID].moulds[i].inputVariableNames = currentLib.BlockMoulds[i].codeManager.inputVariableNames;
+                    Blibrary[currentLib.nameID].moulds[i].outputVariableNames = currentLib.BlockMoulds[i].codeManager.outputVariableNames;
+                    Blibrary[currentLib.nameID].moulds[i].blocks = {};
+                    console.log(Blibrary[currentLib.nameID].moulds[i].outputVariableNames);
+                    inputs[currentLib.nameID][i] = {};
+                    for (let j in currentLib.BlockMoulds[i].codeManager.graph.blocks) {
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j] = {};
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].index = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].index;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].nameID = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.nameID;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].lib = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.lib;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].generalType = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.generalType;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].type = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].logicImports = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].logicImports;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].logicExports = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].logicExports;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].dataImports = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].dataImports;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].dataExports = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].dataExports;
+                        Blibrary[currentLib.nameID].moulds[i].blocks[j].forward = currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.forward.toString();
+                        if (currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "assign" || currentLib.BlockMoulds[i].codeManager.graph.blocks[j].blockMould.type == "input")
+                            inputs[currentLib.nameID][i][j] = newLibMem[currentLib.nameID][i][j];
+                    }
+                }
+            }
             console.log(thisLibrary);
             console.log(Blibrary);
             return { blocks: blocks, inputs: inputs, Blibrary: Blibrary };
@@ -2076,7 +2142,6 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
             div2.classList.add("contentHover");
             div2.draggable = true;
 
-            // Desktop
             div2.ondragstart = () => {
                 dragType = "mould";
                 dragDivArea.classList.remove("notDisplay");
@@ -2092,122 +2157,9 @@ for (let blockLib in BlockLibraryManager.instance.libraries) {
                 shadowActivated = false;
             }
 
-            // mobile devices
-            /* div2.ontouchstart = (e) => {
-                e.preventDefault();
-                dragType = "mould";
-                dragDivArea.classList.remove("notDisplay");
-                dragDivArea.classList.add("display");
-                console.log(2);
-                chosedBlockMould = BlockLibraryManager.instance.libraries[blockLib].BlockMoulds[blockMould];
-            };
-
-            div2.ontouchmove = (e) => {
-                let posX = Math.max(playgroundContainer.scrollLeft + e.pageX, 0);
-                let posY = Math.max(playgroundContainer.scrollTop + e.pageY - 30, 0);
-                if (shadowActivated == false) {
-                    shadowBlock.classList.remove("notDisplay");
-                    shadowBlock.classList.add("display");
-                    if (dragType == "mould") {
-                        shadowBlock.style.width = (chosedBlockMould.size.width + 1) * 50 + "px";
-                        shadowBlock.style.height = (chosedBlockMould.size.height + 1) * 50 + "px";
-                    } else {
-                        shadowBlock.style.width = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1) * 50 + "px";
-                        shadowBlock.style.height = (CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1) * 50 + "px";
-                    }
-                    shadowActivated = true;
-                }
-                let calC = { x: -1, y: -1 }
-                if (dragType == "mould")
-                    calC = CodeManager.instance.calCoor(
-                        px2grid(posX) - Math.round(chosedBlockMould.size.width / 2) - 1,
-                        px2grid(posY) - Math.round(chosedBlockMould.size.height / 2) - 1,
-                        chosedBlockMould, canvasSize);
-                else
-                    calC = CodeManager.instance.calCoor(
-                        px2grid(posX) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width / 2) - 1,
-                        px2grid(posY) - Math.round(CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height / 2) - 1,
-                        CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould, canvasSize, chosedBlockIndex);
-                resX = calC.x;
-                resY = calC.y;
-                shadowBlock.style.left = resX * 50 + 25 + "px";
-                shadowBlock.style.top = resY * 50 + 25 + "px";
-                console.log(posX, posY);
-            }
-            div2.ontouchend = (e) => {
-                e.preventDefault();
-                if (dragType == "mould") {
-                    let newIndex = CodeManager.instance.addBlock(chosedBlockMould, resX, resY);
-                    blockArea.appendChild(renderBlock(newIndex));
-                    pblocks.innerText = CodeManager.instance.graph.size;
-                } else {
-                    let tmpblock = document.getElementById("b" + chosedBlockIndex);
-                    CodeManager.instance.graph.blocks[chosedBlockIndex].x = resX;
-                    CodeManager.instance.graph.blocks[chosedBlockIndex].y = resY;
-                    tmpblock.style.left = resX * 50 + 25 + "px";
-                    tmpblock.style.top = resY * 50 + 25 + "px";
-                    tmpblock.style.zIndex = 5;
-                    CodeManager.instance.blockCoords[chosedBlockIndex] = {
-                        x1: resX,
-                        x2: resX + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.width + 1,
-                        y1: resY,
-                        y2: resY + CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.size.height + 1
-                    };
-                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicImportNum; i++) {
-                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i].length; j++) {
-                            let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j] +
-                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex) +
-                                "_" + chosedBlockIndex + "_" + i + "_" + "logic");
-                            blockArea.removeChild(link);
-                            renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j],
-                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicImports[i][j]].searchLogicExport(chosedBlockIndex),
-                                chosedBlockIndex, i, "logic");
-                        }
-                    }
-                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.logicExportNum; i++) {
-                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i].length; j++) {
-                            let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
-                                "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j] +
-                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex) +
-                                "_" + "logic");
-                            blockArea.removeChild(link);
-                            renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j],
-                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].logicExports[i][j]].searchLogicImport(chosedBlockIndex), "logic");
-                        }
-                    }
-                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataImportNum; i++) {
-                        if (CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] == -1)
-                            continue;
-                        let link = document.getElementById("l" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i] +
-                            "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex) +
-                            "_" + chosedBlockIndex + "_" + i + "_" + "data");
-                        blockArea.removeChild(link);
-                        renderLink(CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i],
-                            CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataImports[i]].searchDataExport(chosedBlockIndex),
-                            chosedBlockIndex, i, "data");
-                    }
-                    for (let i = 0; i < CodeManager.instance.graph.blocks[chosedBlockIndex].blockMould.dataExportNum; i++) {
-                        for (let j = 0; j < CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i].length; j++) {
-                            let link = document.getElementById("l" + chosedBlockIndex + "_" + i +
-                                "_" + CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j] +
-                                "_" + CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex) +
-                                "_" + "data");
-                            blockArea.removeChild(link);
-                            renderLink(chosedBlockIndex, i, CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j],
-                                CodeManager.instance.graph.blocks[CodeManager.instance.graph.blocks[chosedBlockIndex].dataExports[i][j]].searchDataImport(chosedBlockIndex), "data");
-                        }
-                    }
-                }
-                dragDivArea.classList.remove("display");
-                dragDivArea.classList.add("notDisplay");
-                shadowBlock.classList.remove("display");
-                shadowBlock.classList.add("notDisplay");
-                shadowActivated = false;
-            }*/
-
             let p2 = document.createElement("p");
-            p2.setAttribute("name", blockMould);
-            p2.innerText = LanguageManager.phrases[blockMould][LanguageManager.currentLanguage];
+            p2.setAttribute("name", blockLib + "_" + blockMould);
+            p2.innerText = LanguageManager.phrases[blockLib + "_" + blockMould][LanguageManager.currentLanguage];
             div2.appendChild(p2);
             opBlockElementSelector.appendChild(div2);
         }
