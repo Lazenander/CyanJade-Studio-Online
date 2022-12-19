@@ -1259,6 +1259,125 @@ function formAnalysis() {
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
+    analysis.BlockMoulds["matmedian"] = new BlockMould("matmedian", { "English": "matmedian", "Chinese": "矩阵中值" }, "data", "matmedian", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let output = [];
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[i].data.length; j++)
+                        output.push(ds1.data[i].data[j].data);
+                output.sort();
+                console.log(output);
+                if (ds1.data.length * ds1.data[0].data.length % 2 == 1)
+                    return { logicport: -1, dataOutput: [new DataStream("number", output[Math.floor(ds1.data.length * ds1.data[0].data.length / 2)])] };
+                else
+                    return { logicport: -1, dataOutput: [new DataStream("number", (output[Math.floor(ds1.data.length * ds1.data[0].data.length / 2 - 1)] + output[Math.floor(ds1.data.length * ds1.data[0].data.length / 2)]) / 2)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let tmp = [];
+                    for (let j = 0; j < ds1.data[0].data.length; j++)
+                        tmp.push(ds1.data[i].data[j].data);
+                    tmp.sort();
+                    if (ds1.data[0].data.length % 2 == 1)
+                        output.push(new DataStream("number", tmp[Math.floor(ds1.data[0].data.length / 2)]));
+                    else
+                        output.push(new DataStream("number", (tmp[Math.floor(ds1.data[0].data.length / 2 - 1)] + tmp[Math.floor(ds1.data[0].data.length / 2)]) / 2));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let tmp = [];
+                    for (let i = 0; i < ds1.data.length; i++)
+                        tmp.push(ds1.data[i].data[j].data);
+                    if (ds1.data.length % 2 == 1)
+                        output.push(new DataStream("number", tmp[Math.floor(ds1.data.length / 2)]));
+                    else
+                        output.push(new DataStream("number", (tmp[Math.floor(ds1.data.length / 2 - 1)] + tmp[Math.floor(ds1.data.length / 2)]) / 2));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
+    analysis.BlockMoulds["matmode"] = new BlockMould("matmode", { "English": "matmode", "Chinese": "矩阵众数" }, "data", "matmode", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let maxn = 2;
+                let tmp = {};
+                let ans = [];
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++) {
+                        if (ds1.data[i].data[j].data in tmp)
+                            tmp[ds1.data[i].data[j].data]++;
+                        else
+                            tmp[ds1.data[i].data[j].data] = 1;
+                        if (tmp[ds1.data[i].data[j].data] > maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans = [ds1.data[i].data[j].data];
+                        } else if (tmp[ds1.data[i].data[j].data] == maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans.push(ds1.data[i].data[j].data);
+                        }
+                    }
+                return { logicport: -1, dataOutput: [new DataStream("array", ans)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let maxn = 2;
+                    let tmp = {};
+                    let ans = [];
+                    for (let j = 0; j < ds1.data[0].data.length; j++) {
+                        if (ds1.data[i].data[j].data in tmp)
+                            tmp[ds1.data[i].data[j].data]++;
+                        else
+                            tmp[ds1.data[i].data[j].data] = 1;
+                        if (tmp[ds1.data[i].data[j].data] > maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans = [ds1.data[i].data[j].data];
+                        } else if (tmp[ds1.data[i].data[j].data] == maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans.push(ds1.data[i].data[j].data);
+                        }
+                    }
+                    output.push(new DataStream("array", ans));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let maxn = 2;
+                    let tmp = {};
+                    let ans = [];
+                    for (let i = 0; i < ds1.data.length; i++) {
+                        if (ds1.data[i].data[j].data in tmp)
+                            tmp[ds1.data[i].data[j].data]++;
+                        else
+                            tmp[ds1.data[i].data[j].data] = 1;
+                        if (tmp[ds1.data[i].data[j].data] > maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans = [ds1.data[i].data[j].data];
+                        } else if (tmp[ds1.data[i].data[j].data] == maxn) {
+                            maxn = tmp[ds1.data[i].data[j].data];
+                            ans.push(ds1.data[i].data[j].data);
+                        }
+                    }
+                    output.push(new DataStream("array", ans));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
     analysis.BlockMoulds["matsum"] = new BlockMould("matsum", { "English": "matsum", "Chinese": "矩阵总和值" }, "data", "matsum", "sys_lib_analysis", { width: 3, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
