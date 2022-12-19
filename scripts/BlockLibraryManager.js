@@ -1078,6 +1078,25 @@ function formArray() {
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
+    array.BlockMoulds["sort"] = new BlockMould("sort", { "English": "sort", "Chinese": "数列排序" }, "data", "sort", "sys_lib_array", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        if (ds1.type == "array") {
+            let output = [];
+            for (let i = 0; i < ds1.data.length; i++) {
+                console.log(ds1.data[i]);
+                if (ds1.data[i].type != "number")
+                    continue;
+                output.push(ds1.data[i].data);
+            }
+            console.log(output);
+            output = output.sort();
+            for (let i = 0; i < output.length; i++)
+                output[i] = new DataStream("number", output[i]);
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+        }
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
     array.BlockMoulds["length"] = new BlockMould("length", { "English": "length", "Chinese": "数列长度" }, "data", "length", "sys_lib_array", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "array")
