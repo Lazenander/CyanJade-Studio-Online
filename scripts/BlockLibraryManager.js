@@ -1361,6 +1361,49 @@ function formAnalysis() {
         return { logicport: -1, dataOutput: [new DataStream()] };
     });
 
+    analysis.BlockMoulds["matHalfRange"] = new BlockMould("matHalfRange", { "English": "half range", "Chinese": "半程" }, "data", "matHalfRange", "sys_lib_analysis", { width: 2, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
+        let ds1 = preDataStream[0].readData(variableTables).duplicate();
+        let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "number") {
+            let output = [];
+            if (ds2.data == -1) {
+                let maxn = ds1.data[0].data[0].data;
+                let minn = ds1.data[0].data[0].data;
+                for (let i = 0; i < ds1.data.length; i++)
+                    for (let j = 0; j < ds1.data[0].data.length; j++) {
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                    }
+                return { logicport: -1, dataOutput: [new DataStream("number", (maxn - minn) / 2)] };
+            } else if (ds2.data == 0) {
+                for (let i = 0; i < ds1.data.length; i++) {
+                    let maxn = ds1.data[i].data[0].data;
+                    let minn = ds1.data[i].data[0].data;
+                    for (let j = 0; j < ds1.data[0].data.length; j++) {
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                    }
+                    output.push(new DataStream("number", (maxn - minn) / 2));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            } else {
+                for (let j = 0; j < ds1.data[0].data.length; j++) {
+                    let maxn = ds1.data[0].data[j].data;
+                    let minn = ds1.data[0].data[j].data;
+                    for (let i = 0; i < ds1.data.length; i++) {
+                        maxn = Math.max(maxn, ds1.data[i].data[j].data);
+                        minn = Math.min(minn, ds1.data[i].data[j].data);
+                    }
+                    output.push(new DataStream("number", (maxn - minn) / 2));
+                }
+                return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
+            }
+            console.log(output);
+        }
+        console.error("Not Matrix!");
+        return { logicport: -1, dataOutput: [new DataStream()] };
+    });
+
     analysis.BlockMoulds["variance"] = new BlockMould("variance", { "English": "variance", "Chinese": "方差" }, "data", "variance", "sys_lib_analysis", { width: 2, height: 1 }, 0, 0, 1, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         if (ds1.type == "array") {
