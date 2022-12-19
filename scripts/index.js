@@ -575,6 +575,7 @@ function renderBlock(index) {
         div.onmouseup = (event) => {
             if (event.button == 2) {
                 let tmpblock = document.getElementById("b" + index);
+                console.log(CodeManager.instance.graph.blocks[index].logicImports);
                 for (let i = 0; i < CodeManager.instance.graph.blocks[index].blockMould.logicImportNum; i++) {
                     for (let j = 0; j < CodeManager.instance.graph.blocks[index].logicImports[i].length; j++) {
                         let link = document.getElementById("l" + CodeManager.instance.graph.blocks[index].logicImports[i][j] +
@@ -627,7 +628,7 @@ function renderBlock(index) {
                 CodeManager.instance.delBlock(index);
                 pblocks.innerText = CodeManager.instance.graph.size;
             } else {
-                if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
+                /*if (CodeManager.instance.graph.blocks[index].blockMould.type == "output") {
                     var text = document.getElementById("out" + index).innerText;
                     if (navigator.clipboard && window.isSecureContext)
                         navigator.clipboard.writeText(text);
@@ -647,7 +648,7 @@ function renderBlock(index) {
                             textArea.remove();
                         });
                     }
-                }
+                }*/
             }
         }
         div.ondragend = () => {
@@ -893,7 +894,7 @@ function renderBlock(index) {
                 thisLibrary.BlockMoulds[currentCodeGraph].codeManager.delBlock(index);
                 pblocks.innerText = thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.size;
             } else {
-                if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.type == "output") {
+                /*if (thisLibrary.BlockMoulds[currentCodeGraph].codeManager.graph.blocks[index].blockMould.type == "output") {
                     var text = document.getElementById("out" + index).innerText;
                     if (navigator.clipboard && window.isSecureContext)
                         navigator.clipboard.writeText(text);
@@ -913,7 +914,7 @@ function renderBlock(index) {
                             textArea.remove();
                         });
                     }
-                }
+                }*/
             }
         }
         div.ondragend = () => {

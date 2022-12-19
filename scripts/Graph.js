@@ -25,12 +25,12 @@ export default class Graph {
         console.log(this.blocks[index].dataImports);
         console.log(this.blocks[index].dataExports);
         for (let i = 0; i < this.blocks[index].blockMould.logicImportNum; i++)
-            for (let j = 0; j < this.blocks[index].logicImports[i].length; j++)
+            for (let j = this.blocks[index].logicImports[i].length - 1; j >= 0; j--)
                 this.delLogicConnection(this.blocks[index].logicImports[i][j],
                     this.blocks[this.blocks[index].logicImports[i][j]].searchLogicExport(index),
                     index, i);
         for (let i = 0; i < this.blocks[index].blockMould.logicExportNum; i++)
-            for (let j = 0; j < this.blocks[index].logicExports[i].length; j++)
+            for (let j = this.blocks[index].logicExports[i].length - 1; j >= 0; j--)
                 this.delLogicConnection(index, i, this.blocks[index].logicExports[i][j],
                     this.blocks[this.blocks[index].logicExports[i][j]].searchLogicImport(index));
         for (let i = 0; i < this.blocks[index].blockMould.dataImportNum; i++) {
@@ -40,7 +40,7 @@ export default class Graph {
                 this.blocks[this.blocks[index].dataImports[i]].searchDataExport(index), index, i);
         }
         for (let i = 0; i < this.blocks[index].blockMould.dataExportNum; i++)
-            for (let j = 0; j < this.blocks[index].dataExports[i].length; j++)
+            for (let j = this.blocks[index].dataExports[i].length - 1; j >= 0; j--)
                 this.delDataConnection(index, i, this.blocks[index].dataExports[i][j],
                     this.blocks[this.blocks[index].dataExports[i][j]].searchDataImport(index));
         delete this.blocks[index];
