@@ -1260,7 +1260,7 @@ function formAnalysis() {
                     let ave = 0;
                     for (let j = 0; j < ds1.data[0].data.length; j++)
                         ave += ds1.data[i].data[j].data;
-                    output.push(new DataStream("number", ave / ds1.data.length));
+                    output.push(new DataStream("number", ave / ds1.data[0].data.length));
                 }
                 return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
             } else {
@@ -1268,7 +1268,7 @@ function formAnalysis() {
                     let ave = 0;
                     for (let i = 0; i < ds1.data.length; i++)
                         ave += ds1.data[i].data[j].data;
-                    output.push(new DataStream("number", ave / ds1.data[0].data.length));
+                    output.push(new DataStream("number", ave / ds1.data.length));
                 }
                 return { logicport: -1, dataOutput: [new DataStream(ds1.type, output)] };
             }

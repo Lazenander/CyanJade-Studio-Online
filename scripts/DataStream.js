@@ -28,10 +28,10 @@ export default class DataStream {
     }
 
     isVariable(str) {
-        if (!(str[0] == "_" || str[0] >= "A" && str[0] <= "Z" || str[0] >= "a" && str[0] <= "z"))
+        if (!(str[0] == "_" || str[0] >= "A" && str[0] <= "Z" || str[0] >= "a" && str[0] <= "z" || str.charCodeAt(0) >= 128))
             return false;
         for (let i = 1; i < str.length; i++)
-            if (!(str[i] == "_" || str[i] >= "A" && str[i] <= "Z" || str[i] >= "a" && str[i] <= "z" || str[i] >= "0" && str[i] <= "9"))
+            if (!(str[i] == "_" || str[i] >= "A" && str[i] <= "Z" || str[i] >= "a" && str[i] <= "z" || str[i] >= "0" && str[i] <= "9" || str.charCodeAt(i) >= 128))
                 return false;
         return true;
     }
