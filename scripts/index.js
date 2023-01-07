@@ -1918,10 +1918,13 @@ window.addMould = () => {
     let thisMouldNum = mouldNum;
     div.onmouseup = (event) => {
         if (event.button == 2) {
+            if (thisMouldNum == currentCodeGraph)
+                changeCodeGraph(0);
             console.log("delete mould " + thisMouldNum);
             BLibMouldsContainer.removeChild(div);
             delBlockMouldBlocks(thisMouldNum);
-            delete thisLibrary[thisMouldNum];
+            delete thisLibrary.BlockMoulds[thisMouldNum];
+            console.log(thisLibrary.BlockMoulds);
         } else {
             changeCodeGraph(thisMouldNum);
             console.log(thisMouldNum, event.button);
