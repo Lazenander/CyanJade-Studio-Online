@@ -79,7 +79,7 @@ export default class DataStream {
             let isInString = false;
             if (str.length != 2) {
                 for (let i = 1; i < str.length - 1; i++) {
-                    if (str[i] == "\"" && str[i - 1] != "\\")
+                    if ((str[i] == "\"" || str[i] == "\'") && str[i - 1] != "\\")
                         isInString = isInString ? false : true;
                     if (isInString == true)
                         continue;
