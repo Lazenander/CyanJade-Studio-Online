@@ -9,16 +9,37 @@ export default class DataStream {
     readData(variableTables) {
         if (this.type == "variable") {
             for (let i = variableTables.length - 1; i >= 0; i--)
-                if (variableTables[i].existVariable(this))
-                    return variableTables[i].readVariable(this);
+                if (variableTables[i].existVariable(this)) {
+                    let vdata = variableTables[i].readVariable(this);
+                    if (vdata.type == "array") {
+                        let res = new DataStream("array", []);
+                        for (let j = 0; j < vdata.length; j++)
+                            res.data.push(vdata[j].readData(variableTables));
+                        return res.duplicate();
+                    }
+                    return vdata.duplicate();
+                }
             ErrorManager.error(3, this.data);
             return new DataStream(this.type, this.data);
         } else if (this.type == "variableArrayElement") {
             for (let i = variableTables.length - 1; i >= 0; i--)
-                if (variableTables[i].existVariable(this))
-                    return variableTables[i].readVariable(this);
+                if (variableTables[i].existVariable(this)) {
+                    let vdata = variableTables[i].readVariable(this);
+                    if (vdata.type == "array") {
+                        let res = new DataStream("array", []);
+                        for (let j = 0; j < vdata.length; j++)
+                            res.data.push(vdata[j].readData(variableTables));
+                        return res.duplicate();
+                    }
+                    return vdata.duplicate();
+                }
             ErrorManager.error(3, this.data);
             return new DataStream(this.type, this.data);
+        } else if (this.type == "array") {
+            let res = new DataStream("array", []);
+            for (let j = 0; j < this.data.length; j++)
+                res.data.push(this.data[j].readData(variableTables));
+            return res.duplicate();
         }
         return new DataStream(this.type, this.data);
     }
