@@ -833,7 +833,23 @@ function formLogic() {
     logic.BlockMoulds["equal"] = new BlockMould("equal", { "English": "=", "Chinese": "=" }, "data", "equal", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
-        if (ds1.type == "array") {
+        if (ds1.type == "array" && ds2.type == "array") {
+            function lstEqualNum(lst1, lst2) {
+                let lst = [];
+                for (let i = 0; i < lst1.length && i < lst2.length; i++) {
+                    lst.push(new DataStream());
+                    if (lst1[i].type == "array" && lst2[i].type == "array") {
+                        lst[i].type = "array";
+                        lst[i].data = lstEqualNum([...lst1[i].data], [...lst2[i].data]);
+                    } else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst1[i].type == lst2[i].type && lst1[i].data == lst2[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstEqualNum([...ds1.data], [...ds2.data]))] };
+        } else if (ds1.type == "array") {
             function lstEqualNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "array")
