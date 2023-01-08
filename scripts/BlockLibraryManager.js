@@ -231,7 +231,7 @@ function formMath() {
             function lstModNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = ds2.data % lst[i].data;
+                        lst[i].data = ds1.data % lst[i].data;
                     if (lst[i].type == "array")
                         lst[i].data = lstModNum([...lst[i].data]);
                 }
@@ -262,7 +262,7 @@ function formMath() {
             function lstMaxNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = Math.max(lst[i].data, ds2.data);
+                        lst[i].data = Math.max(lst[i].data, ds1.data);
                     if (lst[i].type == "array")
                         lst[i].data = lstMaxNum([...lst[i].data]);
                 }
@@ -293,7 +293,7 @@ function formMath() {
             function lstMinNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = Math.min(lst[i].data, ds2.data);
+                        lst[i].data = Math.min(lst[i].data, ds1.data);
                     if (lst[i].type == "array")
                         lst[i].data = lstMinNum([...lst[i].data]);
                 }
@@ -485,7 +485,7 @@ function formMath() {
             function lstBandNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = lst[i].data & ds2.data;
+                        lst[i].data = lst[i].data & ds1.data;
                     if (lst[i].type == "array")
                         lst[i].data = lstBandNum([...lst[i].data]);
                 }
@@ -516,7 +516,7 @@ function formMath() {
             function lstBorNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = lst[i].data | ds2.data;
+                        lst[i].data = lst[i].data | ds1.data;
                     if (lst[i].type == "array")
                         lst[i].data = lstBorNum([...lst[i].data]);
                 }
@@ -547,7 +547,7 @@ function formMath() {
             function lstBxorNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
                     if (lst[i].type == "number")
-                        lst[i].data = lst[i].data ^ ds2.data;
+                        lst[i].data = lst[i].data ^ ds1.data;
                     if (lst[i].type == "array")
                         lst[i].data = lstBxorNum([...lst[i].data]);
                 }
@@ -882,6 +882,23 @@ function formLogic() {
     logic.BlockMoulds["unequal"] = new BlockMould("unequal", { "English": "≠", "Chinese": "≠" }, "data", "unequal", "sys_lib_logic", { width: 1, height: 2 }, 0, 0, 2, 1, (innerInput, preDataStream, variableTables) => {
         let ds1 = preDataStream[0].readData(variableTables).duplicate();
         let ds2 = preDataStream[1].readData(variableTables).duplicate();
+        if (ds1.type == "array" && ds2.type == "array") {
+            function lstUnequalNum(lst1, lst2) {
+                let lst = [];
+                for (let i = 0; i < lst1.length && i < lst2.length; i++) {
+                    lst.push(new DataStream());
+                    if (lst1[i].type == "array" && lst2[i].type == "array") {
+                        lst[i].type = "array";
+                        lst[i].data = lstUnequalNum([...lst1[i].data], [...lst2[i].data]);
+                    } else {
+                        lst[i].type = "boolean";
+                        lst[i].data = (lst1[i].type != lst2[i].type && lst1[i].data != lst2[i].data) ? true : false;
+                    }
+                }
+                return lst;
+            }
+            return { logicport: -1, dataOutput: [new DataStream(ds1.type, lstUnequalNum([...ds1.data], [...ds2.data]))] };
+        }
         if (ds1.type == "array") {
             function lstUnequalNum(lst) {
                 for (let i = 0; i < lst.length; i++) {
