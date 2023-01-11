@@ -16,6 +16,7 @@ export default class VariableTable {
         }
         console.log("Assign var " + variable + ": " + data);
         this._storage[variable.data] = data.readData([this]);
+        console.log(this._storage[variable.data]);
     }
 
     changeVariable(variable, data) {

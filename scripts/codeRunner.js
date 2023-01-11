@@ -109,6 +109,7 @@ function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
     if (blocks[index].type == "input") {
         let ds = new DataStream();
         ds.read(inputs[index]);
+        console.log("index", index, ds.data);
         innerDataStream.push(ds);
         res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     } else if (blocks[index].type == "userDefData") {
@@ -130,7 +131,7 @@ function calculateDataBlock(index, blocks, variableTables = [], inputs = {}) {
         }
         res = blocks[index].forward(innerDataStream, inputDataStream, variableTables);
     }
-    console.log(res);
+    console.log(index, res.dataOutput[0].type, res.dataOutput[0].data);
     return res;
 }
 

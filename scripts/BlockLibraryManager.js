@@ -47,6 +47,7 @@ function formBasic() {
     });
 
     basic.BlockMoulds["input"] = new BlockMould("input", { "English": "input", "Chinese": "输入" }, "data", "input", "sys_lib_basic", { width: 3, height: 1 }, 0, 0, 0, 1, (innerInput, preDataStream, variableTables) => {
+        console.log(variableTables);
         let ds = innerInput[0].readData(variableTables);
         return {
             logicport: -1,

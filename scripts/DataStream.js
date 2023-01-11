@@ -13,8 +13,9 @@ export default class DataStream {
                     let vdata = variableTables[i].readVariable(this);
                     if (vdata.type == "array") {
                         let res = new DataStream("array", []);
-                        for (let j = 0; j < vdata.length; j++)
-                            res.data.push(vdata[j].readData(variableTables));
+                        for (let j = 0; j < vdata.data.length; j++)
+                            res.data.push(vdata.data[j].readData(variableTables));
+                        console.log(res, vdata);
                         return res.duplicate();
                     }
                     return vdata.duplicate();
@@ -27,8 +28,8 @@ export default class DataStream {
                     let vdata = variableTables[i].readVariable(this);
                     if (vdata.type == "array") {
                         let res = new DataStream("array", []);
-                        for (let j = 0; j < vdata.length; j++)
-                            res.data.push(vdata[j].readData(variableTables));
+                        for (let j = 0; j < vdata.data.length; j++)
+                            res.data.push(vdata.data[j].readData(variableTables));
                         return res.duplicate();
                     }
                     return vdata.duplicate();
@@ -36,9 +37,11 @@ export default class DataStream {
             ErrorManager.error(3, this.data);
             return new DataStream(this.type, this.data);
         } else if (this.type == "array") {
+            console.log("02", this.data);
             let res = new DataStream("array", []);
             for (let j = 0; j < this.data.length; j++)
                 res.data.push(this.data[j].readData(variableTables));
+            console.log("-1-", res, this.data);
             return res.duplicate();
         }
         return new DataStream(this.type, this.data);
@@ -72,11 +75,11 @@ export default class DataStream {
             this.type = "null";
             this.data = null;
             return;
-        } else if (str == "true") {
+        } else if (str == "true" || str == "真") {
             this.type = "boolean";
             this.data = true;
             return;
-        } else if (str == "false") {
+        } else if (str == "false" || str == "假") {
             this.type = "boolean";
             this.data = false;
             return;
@@ -102,7 +105,8 @@ export default class DataStream {
                 for (let i = 1; i < str.length - 1; i++) {
                     if ((str[i] == "\"" || str[i] == "\'") && str[i - 1] != "\\")
                         isInString = isInString ? false : true;
-                    if (isInString == true)
+                    console.log(str[i], str[i - 1], str[i] == "\"" || str[i] == "\'", isInString);
+                    if (isInString)
                         continue;
                     if (str[i] == "[")
                         br++;
@@ -111,15 +115,17 @@ export default class DataStream {
                     if (str[i] == "," && br == 0) {
                         let tmpDS = new DataStream();
                         tmpDS.read(tmpstr);
+                        console.log("a", tmpDS);
                         this.data.push(tmpDS);
                         tmpstr = "";
                     } else if (str[i])
                         tmpstr += str[i];
                 }
                 let tmpDS = new DataStream();
-                tmpDS.read(tmpstr)
+                tmpDS.read(tmpstr);
                 this.data.push(tmpDS);
             }
+            console.log("123:", this.data, this.data[0].data, this.data[0].type);
             return;
         } else if (this.isVariable(str.split('[')[0])) {
             this.type = "variableArrayElement";
@@ -178,7 +184,7 @@ export default class DataStream {
                 return "" + this.data;
             case "array":
                 let str = "[";
-                console.log(this.data);
+                console.log(this.data, this.data.length);
                 for (let i = 0; i < this.data.length; i++) {
                     str += this.data[i].toString();
                     if (i != this.data.length - 1)
